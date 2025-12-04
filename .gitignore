@@ -1,0 +1,72 @@
+# ----------------------------
+# JetBrains IDE
+# ----------------------------
+.idea/
+
+# ----------------------------
+# Python
+# ----------------------------
+__pycache__/
+*.py[cod]
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# ----------------------------
+# Django
+# ----------------------------
+# SQLite database
+db.sqlite3
+
+# Django migrations cache
+**/migrations/*.py
+!**/migrations/__init__.py
+
+# Collected static files
+staticfiles/
+static_root/
+static/
+
+# User-uploaded media
+media/
+
+# Local settings (if you split them)
+local_settings.py
+
+# ----------------------------
+# Logs & runtime artefacts
+# ----------------------------
+*.log
+*.pid
+
+# ----------------------------
+# Environment variables / secrets
+# ----------------------------
+*.env
+.env.*
+.env
+
+# ----------------------------
+# OS-specific clutter
+# ----------------------------
+.DS_Store
+Thumbs.db
+
+# ----------------------------
+# Editor temporary files
+# ----------------------------
+*.swp
+*.swo
+
+# ----------------------------
+# Jupyter
+# ----------------------------
+.ipynb_checkpoints/
