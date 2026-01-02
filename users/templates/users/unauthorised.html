@@ -1,15 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Sodia</title>
-</head>
-<body>
-<H1>Sodia</H1>
-<h2>Sign in:</h2>
-<input type="text" name="username" id="username" placeholder="Username"><br>
-<input type="password" name="password" id="password" placeholder="Password"><br>
-<u>forgot your password?</u><br>
-<input type="submit" value="Sign in">
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}Sodia!{% endblock %}
+
+{% block body %}
+    <main>
+        <H1>Sodia</H1>
+        <h2>Sign in:</h2>
+        <input type="text" name="username" id="username" placeholder="Username"><br>
+        <input type="password" name="password" id="password" placeholder="Password"><br>
+        <u>forgot your password?</u><br>
+        <input type="submit" value="Sign in">
+    </main>
+{% endblock %}
