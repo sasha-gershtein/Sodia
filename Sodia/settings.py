@@ -31,23 +31,24 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
+    # 'django.contrib.auth',             REMOVED DEFAULT (user authentication)
+    # 'django.contrib.contenttypes',     REMOVED DEFAULT (admin panel)
+    # 'django.contrib.sessions',         REMOVED DEFAULT (session management)
+    # 'django.contrib.messages',         REMOVED DEFAULT (flash messages)
+    'django.contrib.staticfiles',  #             DEFAULT (serve static files in development)
 
+    # my apps:
     'users',
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.security.SecurityMiddleware',  #                   DEFAULT (HSTS & security)
+    # 'django.contrib.sessions.middleware.SessionMiddleware',     REMOVED DEFAULT (session management)
+    'django.middleware.common.CommonMiddleware',  #                       DEFAULT (basic HTTP behaviour)
+    'django.middleware.csrf.CsrfViewMiddleware',  #                       DEFAULT (CSRF protection)
+    # 'django.contrib.auth.middleware.AuthenticationMiddleware',  REMOVED DEFAULT (user authentication)
+    # 'django.contrib.messages.middleware.MessageMiddleware',     REMOVED DEFAULT (flash messages)
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',  #          DEFAULT (X-Frame-Options)
 ]
 
 ROOT_URLCONF = 'Sodia.urls'
@@ -61,8 +62,8 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+                # 'django.contrib.auth.context_processors.auth',          REMOVED DEFAULT (auth)
+                # 'django.contrib.messages.context_processors.messages',  REMOVED DEFAULT (messages)
             ],
         },
     },
@@ -82,23 +83,23 @@ DATABASES = {
 }
 
 
-# Password validation
+# Password validation    REMOVED DEFAULT (password validation)
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
+# AUTH_PASSWORD_VALIDATORS = [
+#     {
+#         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+#     },
+#     {
+#         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+#     },
+#     {
+#         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+#     },
+#     {
+#         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+#     },
+# ]
 
 
 # Internationalization
