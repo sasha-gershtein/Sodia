@@ -30,11 +30,6 @@ db.sqlite3
 **/migrations/*.py
 !**/migrations/__init__.py
 
-# Collected static files
-staticfiles/
-static_root/
-static/
-
 # User-uploaded media
 media/
 
