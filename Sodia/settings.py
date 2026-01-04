@@ -48,6 +48,9 @@ MIDDLEWARE = [
     # 'django.contrib.auth.middleware.AuthenticationMiddleware',  REMOVED DEFAULT (user authentication)
     # 'django.contrib.messages.middleware.MessageMiddleware',     REMOVED DEFAULT (flash messages)
     'django.middleware.clickjacking.XFrameOptionsMiddleware',  # DEFAULT (X-Frame-Options)
+
+    # my middleware
+    'users.middleware.AuthenticationMiddleware',
 ]
 
 ROOT_URLCONF = 'Sodia.urls'

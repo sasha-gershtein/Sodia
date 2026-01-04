@@ -36,7 +36,7 @@ class UserManager(models.Manager):
 
 class User(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    time_created = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     is_activated = models.BooleanField(default=False)
     flag = IntFlagField(enum_class=AccountFlag, exclusive_choices=True, default=AccountFlag.UNSAFE)
     # TODO: make separate table Challenge
@@ -78,32 +78,40 @@ class UserLoginDetails(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="login_details", primary_key=True)
     email = models.EmailField(unique=True)
     is_email_verified = models.BooleanField(default=False)
-    time_email_changed = models.DateTimeField(default=timezone.now)
+    email_changed_at = models.DateTimeField(default=timezone.now)
     password = PasswordField()
-    time_password_changed = models.DateTimeField(default=timezone.now)
+    password_changed_at = models.DateTimeField(default=timezone.now)
 
 
-class Session(models.Model):
+class SessionManager(models.Manager):
     DEFAULT_TTL = timedelta(days=7)
 
-    def get_time_expires(self):
-        return timezone.now() + self.DEFAULT_TTL
+    @classmethod
+    def new_expires_at(cls):
+        return timezone.now() + cls.DEFAULT_TTL
 
-    # noinspection PyMethodMayBeStatic
+    @staticmethod
     def generate_session_token(self):
         return secrets.token_urlsafe(32)
 
+
+class Session(models.Model):
+    objects = SessionManager()
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    token = models.CharField(max_length=255, default=generate_session_token, unique=True)
+    token = models.CharField(max_length=255, default=objects.generate_session_token, unique=True)
     last_request_ip = models.GenericIPAddressField()
-    last_request_time = models.DateTimeField(auto_now=True)
-    time_expires = models.DateTimeField(default=get_time_expires)
+    last_request_at = models.DateTimeField(auto_now=True)
+    expires_at = models.DateTimeField(default=objects.new_expires_at)
     next_update_number = models.IntegerField(default=0)
 
     class Meta:
         indexes = [
-            models.Index(fields=["user", "time_expires"]),
+            models.Index(fields=["user", "expires_at"]),
         ]
+
+    def is_valid(self):
+        return timezone.now() < self.expires_at
 
 
 class SessionUpdate(models.Model):
