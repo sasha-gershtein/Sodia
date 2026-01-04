@@ -1,4 +1,5 @@
 from enum import IntFlag, auto
+import secrets
 import uuid
 
 from .passwords import Password
@@ -11,6 +12,7 @@ from settings.models import UserAccountSettings, UserPrivacySettings, UserNotifi
 
 
 # TODO: make __str__
+# TODO: add indexes
 
 class AccountFlag(IntFlag):
     UNSAFE = auto()
@@ -78,3 +80,31 @@ class UserLoginDetails(models.Model):
     time_email_changed = models.DateTimeField(default=timezone.now)
     password = PasswordField()
     time_password_changed = models.DateTimeField(default=timezone.now)
+
+
+def generate_session_token():
+    return secrets.token_urlsafe(32)
+
+
+class Session(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    token = models.CharField(max_length=255, default=generate_session_token, unique=True)
+    last_request_ip = models.GenericIPAddressField()
+    last_request_time = models.DateTimeField(auto_now=True)
+    time_expires = models.DateTimeField()
+    next_update_number = models.IntegerField(default=0)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["user", "time_expires"]),
+        ]
+
+class SessionUpdate(models.Model):
+    session = models.ForeignKey(Session, on_delete=models.CASCADE)
+    update_number = models.IntegerField(default=0)
+    update_message = models.TextField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['session', 'update_number'], name='unique_session_update_number'),
+        ]
