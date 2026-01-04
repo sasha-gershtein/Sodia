@@ -1,3 +1,4 @@
+from datetime import timedelta
 from enum import IntFlag, auto
 import secrets
 import uuid
@@ -57,7 +58,7 @@ class PasswordField(models.CharField):
         return name, path, args, kwargs
 
     # noinspection PyMethodMayBeStatic
-    def from_db_value(self, value, expression, connection):
+    def from_db_value(self, value, *_args, **_kwargs):
         if value is None:
             return value
         return Password.from_db_value(value)
@@ -82,22 +83,28 @@ class UserLoginDetails(models.Model):
     time_password_changed = models.DateTimeField(default=timezone.now)
 
 
-def generate_session_token():
-    return secrets.token_urlsafe(32)
-
-
 class Session(models.Model):
+    DEFAULT_TTL = timedelta(days=7)
+
+    def get_time_expires(self):
+        return timezone.now() + self.DEFAULT_TTL
+
+    # noinspection PyMethodMayBeStatic
+    def generate_session_token(self):
+        return secrets.token_urlsafe(32)
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     token = models.CharField(max_length=255, default=generate_session_token, unique=True)
     last_request_ip = models.GenericIPAddressField()
     last_request_time = models.DateTimeField(auto_now=True)
-    time_expires = models.DateTimeField()
+    time_expires = models.DateTimeField(default=get_time_expires)
     next_update_number = models.IntegerField(default=0)
 
     class Meta:
         indexes = [
             models.Index(fields=["user", "time_expires"]),
         ]
+
 
 class SessionUpdate(models.Model):
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
