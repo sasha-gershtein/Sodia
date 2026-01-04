@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -18,11 +18,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-s)x5%2$-gzzbd(q9fd=d#0n+3bp7n8kpd=j_*s-z_ai43$uyrj'  # noqa
-
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DJANGO_DEBUG', "True") == "True"
+
+# SECURITY WARNING: keep the secret key used in production secret!
+if DEBUG:
+    SECRET_KEY = os.getenv('DJANGO_SECRET_KEY',
+                           'django-insecure-s)x5%2$-gzzbd(q9fd=d#0n+3bp7n8kpd=j_*s-z_ai43$uyrj')  # noqa
+else:
+    SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
+    if not SECRET_KEY:
+        raise ValueError("DJANGO_SECRET_KEY is not set in the environment")
+    SECRET_KEY = SECRET_KEY
 
 ALLOWED_HOSTS = []
 
@@ -50,6 +57,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',  # DEFAULT (X-Frame-Options)
 
     # my middleware
+    'users.middleware.SessionMiddleware',
     'users.middleware.AuthenticationMiddleware',
 ]
 

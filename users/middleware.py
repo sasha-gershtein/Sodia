@@ -1,12 +1,13 @@
 from django.http import HttpRequest, HttpResponse
 
-from .models import Session
+from .models import Session, User
 
 
-class AuthData:
-    def __init__(self, session=None, user=None):
-        self.session = session
-        self.user = user
+class SessionData:
+    def __init__(self, session=None, is_session_new=False, user=None, ):
+        self.session: Session | None = session
+        self.is_session_new: bool = is_session_new
+        self.user: User | None = user
 
 
 def get_client_ip(request):
@@ -16,32 +17,47 @@ def get_client_ip(request):
     return request.META.get("REMOTE_ADDR")
 
 
+class SessionMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request: HttpRequest) -> HttpResponse:
+        session: Session | None = None
+        is_session_new = False
+        token = request.COOKIES.get("auth")
+        if token:
+            try:
+                session = Session.objects.select_related("user").get(token=token)
+                if session.expire():
+                    session = None
+            except Session.DoesNotExist:
+                pass
+        if session is None:
+            session = Session.objects.create(last_request_ip=get_client_ip(request))
+            is_session_new = True
+        else:
+            session.last_request_ip = get_client_ip(request)
+            session.renew(save=True)
+
+        request.session_data = SessionData(session=session, is_session_new=is_session_new)
+        response: HttpResponse = self.get_response(request)
+        if request.session_data.is_session_new:
+            response.set_cookie(key="auth", value=session.token, httponly=True)
+        return response
+
+
 class AuthenticationMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request: HttpRequest) -> HttpResponse:
-        user = None
-        session_token = request.COOKIES.get("auth")
-        if not session_token:
-            return self.get_response(request)
-        try:
-            session = Session.objects.select_related("user").get(token=session_token)
-        except Session.DoesNotExist:
-            session = None
-        if session:
-            if session.is_valid():
-                session.last_request_ip = get_client_ip(request)
-                session.expire_at = Session.objects.new_expires_at()
-                session.save()
-                user = session.user
+        session_data: SessionData = request.session_data
+        user = session_data.session.user
+        if user is not None:
+            if session_data.session.is_auth_valid():
+                session_data.user = user
             else:
-                session.delete()
-                session = None
+                session_data.session = Session.objects.create(last_request_ip=get_client_ip(request))
+                session_data.is_session_new = True
 
-        request.auth = AuthData(session=session, user=user)
-        response: HttpResponse = self.get_response(request)
-        if session_token and session is None:
-            if not response.cookies.get("auth"):
-                response.delete_cookie("auth")
-        return response
+        return self.get_response(request)

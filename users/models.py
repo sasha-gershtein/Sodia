@@ -1,8 +1,12 @@
 from datetime import timedelta
 from enum import IntFlag, auto
 import secrets
+import hashlib
+import base64
 import uuid
+import hmac
 
+from Sodia.settings import SECRET_KEY
 from .passwords import Password
 
 from django.db import models, transaction
@@ -46,10 +50,16 @@ class User(models.Model):
 
     objects = UserManager()
 
+    def get_session_auth_hash(self):
+        signature = hmac.new(key=SECRET_KEY.encode("ascii"),
+                             msg=self.login_details.password.password_hash,
+                             digestmod=hashlib.sha256)
+        return base64.b64encode(signature.digest()).decode("ascii")
+
 
 class PasswordField(models.CharField):
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault("max_length", 255)
+        kwargs.setdefault("max_length", 128)
         super().__init__(*args, **kwargs)
 
     def deconstruct(self):
@@ -67,6 +77,11 @@ class PasswordField(models.CharField):
         if isinstance(value, Password) or value is None:
             return value
         return Password.from_password(value)
+
+    def pre_save(self, model_instance, add):
+        value = self.to_python(getattr(model_instance, self.attname))
+        setattr(model_instance, self.attname, value)
+        return value
 
     def get_prep_value(self, value):
         if value is None:
@@ -91,15 +106,17 @@ class SessionManager(models.Manager):
         return timezone.now() + cls.DEFAULT_TTL
 
     @staticmethod
-    def generate_session_token(self):
+    def generate_session_token():
         return secrets.token_urlsafe(32)
 
 
 class Session(models.Model):
     objects = SessionManager()
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    token = models.CharField(max_length=255, default=objects.generate_session_token, unique=True)
+    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    token = models.CharField(max_length=64, default=objects.generate_session_token, unique=True)
+    session_auth_hash = models.CharField(max_length=64, null=True)
+
     last_request_ip = models.GenericIPAddressField()
     last_request_at = models.DateTimeField(auto_now=True)
     expires_at = models.DateTimeField(default=objects.new_expires_at)
@@ -110,8 +127,35 @@ class Session(models.Model):
             models.Index(fields=["user", "expires_at"]),
         ]
 
-    def is_valid(self):
-        return timezone.now() < self.expires_at
+    def expire(self):
+        exp = self.expires_at < timezone.now()
+        if exp:
+            self.delete()
+        return exp
+
+    def renew(self, save=True):
+        self.expires_at = Session.objects.new_expires_at()
+        if save:
+            self.save()
+
+    def auth(self, user):
+        self.user = user
+        self.session_auth_hash = user.get_session_auth_hash()
+        self.save()
+
+    def logout(self):
+        self.delete()
+
+    def is_auth_valid(self):
+        if self.expire() or self.user is None:
+            return False
+        if self.session_auth_hash is None:
+            self.logout()
+            return False
+        if secrets.compare_digest(self.user.get_session_auth_hash(), self.session_auth_hash):
+            return True
+        self.logout()
+        return False
 
 
 class SessionUpdate(models.Model):
