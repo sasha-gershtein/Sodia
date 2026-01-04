@@ -15,18 +15,16 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-s)x5%2$-gzzbd(q9fd=d#0n+3bp7n8kpd=j_*s-z_ai43$uyrj'
+SECRET_KEY = 'django-insecure-s)x5%2$-gzzbd(q9fd=d#0n+3bp7n8kpd=j_*s-z_ai43$uyrj'  # noqa
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -35,7 +33,7 @@ INSTALLED_APPS = [
     # 'django.contrib.contenttypes',     REMOVED DEFAULT (admin panel)
     # 'django.contrib.sessions',         REMOVED DEFAULT (session management)
     # 'django.contrib.messages',         REMOVED DEFAULT (flash messages)
-    'django.contrib.staticfiles',  #             DEFAULT (serve static files in development)
+    'django.contrib.staticfiles',  # DEFAULT (serve static files in development)
 
     # my apps:
     'users',
@@ -43,13 +41,13 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',  #                   DEFAULT (HSTS & security)
+    'django.middleware.security.SecurityMiddleware',  # DEFAULT (HSTS & security)
     # 'django.contrib.sessions.middleware.SessionMiddleware',     REMOVED DEFAULT (session management)
-    'django.middleware.common.CommonMiddleware',  #                       DEFAULT (basic HTTP behaviour)
-    'django.middleware.csrf.CsrfViewMiddleware',  #                       DEFAULT (CSRF protection)
+    'django.middleware.common.CommonMiddleware',  # DEFAULT (basic HTTP behaviour)
+    'django.middleware.csrf.CsrfViewMiddleware',  # DEFAULT (CSRF protection)
     # 'django.contrib.auth.middleware.AuthenticationMiddleware',  REMOVED DEFAULT (user authentication)
     # 'django.contrib.messages.middleware.MessageMiddleware',     REMOVED DEFAULT (flash messages)
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',  #          DEFAULT (X-Frame-Options)
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',  # DEFAULT (X-Frame-Options)
 ]
 
 ROOT_URLCONF = 'Sodia.urls'
@@ -72,7 +70,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Sodia.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
@@ -82,7 +79,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 # Password validation    REMOVED DEFAULT (password validation)
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -113,7 +109,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
