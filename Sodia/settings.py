@@ -31,7 +31,7 @@ else:
         raise ValueError("DJANGO_SECRET_KEY is not set in the environment")
     SECRET_KEY = SECRET_KEY
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS').split(',')
 
 # Application definition
 

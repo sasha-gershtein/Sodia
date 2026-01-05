@@ -3,6 +3,7 @@ from django.views import View
 
 
 class Home(View):
+    # noinspection PyMethodMayBeStatic
     def get(self, request):
         return render(request, 'users/unauthorised.html')
 
