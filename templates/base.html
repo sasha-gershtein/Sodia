@@ -6,6 +6,8 @@
     <meta charset="UTF-8">
     <title>{% block title %}Sodia{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'main.css' %}">
+    {% csrf_token %}
+    <script type="module" src="{% static 'api.js' %}"></script>
     {% block head %}{% endblock %}
 </head>
 <body>
