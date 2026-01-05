@@ -1,15 +1,38 @@
 {% extends 'base.html' %}
 
+{% load static %}
+
 {% block title %}Sodia!{% endblock %}
+
+{% block head %}
+    <script type="module" src="{% static 'js/users/unauthorised.js' %}"></script>
+{% endblock %}
 
 {% block body %}
     <main>
         <H1>Sodia</H1>
-        <h2>Sign in:</h2>
-        <input type="text" name="username" id="username" placeholder="Username"><br>
-        <input type="password" name="password" id="password" placeholder="Password"><br>
-        <u>forgot your password?</u><br>
-        <input type="submit" value="Sign in">
-        <a href="{% url 'auth' %}">LOG IN! (temp)</a>
+        <form id="sign-in">
+            <h2>Sign in:</h2>
+            <label for="sign-in-username">Username:</label>
+            <input type="text" name="username" id="sign-in-username" placeholder="username" required><br>
+            <label for="sign-in-password">Password:</label>
+            <input type="password" name="password" id="sign-in-password" placeholder="password" required><br>
+            <input type="submit" value="Sign in">
+        </form>
+        <form id="sign-up">
+            <h2>Sign up:</h2>
+            <label for="sign-up-first-name">First name:</label>
+            <input type="text" name="first-name" id="sign-up-first-name" placeholder="John" required><br>
+            <label for="sign-up-last-name">Last name:</label>
+            <input type="text" name="last-name" id="sign-up-last-name" placeholder="Doe" required><br>
+            <label for="sign-up-email">Email:</label>
+            <input type="email" name="email" id="sign-up-email" placeholder="john.doe@example.com" required><br>
+            <label for="sign-up-password">Password:</label>
+            <input type="password" name="password" id="sign-up-password" placeholder="password" required><br>
+            <label for="sign-up-confirm-password">Confirm password:</label>
+            <input type="password" name="confirm-password" id="sign-up-confirm-password" placeholder="confirm password"
+                   required><br>
+            <input type="submit" value="Sign up">
+        </form>
     </main>
 {% endblock %}
