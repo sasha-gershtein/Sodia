@@ -10,6 +10,6 @@ from .middleware import SessionData
 def login(request, data):
     form = LoginForm(data)
     if not form.is_valid():
-        raise UnauthorizedError("Invalid username/email or password.")
+        raise UnauthorizedError("Invalid username/email or password.", reason="INVALID_CREDENTIALS")
     session_data: SessionData = request.session_data
     session_data.session.authenticate(form.user)

@@ -25,8 +25,9 @@ class BadAPIResponse extends Error {
 }
 
 class APIError extends Error {
-    constructor(message, code) {
+    constructor(message, reason, code) {
         super(message);
+        this.reason = reason;
         this.code = code;
         this.name = "APIError";
     }
@@ -83,11 +84,12 @@ export async function api(url, payload = {}, options = {}) {
             }
             if (parsed.success) return parsed.result;
             const message = parsed.error.message;
+            const reason = parsed.error.reason;
             const code = parsed.error.code;
-            if (message === undefined || code === undefined) {
+            if (message === undefined || reason === undefined || code === undefined) {
                 throw new BadAPIResponse(`Bad JSON response on ${full_url}`);
             }
-            throw new APIError(message, code);
+            throw new APIError(message, reason, code);
         } catch (err) {
             if (!((err.name === "AbortError") || (err instanceof TypeError)))
                 throw err;
