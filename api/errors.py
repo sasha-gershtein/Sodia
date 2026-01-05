@@ -5,7 +5,7 @@ class ApiError(Exception):
     code: int = 500
     message: str = "Internal Server Error"
 
-    def __init__(self, code=None, message=None, *args):
+    def __init__(self, message=None, *args, code=None):
         super().__init__(*args)
         self.code = code if code is not None else self.code
         self.message = message if message is not None else self.message
@@ -52,6 +52,11 @@ class ConflictError(ClientError):
 class TooManyRequestsError(ClientError):
     code = 429
     message = "Too Many Requests"
+
+
+class UserInputError(ClientError):
+    code = 499
+    message = "User Input Error"
 
 
 def ErrorResponse(e: ApiError):

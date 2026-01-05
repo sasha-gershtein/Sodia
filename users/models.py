@@ -138,7 +138,7 @@ class Session(models.Model):
         if save:
             self.save()
 
-    def auth(self, user):
+    def authenticate(self, user):
         self.user = user
         self.session_auth_hash = user.get_session_auth_hash()
         self.save()

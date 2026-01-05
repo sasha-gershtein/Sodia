@@ -5,7 +5,7 @@ const signup_form = document.getElementById('sign-up');
 
 login_form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const username = login_form.username.value;
+    const identifier = login_form.identifier.value;
     const password = login_form.password.value;
-    console.log(await api("/login", {username: username, password: password}))
+    console.log(await api("/login", {identifier: identifier, password: password}))
 })

@@ -1,5 +1,15 @@
 from api.decorators import api_view
+from api.errors import UnauthorizedError
+
+from .forms import LoginForm
+
+from .middleware import SessionData
+
 
 @api_view
 def login(request, data):
-    return "Hello world!"
+    form = LoginForm(data)
+    if not form.is_valid():
+        raise UnauthorizedError("Invalid username/email or password.")
+    session_data: SessionData = request.session_data
+    session_data.session.authenticate(form.user)
