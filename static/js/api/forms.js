@@ -112,7 +112,7 @@ export class Field {
 
     onInput(e) {
         // run silent validation
-        this.validate();
+        if (this.validate()) this.clearErrors();
     }
 
     onChange(e) {

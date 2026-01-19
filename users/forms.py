@@ -7,8 +7,9 @@ from settings.models import UserAccountSettings
 
 
 class LoginForm(forms.Form):
-    identifier = forms.CharField(label="Username or email", max_length=254)
-    password = forms.CharField(widget=forms.PasswordInput, max_length=100)
+    identifier = forms.CharField(label="Username or email", min_length=4, max_length=254,
+                                 widget=forms.TextInput(attrs={"placeholder": "john.doe"}))
+    password = forms.CharField(min_length=4, max_length=100, widget=forms.PasswordInput)
 
     def clean(self):
         cleaned_data = super().clean()

@@ -22,3 +22,15 @@ def login(request, data):
             "location": reverse("users:home")
         }
     }
+
+@api_view
+def logout(request, data):
+    session_data: SessionData = request.session_data
+    session_data.session.logout()
+    session_data.reset_cookies = True
+    return {
+        "redirect": {
+            "location": reverse("users:home")
+        }
+    }
+

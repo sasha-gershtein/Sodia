@@ -1,4 +1,7 @@
 <nav>
     <p>this is a navigation bar</p>
+    <form action="{% url 'api:logout' %}" method="post" id="sign-out">
+        <input type="submit" value="Sign out">
+    </form>
     <hr>
 </nav>

@@ -1,4 +1,4 @@
 import {Form} from '../api/forms.js';
 
-window.login_form = new Form('sign-in');
-window.signup_form = new Form('sign-up');
+const login_form = new Form('sign-in');
+const signup_form = new Form('sign-up');

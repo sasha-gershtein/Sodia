@@ -12,12 +12,10 @@
 {% block body %}
     {{ block.super }}
     <main>
-        <H1>Sodia</H1>
+        <h1>Sodia</h1>
         <form id="sign-in" action="{% url 'api:login' %}" method="post">
             <h2>Sign in:</h2>
-            {% comment %}{{ login_form.errors }}{% endcomment %}
             {{ login_form }}
-            {% comment %}<ul id="id_password_error"></ul>{% endcomment %}
             <input type="submit" value="Sign in">
         </form>
         <form id="sign-up">

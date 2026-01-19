@@ -8,6 +8,7 @@ from .models import Session, User
 class SessionData:
     session: Session | None = None
     is_session_new: bool = False
+    reset_cookies: bool = False
     user: User | None = None
 
 
@@ -42,7 +43,9 @@ class SessionMiddleware:
 
         request.session_data = SessionData(session=session, is_session_new=is_session_new)
         response: HttpResponse = self.get_response(request)
-        if request.session_data.is_session_new:
+        if request.session_data.reset_cookies:
+            response.delete_cookie("auth")
+        elif request.session_data.is_session_new:
             response.set_cookie(key="auth", value=session.token, httponly=True)
         return response
 

@@ -3,7 +3,9 @@
 {% load static %}
 
 {% block head %}
+    {{ block.super }}
     <link rel="stylesheet" href="{% static 'css/users/auth_base.css' %}">
+    <script type="module" src="{% static 'js/users/auth_base.js' %}"></script>
 {% endblock %}
 
 {% block body %}
