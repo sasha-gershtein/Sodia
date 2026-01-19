@@ -6,15 +6,16 @@ class ApiError(Exception):
     reason: str = "GENERIC"
     message: str = "Internal Server Error"
 
-    def __init__(self, message=None, *args, code=None, reason=None):
+    def __init__(self, message=None, *args, code=None, reason=None, meta=None):
         super().__init__(*args)
         self.code = code if code is not None else self.code
         self.reason = reason if reason is not None else self.reason
         self.message = message if message is not None else self.message
+        self.meta = meta
 
 
-class ServerError(ApiError):
-    pass
+class InternalServerError(ApiError):
+    reason = "INTERNAL_SERVER_ERROR"
 
 
 class ClientError(ApiError, ValueError):
@@ -25,7 +26,7 @@ class ClientError(ApiError, ValueError):
 
 class BadRequestError(ClientError):
     code = 400
-    reason = "BAD_REQUEST_GENERIC"
+    reason = "BAD_REQUEST"
     message = "Bad Request"
 
 
@@ -36,38 +37,43 @@ class InvalidJsonError(BadRequestError):
 
 class UnauthorizedError(ClientError):
     code = 401
-    reason = "UNAUTHORIZED_GENERIC"
+    reason = "UNAUTHORIZED"
     message = "Unauthorized"
 
 
 class ForbiddenError(ClientError):
     code = 403
-    reason = "FORBIDDEN_GENERIC"
+    reason = "FORBIDDEN"
     message = "Forbidden"
 
 
 class NotFoundError(ClientError):
     code = 404
-    reason = "NOT_FOUND_GENERIC"
+    reason = "NOT_FOUND"
     message = "Not Found"
 
 
 class ConflictError(ClientError):
     code = 409
-    reason = "CONFLICT_GENERIC"
+    reason = "CONFLICT"
     message = "Conflict"
 
 
 class TooManyRequestsError(ClientError):
     code = 429
-    reason = "TOO_MANY_REQUESTS_GENERIC"
+    reason = "TOO_MANY_REQUESTS"
     message = "Too Many Requests"
 
 
 class UserInputError(ClientError):
     code = 499
-    reason = "USER_INPUT_GENERIC"
+    reason = "USER_INPUT"
     message = "User Input Error"
+
+
+class ValidationError(UserInputError):
+    reason = "VALIDATION"
+    message = "Validation error. Please check your input and try again."
 
 
 def ErrorResponse(e: ApiError):
@@ -79,7 +85,9 @@ def ErrorResponse(e: ApiError):
                 "code": e.code,
                 "reason": e.reason,
                 "message": e.message,
+                "meta": e.meta
             },
         },
         status=e.code,
+        reason=e.reason.replace("_", " ").title(),
     )

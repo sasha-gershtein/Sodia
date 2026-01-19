@@ -10,14 +10,14 @@
 {% endblock %}
 
 {% block body %}
+    {{ block.super }}
     <main>
         <H1>Sodia</H1>
-        <form id="sign-in">
+        <form id="sign-in" action="{% url 'api:login' %}" method="post">
             <h2>Sign in:</h2>
-            <label for="sign-in-identifier">Username or email:</label>
-            <input type="text" name="identifier" id="sign-in-identifier" placeholder="username or email" required><br>
-            <label for="sign-in-password">Password:</label>
-            <input type="password" name="password" id="sign-in-password" placeholder="password" required><br>
+            {% comment %}{{ login_form.errors }}{% endcomment %}
+            {{ login_form }}
+            {% comment %}<ul id="id_password_error"></ul>{% endcomment %}
             <input type="submit" value="Sign in">
         </form>
         <form id="sign-up">

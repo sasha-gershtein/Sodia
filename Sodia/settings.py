@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     # 'django.contrib.messages',         REMOVED DEFAULT (flash messages)
     'django.contrib.staticfiles',  # DEFAULT (serve static files in development)
 
+    'django.forms',
+
     # my apps:
     'users',
     'settings',
@@ -78,6 +80,8 @@ TEMPLATES = [
         },
     },
 ]
+
+FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
 WSGI_APPLICATION = 'Sodia.wsgi.application'
 

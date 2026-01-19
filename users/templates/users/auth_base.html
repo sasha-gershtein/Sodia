@@ -7,6 +7,7 @@
 {% endblock %}
 
 {% block body %}
+    {{ block.super }}
     {% include 'users/navigation.html' %}
     <main>
         {% block content %}{% endblock %}

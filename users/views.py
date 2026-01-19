@@ -5,6 +5,7 @@ from django.views import View
 from .middleware import SessionData
 from .decorators import login_required
 from .models import User
+from .forms import LoginForm
 
 class Home(View):
     def dispatch(self, request, *args, **kwargs):
@@ -15,9 +16,15 @@ class Home(View):
 
     # noinspection PyMethodMayBeStatic
     def unauthorised(self, request):
-        return render(request, 'users/unauthorised.html')
+        context = {
+            "login_form": LoginForm(),
+        }
+        return render(request, 'users/unauthorised.html', context)
 
     @method_decorator(login_required)
     # noinspection PyMethodMayBeStatic
     def home(self, request, user: User):
-        return render(request, 'users/home.html', {'user': user})
+        context = {
+            "user": user,
+        }
+        return render(request, 'users/home.html', context)

@@ -1,13 +1,14 @@
+from dataclasses import dataclass
+
 from django.http import HttpRequest, HttpResponse
 
 from .models import Session, User
 
-
+@dataclass
 class SessionData:
-    def __init__(self, session=None, is_session_new=False, user=None, ):
-        self.session: Session | None = session
-        self.is_session_new: bool = is_session_new
-        self.user: User | None = user
+    session: Session | None = None
+    is_session_new: bool = False
+    user: User | None = None
 
 
 def get_client_ip(request):

@@ -6,7 +6,7 @@ from django.http import HttpRequest, JsonResponse
 
 from Sodia.settings import DEBUG
 
-from .errors import ApiError, ServerError, InvalidJsonError, ErrorResponse
+from .errors import ApiError, InternalServerError, InvalidJsonError, ErrorResponse
 
 METHODS = ["POST", "GET"] if DEBUG else ["POST"]
 
@@ -22,7 +22,7 @@ def process_api_errors(func):
         except Exception:
             if DEBUG:
                 raise
-            return ErrorResponse(ServerError())
+            return ErrorResponse(InternalServerError())
 
     return wrapper
 

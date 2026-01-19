@@ -1,7 +1,9 @@
 // noinspection ExceptionCaughtLocallyJS
 
 "use strict";
-const BASE_URL = "/api"
+
+const error_box = document.getElementById("error-box");
+let hide_error_box = 0;
 
 function getCookie(name) {
     return document.cookie.split('; ')
@@ -17,23 +19,37 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-class BadAPIResponse extends Error {
+export function displayError(message) {
+    if (!error_box) {
+        alert(`error: ${message}`);
+        return;
+    }
+    error_box.innerText = message;
+    error_box.classList.remove("hidden");
+    hide_error_box = new Date().getTime() + 4900;
+    setTimeout(function () {
+        if (hide_error_box < new Date().getTime()) error_box.classList.add("hidden");
+    }, 5000)
+}
+
+export class BadAPIResponseError extends Error {
     constructor(message) {
         super(message);
-        this.name = "BadAPIResponse";
+        this.name = "BadAPIResponseError";
     }
 }
 
-class APIError extends Error {
-    constructor(message, reason, code) {
+export class APIError extends Error {
+    constructor(message, reason, code, meta) {
         super(message);
         this.reason = reason;
         this.code = code;
+        this.meta = meta;
         this.name = "APIError";
     }
 }
 
-class MaxRetriesError extends Error {
+export class MaxRetriesError extends Error {
     constructor(message) {
         super(message);
         this.name = "MaxRetriesError";
@@ -68,7 +84,7 @@ export async function api(url, payload = {}, options = {}) {
         delay = 200,
     } = options;
     const body = JSON.stringify(payload);
-    const full_url = BASE_URL + url;
+    const full_url = url;
     while (attempts !== 0) {
         attempts--;
         try {
@@ -77,19 +93,20 @@ export async function api(url, payload = {}, options = {}) {
             try {
                 parsed = await response.json();
             } catch (err) {
-                throw new BadAPIResponse(`Non-JSON response on ${full_url}`);
+                throw new BadAPIResponseError(`Non-JSON response on ${full_url}`);
             }
             if (parsed.success === undefined || parsed.result === undefined || parsed.error === undefined) {
-                throw new BadAPIResponse(`Bad JSON response on ${full_url}`);
+                throw new BadAPIResponseError(`Bad response on ${full_url}`);
             }
             if (parsed.success) return parsed.result;
             const message = parsed.error.message;
             const reason = parsed.error.reason;
             const code = parsed.error.code;
-            if (message === undefined || reason === undefined || code === undefined) {
-                throw new BadAPIResponse(`Bad JSON response on ${full_url}`);
+            const meta = parsed.error.meta;
+            if (message === undefined || reason === undefined || code === undefined || meta === undefined) {
+                throw new BadAPIResponseError(`Bad response on ${full_url}`);
             }
-            throw new APIError(message, reason, code);
+            throw new APIError(message, reason, code, meta);
         } catch (err) {
             if (!((err.name === "AbortError") || (err instanceof TypeError)))
                 throw err;

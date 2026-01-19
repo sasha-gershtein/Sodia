@@ -7,10 +7,8 @@ from settings.models import UserAccountSettings
 
 
 class LoginForm(forms.Form):
-    identifier = forms.CharField(label="Username or email")
-    password = forms.CharField(widget=forms.PasswordInput)
-
-    user: User | None = None
+    identifier = forms.CharField(label="Username or email", max_length=254)
+    password = forms.CharField(widget=forms.PasswordInput, max_length=100)
 
     def clean(self):
         cleaned_data = super().clean()
@@ -32,10 +30,10 @@ class LoginForm(forms.Form):
             else:
                 user = UserAccountSettings.objects.get(username__iexact=identifier).user
         except (UserLoginDetails.DoesNotExist, UserAccountSettings.DoesNotExist):
-            raise ValidationError("Invalid username/email or password.")
+            raise ValidationError("Invalid username/email or password.", code="invalid_credentials")
 
         if not user.login_details.password.verify(password):
-            raise ValidationError("Invalid username/email or password.")
+            raise ValidationError("Invalid username/email or password.", code="invalid_credentials")
 
-        self.user = user
+        cleaned_data["user"] = user
         return cleaned_data
