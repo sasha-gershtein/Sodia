@@ -13,24 +13,14 @@
     {{ block.super }}
     <main>
         <h1>Sodia</h1>
-        <form id="sign-in" action="{% url 'api:login' %}" method="post">
+        <form id="login" action="{% url 'api:login' %}" method="post">
             <h2>Sign in:</h2>
             {{ login_form }}
             <input type="submit" value="Sign in">
         </form>
-        <form id="sign-up">
+        <form id="registration" action="{% url 'api:register' %}" method="post">
             <h2>Sign up:</h2>
-            <label for="sign-up-first-name">First name:</label>
-            <input type="text" name="first-name" id="sign-up-first-name" placeholder="John" required><br>
-            <label for="sign-up-last-name">Last name:</label>
-            <input type="text" name="last-name" id="sign-up-last-name" placeholder="Doe" required><br>
-            <label for="sign-up-email">Email:</label>
-            <input type="email" name="email" id="sign-up-email" placeholder="john.doe@example.com" required><br>
-            <label for="sign-up-password">Password:</label>
-            <input type="password" name="password" id="sign-up-password" placeholder="password" required><br>
-            <label for="sign-up-confirm-password">Confirm password:</label>
-            <input type="password" name="confirm-password" id="sign-up-confirm-password" placeholder="confirm password"
-                   required><br>
+            {{ registration_form }}
             <input type="submit" value="Sign up">
         </form>
     </main>

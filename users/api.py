@@ -1,20 +1,18 @@
 from api.decorators import api_view
-from api.errors import UserInputError, ValidationError as APIValidationError
+from api.errors import parse_form_errors
 from django.urls import reverse
 
-from .forms import LoginForm
+from .forms import LoginForm, RegistrationForm
 
 from .middleware import SessionData
+from .models import User
 
 
 @api_view
 def login(request, data):
     form = LoginForm(data)
     if not form.is_valid():
-        non_field = form.non_field_errors().as_data()
-        if len(non_field) and non_field[0].code == "invalid_credentials":
-            raise UserInputError("Invalid username/email or password.", reason="INVALID_CREDENTIALS")
-        raise APIValidationError(meta=form.errors)
+        raise parse_form_errors(form)
     session_data: SessionData = request.session_data
     session_data.session.authenticate(form.cleaned_data["user"])
     return {
@@ -34,3 +32,16 @@ def logout(request, data):
         }
     }
 
+@api_view
+def register(request, data):
+    form = RegistrationForm(data)
+    if not form.is_valid():
+        raise parse_form_errors(form)
+    user = User.objects.create_user(**form.cleaned_data)
+    session_data: SessionData = request.session_data
+    session_data.session.authenticate(user)
+    return {
+        "redirect": {
+            "location": reverse("users:home")
+        }
+    }

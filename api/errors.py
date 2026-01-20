@@ -1,3 +1,5 @@
+from django.core.exceptions import ValidationError
+from django.forms import forms
 from django.http import JsonResponse
 
 
@@ -65,15 +67,26 @@ class TooManyRequestsError(ClientError):
     message = "Too Many Requests"
 
 
-class UserInputError(ClientError):
+class BadUserInputError(ClientError):
     code = 499
-    reason = "USER_INPUT"
-    message = "User Input Error"
+    reason = "BAD_USER_INPUT"
+    message = "Bad User Input"
 
 
-class ValidationError(UserInputError):
+class APIValidationError(BadUserInputError):
     reason = "VALIDATION"
-    message = "Validation error. Please check your input and try again."
+    message = "Validation error. Please check your input and try again"
+
+
+class FormResponseUserError(ValidationError):
+    ...
+
+
+def parse_form_errors(form: forms.Form):
+    non_field = form.non_field_errors().as_data()
+    if len(non_field) and isinstance(non_field[0], FormResponseUserError):
+        return BadUserInputError(non_field[0].message, reason=non_field[0].code.upper() if non_field[0].code else None)
+    return APIValidationError(meta=form.errors)
 
 
 def ErrorResponse(e: ApiError):

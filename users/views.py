@@ -5,7 +5,8 @@ from django.views import View
 from .middleware import SessionData
 from .decorators import login_required
 from .models import User
-from .forms import LoginForm
+from .forms import LoginForm, RegistrationForm
+
 
 class Home(View):
     def dispatch(self, request, *args, **kwargs):
@@ -18,6 +19,7 @@ class Home(View):
     def unauthorised(self, request):
         context = {
             "login_form": LoginForm(),
+            "registration_form": RegistrationForm(),
         }
         return render(request, 'users/unauthorised.html', context)
 

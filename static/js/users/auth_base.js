@@ -1,3 +1,3 @@
 import {Form} from "../api/forms.js";
 
-const logout_form = new Form('sign-out');
+const logout_form = new Form('logout');

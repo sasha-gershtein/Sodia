@@ -26,3 +26,7 @@ ul.errorlist:not(:has(li)) {
 ul.errorlist li {
     color: #f44336;
 }
+
+ul.errorlist li:first-letter {
+    text-transform: uppercase;
+}

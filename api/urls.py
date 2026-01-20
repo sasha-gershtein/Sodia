@@ -14,4 +14,5 @@ urlpatterns = [
     path('', api_root_404, name='root'),
     path('login', users.api.login, name='login'),
     path('logout', users.api.logout, name='logout'),
+    path('register', users.api.register, name='register'),
 ]
