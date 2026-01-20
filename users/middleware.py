@@ -1,14 +1,17 @@
+import hashlib
+import hmac
 from dataclasses import dataclass
 
 from django.http import HttpRequest, HttpResponse
 
+from Sodia.settings import SECRET_KEY
 from .models import Session, User
+
 
 @dataclass
 class SessionData:
     session: Session | None = None
-    is_session_new: bool = False
-    reset_cookies: bool = False
+    session_token_plaintext: str | None = None
     user: User | None = None
 
 
@@ -25,28 +28,30 @@ class SessionMiddleware:
 
     def __call__(self, request: HttpRequest) -> HttpResponse:
         session: Session | None = None
-        is_session_new = False
-        token = request.COOKIES.get("auth")
-        if token:
+        token_plaintext = request.COOKIES.get("auth")
+        if token_plaintext:
+            token_hash = hmac.new(key=SECRET_KEY.encode("ascii"),
+                                  msg=token_plaintext.encode("ascii"),
+                                  digestmod=hashlib.sha256).digest()
             try:
-                session = Session.objects.select_related("user").get(token=token)
+                session = Session.objects.select_related("user").get(token=token_hash)
                 if session.expire():
                     session = None
             except Session.DoesNotExist:
                 pass
         if session is None:
-            session = Session.objects.create(last_request_ip=get_client_ip(request))
-            is_session_new = True
+            token_plaintext, session = Session.objects.create_session(last_request_ip=get_client_ip(request))
         else:
             session.last_request_ip = get_client_ip(request)
             session.renew(save=True)
 
-        request.session_data = SessionData(session=session, is_session_new=is_session_new)
+        request.session_data = SessionData(session=session, session_token_plaintext=token_plaintext)
         response: HttpResponse = self.get_response(request)
-        if request.session_data.reset_cookies:
+        if request.session_data.session_token_plaintext:
+            response.set_cookie(key="auth", value=token_plaintext, httponly=True, samesite="Lax", path="/",
+                                expires=request.session_data.session.expires_at)
+        else:
             response.delete_cookie("auth")
-        elif request.session_data.is_session_new:
-            response.set_cookie(key="auth", value=session.token, httponly=True)
         return response
 
 
@@ -61,7 +66,8 @@ class AuthenticationMiddleware:
             if session_data.session.is_auth_valid():
                 session_data.user = user
             else:
-                session_data.session = Session.objects.create(last_request_ip=get_client_ip(request))
-                session_data.is_session_new = True
+                session_data.session_token_plaintext, session_data.session = Session.objects.create_session(
+                    last_request_ip=get_client_ip(request)
+                )
 
         return self.get_response(request)

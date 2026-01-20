@@ -2,7 +2,6 @@ from datetime import timedelta
 from enum import IntFlag, auto
 import secrets
 import hashlib
-import base64
 import uuid
 import hmac
 
@@ -17,7 +16,6 @@ from settings.models import UserAccountSettings, UserPrivacySettings, UserNotifi
 
 
 # TODO: make __str__
-# TODO: add indexes
 
 class AccountFlag(IntFlag):
     UNSAFE = auto()
@@ -49,12 +47,6 @@ class User(models.Model):
     is_pressing_sodia_button = models.BooleanField(default=False)
 
     objects = UserManager()
-
-    def get_session_auth_hash(self):
-        signature = hmac.new(key=SECRET_KEY.encode("ascii"),
-                             msg=self.login_details.password.password_hash,
-                             digestmod=hashlib.sha256)
-        return base64.b64encode(signature.digest()).decode("ascii")
 
 
 class PasswordField(models.CharField):
@@ -109,13 +101,21 @@ class SessionManager(models.Manager):
     def generate_session_token():
         return secrets.token_urlsafe(32)
 
+    def create_session(self, **kwargs):
+        token_plaintext = self.generate_session_token()
+        token_hash = hmac.new(key=SECRET_KEY.encode("ascii"),
+                              msg=token_plaintext.encode("ascii"),
+                              digestmod=hashlib.sha256)
+        kwargs["token"] = token_hash.digest()
+        return token_plaintext, self.create(**kwargs)
+
 
 class Session(models.Model):
     objects = SessionManager()
 
+    token = models.BinaryField(unique=True, max_length=64)
     user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
-    token = models.CharField(max_length=64, default=objects.generate_session_token, unique=True)
-    session_auth_hash = models.CharField(max_length=64, null=True)
+    session_auth_hash = models.BinaryField(max_length=64, null=True)
 
     last_request_ip = models.GenericIPAddressField()
     last_request_at = models.DateTimeField(auto_now=True)
@@ -126,6 +126,12 @@ class Session(models.Model):
         indexes = [
             models.Index(fields=["user", "expires_at"]),
         ]
+
+    def get_auth_hash(self):
+        signature = hmac.new(key=SECRET_KEY.encode("ascii"),
+                             msg=self.user.login_details.password.password_hash + b":" + self.token,
+                             digestmod=hashlib.sha256)
+        return signature.digest()
 
     def expire(self):
         exp = self.expires_at < timezone.now()
@@ -138,9 +144,9 @@ class Session(models.Model):
         if save:
             self.save()
 
-    def authenticate(self, user):
+    def authenticate(self, user: User):
         self.user = user
-        self.session_auth_hash = user.get_session_auth_hash()
+        self.session_auth_hash = self.get_auth_hash()
         self.save()
 
     def logout(self):
@@ -152,7 +158,7 @@ class Session(models.Model):
         if self.session_auth_hash is None:
             self.logout()
             return False
-        if secrets.compare_digest(self.user.get_session_auth_hash(), self.session_auth_hash):
+        if secrets.compare_digest(self.get_auth_hash(), self.session_auth_hash):
             return True
         self.logout()
         return False
