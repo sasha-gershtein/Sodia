@@ -270,12 +270,12 @@ export class Form {
     async onSubmit(e) {
         e.preventDefault();
         if (this.is_submitting) return;
+        if (!this.form_validation_field.input.validity.valid) {
+            this.form_validation_field.showErrors();
+            return;
+        }
         this.is_submitting = true;
         try {
-            if (!this.form_validation_field.input.validity.valid) {
-                this.form_validation_field.showErrors();
-                return;
-            }
             this.result = await api(this.action, this.getData(), {attempts: 5});
             if (this.result.redirect) location.href = this.result.redirect.location;
         } catch (err) {

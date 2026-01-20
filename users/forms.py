@@ -12,6 +12,10 @@ class LoginForm(forms.Form):
                                  widget=forms.TextInput(attrs={"placeholder": "john.doe"}))
     password = forms.CharField(min_length=4, max_length=100, widget=forms.PasswordInput)
 
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("prefix", "login")
+        super().__init__(*args, **kwargs)
+
     def clean(self):
         cleaned_data = super().clean()
         identifier = cleaned_data.get("identifier")
@@ -51,6 +55,10 @@ class RegistrationForm(forms.Form):
     password = forms.CharField(min_length=4, max_length=100, widget=forms.PasswordInput)
     password_confirm = forms.CharField(label="Confirm password", min_length=4, max_length=100,
                                        widget=forms.PasswordInput)
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("prefix", "registration")
+        super().__init__(*args, **kwargs)
 
     def clean(self):
         cleaned_data = super().clean()
