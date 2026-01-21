@@ -51,7 +51,7 @@ class RegistrationForm(forms.Form):
                                  widget=forms.TextInput(attrs={"placeholder": "John"}))
     last_name = forms.CharField(min_length=2, max_length=50,
                                 widget=forms.TextInput(attrs={"placeholder": "Doe"}))
-    email = forms.EmailField(widget=forms.TextInput(attrs={"placeholder": "john.doe@example.com"}))
+    email = forms.EmailField(widget=forms.EmailInput(attrs={"placeholder": "john.doe@example.com"}))
     password = forms.CharField(min_length=4, max_length=100, widget=forms.PasswordInput)
     password_confirm = forms.CharField(label="Confirm password", min_length=4, max_length=100,
                                        widget=forms.PasswordInput)
