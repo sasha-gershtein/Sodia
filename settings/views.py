@@ -1,3 +1,8 @@
 from django.shortcuts import render
 
-# Create your views here.
+from users.decorators import login_required
+
+
+@login_required
+def index(request, user):
+    return render(request, 'settings/index.html')
