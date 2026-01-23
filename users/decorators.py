@@ -12,7 +12,6 @@ def login_required(func):
         if session_data is None or session_data.user is None:
             return redirect("/")
 
-        kwargs["user"] = session_data.user
-        return func(request, *args, **kwargs)
+        return func(request, session_data.user, *args, **kwargs)
 
     return wrapper

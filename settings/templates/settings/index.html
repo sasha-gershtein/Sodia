@@ -1,5 +1,11 @@
 {% extends "users/auth_base.html" %}
 
+{% block title %}Settings — Sodia{% endblock %}
+
 {% block content %}
     <h1>Settings</h1>
+    <a href="{% url "settings:account" %}">Account settings</a><br>
+    <a href="{% url "settings:privacy" %}">Privacy settings</a><br>
+    <a href="{% url "settings:notifications" %}">Notifications settings</a><br>
+    <a href="{% url "settings:challenges" %}">Challenges settings</a><br>
 {% endblock %}
