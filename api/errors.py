@@ -82,7 +82,7 @@ class FormResponseUserError(ValidationError):
     ...
 
 
-def parse_form_errors(form: forms.Form):
+def parse_form_errors(form: forms.BaseForm):
     non_field = form.non_field_errors().as_data()
     if len(non_field) and isinstance(non_field[0], FormResponseUserError):
         return BadUserInputError(non_field[0].message, reason=non_field[0].code.upper() if non_field[0].code else None)

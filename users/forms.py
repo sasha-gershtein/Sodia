@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 
 from api.errors import FormResponseUserError
-from .models import UserLoginDetails
+from .models import User, UserLoginDetails
 from settings.models import UserAccountSettings
 
 
@@ -46,6 +46,7 @@ class LoginForm(forms.Form):
         cleaned_data["user"] = user
         return cleaned_data
 
+
 class RegistrationForm(forms.Form):
     first_name = forms.CharField(min_length=2, max_length=50,
                                  widget=forms.TextInput(attrs={"placeholder": "John"}))
@@ -77,3 +78,14 @@ class RegistrationForm(forms.Form):
 
         cleaned_data.pop("password_confirm")
         return cleaned_data
+
+
+class ChangePasswordForm(forms.Form):
+    old_password = forms.CharField(min_length=4, max_length=100, widget=forms.PasswordInput)
+    new_password = forms.CharField(min_length=4, max_length=100, widget=forms.PasswordInput)
+    confirm_new_password = forms.CharField(min_length=4, max_length=100, widget=forms.PasswordInput)
+
+    def __init__(self, *args, user: User | None = None, **kwargs):
+        kwargs.setdefault("prefix", "change-password")
+        super().__init__(*args, **kwargs)
+        self.user = user

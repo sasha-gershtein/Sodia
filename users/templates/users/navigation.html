@@ -1,7 +1,7 @@
 <nav>
     <a href="{% url 'users:home' %}">home</a>
     <a href="{% url 'settings:index' %}">settings</a>
-    <form id="logout" action="{% url 'api:logout' %}" method="post">
+    <form id="logout" action="{% url 'api:users:logout' %}" method="post">
         <input type="submit" value="Sign out">
     </form>
     <hr>

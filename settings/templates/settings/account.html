@@ -5,5 +5,14 @@
 {% block page_name %}Account settings{% endblock %}
 
 {% block settings %}
-    <p>...account settings go here...</p>
+    <form method="POST" action="{% url 'api:users:change_password' %}">
+        <h2>Change password:</h2>
+        {{ change_password_form }}
+        <input type="submit" value="Change password">
+    </form>
+    <form method="POST" action="{% url 'api:settings:account.save' %}">
+        <h2>Account settings:</h2>
+        {{ account_form }}
+        <input type="submit" value="Save">
+    </form>
 {% endblock %}

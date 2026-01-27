@@ -21,8 +21,9 @@ def login(request, data):
         }
     }
 
+
 @api_view
-def logout(request, data):
+def logout(request, _data):
     session_data: SessionData = request.session_data
     session_data.session.logout()
     session_data.reset_cookies = True
@@ -31,6 +32,7 @@ def logout(request, data):
             "location": reverse("users:home")
         }
     }
+
 
 @api_view
 def register(request, data):
@@ -44,4 +46,11 @@ def register(request, data):
         "redirect": {
             "location": reverse("users:home")
         }
+    }
+
+
+@api_view
+def change_password():
+    return {
+        "message": "received"
     }

@@ -1,5 +1,6 @@
 from enum import IntFlag, auto
 
+from django.core.validators import MinLengthValidator
 from django.db import models
 
 from Sodia.models import IntFlagField
@@ -36,10 +37,10 @@ class YearGroup(models.Model):
 class UserAccountSettings(models.Model):
     user = models.OneToOneField("users.User", on_delete=models.CASCADE, related_name='account_settings',
                                 primary_key=True)
-    username = models.CharField(max_length=30, unique=True)
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
-    display_name = models.CharField(null=True, blank=True, max_length=100)
+    username = models.CharField(max_length=30, validators=[MinLengthValidator(4)], unique=True)
+    first_name = models.CharField(max_length=50, validators=[MinLengthValidator(2)])
+    last_name = models.CharField(max_length=50, validators=[MinLengthValidator(2)])
+    display_name = models.CharField(null=True, blank=True, max_length=100, validators=[MinLengthValidator(5)])
     is_full_name_hidden = models.BooleanField(default=False)
     # profile_picture = models.??? TODO
     gender = models.CharField(null=True, blank=True, max_length=30)

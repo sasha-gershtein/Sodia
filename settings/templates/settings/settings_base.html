@@ -4,6 +4,6 @@
 
 {% block content %}
     <h1>{% block page_name %}Settings{% endblock %}</h1>
-    <a href="{% url "settings:index" %}">back to settings</a>
+    <a href="{% url "settings:index" %}">back to settings</a><br>
     {% block settings %}{% endblock %}
 {% endblock %}
