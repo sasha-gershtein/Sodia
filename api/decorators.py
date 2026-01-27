@@ -6,7 +6,9 @@ from django.http import HttpRequest, JsonResponse
 
 from Sodia.settings import DEBUG
 
-from .errors import ApiError, InternalServerError, InvalidJsonError, ErrorResponse
+from users.middleware import SessionData
+
+from .errors import ApiError, InternalServerError, InvalidJsonError, ErrorResponse, UnauthorizedError
 
 METHODS = ["POST", "GET"] if DEBUG else ["POST"]
 
@@ -48,4 +50,15 @@ def api_view(func):
 
     return wrapper
 
-# TODO: login_required_api_view
+
+def api_login_required(func):
+    @api_view
+    @wraps(func)
+    def wrapper(request: HttpRequest, data, *args, **kwargs):
+        session_data: SessionData | None = getattr(request, "session_data", None)
+        if session_data is None or session_data.user is None:
+            raise UnauthorizedError(f"{request.path} requires authentication")
+
+        return func(request, session_data.user, data, *args, **kwargs)
+
+    return wrapper

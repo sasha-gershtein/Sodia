@@ -1,4 +1,4 @@
-from api.decorators import api_view
+from api.decorators import api_login_required
 from api.errors import parse_form_errors
 
 from .forms import AccountForm, PrivacyForm, NotificationsForm, ChallengesForm
@@ -6,8 +6,8 @@ from .forms import AccountForm, PrivacyForm, NotificationsForm, ChallengesForm
 
 class Account:
     @staticmethod
-    @api_view
-    def save(_request, data):
+    @api_login_required
+    def save(_request, _user, data):
         form = AccountForm(data)
         if not form.is_valid():
             raise parse_form_errors(form)
@@ -18,8 +18,8 @@ class Account:
 
 class Privacy:
     @staticmethod
-    @api_view
-    def save(_request, data):
+    @api_login_required
+    def save(_request, _user, data):
         form = PrivacyForm(data)
         if not form.is_valid():
             raise parse_form_errors(form)
@@ -30,8 +30,8 @@ class Privacy:
 
 class Notifications:
     @staticmethod
-    @api_view
-    def save(_request, data):
+    @api_login_required
+    def save(_request, _user, data):
         form = NotificationsForm(data)
         if not form.is_valid():
             raise parse_form_errors(form)
@@ -42,8 +42,8 @@ class Notifications:
 
 class Challenges:
     @staticmethod
-    @api_view
-    def save(_request, data):
+    @api_login_required
+    def save(_request, _user, data):
         form = ChallengesForm(data)
         if not form.is_valid():
             raise parse_form_errors(form)

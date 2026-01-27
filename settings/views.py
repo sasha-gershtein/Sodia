@@ -13,7 +13,7 @@ def index(request, _user: users.models.User):
 
 @login_required
 def account(request, _user: users.models.User):
-    context = {  # TODO: password change form
+    context = {
         "change_password_form": ChangePasswordForm(),
         "account_form": AccountForm(),
     }
