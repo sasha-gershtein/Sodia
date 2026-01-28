@@ -162,6 +162,7 @@ export class Form {
         this.form = document.getElementById(id);
         if (!this.form) throw ReferenceError(`The form with id ${id} does not exist`);
 
+        this.success_message = "Success!";
         this.action = this.form.action;
         this.is_submitting = false;
         this.result = null;
@@ -254,6 +255,11 @@ export class Form {
         return data;
     }
 
+    clear() {
+        this.form.reset();
+        this.clearErrors();
+    }
+
     onBeforeInput(e) {
         if (this.is_submitting) e.preventDefault();
     }
@@ -282,38 +288,51 @@ export class Form {
         this.is_submitting = true;
         try {
             this.result = await api(this.action, this.getData(), {attempts: 5});
-            if (this.result.redirect) location.href = this.result.redirect.location;
+            this.onSuccess();
         } catch (err) {
-            if (err instanceof APIError) {
-                if (err.code !== 499) {
-                    displayError(err.message);
-                    throw err;
-                }
-                for (const [field, errors] of Object.entries(err.meta)) {
-                    for (const message of errors) {
-                        if (field === "__all__" || !this.fields[field]) {
-                            this.addError(message);
-                            continue;
-                        }
-                        this.fields[field].addError(message);
-                    }
-                }
-                this.showErrors();
-                return;
-            }
-            if (err instanceof BadAPIResponseError) {
-                displayError("The server returned an invalid response. Please try again later.");
-                console.error(`${err.name}: ${err.message}`);
-                return;
-            }
-            if (err instanceof MaxRetriesError) {
-                displayError("Unable to connect to the server. Please try again later.");
-                console.error(`${err.name}: ${err.message}`);
-                return;
-            }
-            throw err;
+            this.onError(err);
         } finally {
             this.is_submitting = false;
         }
+    }
+
+    onSuccess() {
+        if (this.result.redirect) {
+            location.href = this.result.redirect.location
+            return;
+        }
+        alert(this.success_message);
+        this.clear();
+    }
+
+    onError(err) {
+        if (err instanceof APIError) {
+            if (err.code !== 499) {
+                displayError(err.message);
+                throw err;
+            }
+            for (const [field, errors] of Object.entries(err.meta)) {
+                for (const message of errors) {
+                    if (field === "__all__" || !this.fields[field]) {
+                        this.addError(message);
+                        continue;
+                    }
+                    this.fields[field].addError(message);
+                }
+            }
+            this.showErrors();
+            return;
+        }
+        if (err instanceof BadAPIResponseError) {
+            displayError("The server returned an invalid response. Please try again later.");
+            console.error(`${err.name}: ${err.message}`);
+            return;
+        }
+        if (err instanceof MaxRetriesError) {
+            displayError("Unable to connect to the server. Please try again later.");
+            console.error(`${err.name}: ${err.message}`);
+            return;
+        }
+        throw err;
     }
 }

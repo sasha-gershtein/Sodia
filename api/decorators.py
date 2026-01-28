@@ -43,7 +43,7 @@ def api_view(func):
         return JsonResponse(
             data={
                 "success": True,
-                "result": response,
+                "result": response if response is not None else {},
                 "error": None,
             }
         )
