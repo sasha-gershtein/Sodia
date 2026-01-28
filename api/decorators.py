@@ -36,7 +36,7 @@ def api_view(func):
     def wrapper(request: HttpRequest, *args, **kwargs):
         body = request.body.decode("utf-8")
         try:
-            data = json.loads(body) if body else None
+            data = json.loads(body) if body else {}
         except json.decoder.JSONDecodeError:
             raise InvalidJsonError
         response = func(request, data, *args, **kwargs)

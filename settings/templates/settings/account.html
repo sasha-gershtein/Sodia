@@ -1,16 +1,23 @@
 {% extends "settings/settings_base.html" %}
 
+{% load static %}
+
 {% block title %}Account settings — Sodia{% endblock %}
 
 {% block page_name %}Account settings{% endblock %}
 
+{% block head %}
+    {{ block.super }}
+    <script type="module" src="{% static 'js/settings/account.js' %}"></script>
+{% endblock %}
+
 {% block settings %}
-    <form method="POST" action="{% url 'api:users:change_password' %}">
+    <form id="change-password" action="{% url 'api:users:change_password' %}" method="post">
         <h2>Change password:</h2>
         {{ change_password_form }}
         <input type="submit" value="Change password">
     </form>
-    <form method="POST" action="{% url 'api:settings:account.save' %}">
+    <form id="account" action="{% url 'api:settings:account.save' %}" method="post">
         <h2>Account settings:</h2>
         {{ account_form }}
         <input type="submit" value="Save">

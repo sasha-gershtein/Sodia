@@ -192,10 +192,15 @@ export class Form {
         this.controller.abort();
     }
 
+    removePrefix(name) {
+        return name.startsWith(`${this.form.id}-`) ? name.substring(this.form.id.length + 1) : name;
+    }
+
     addField(input) {
         if (!input.name) return;
         if (input === this.form_validation_field.input) return;
-        if (input.type !== "submit") this.fields[input.name] = new Field(input, this, this.controller.signal);
+        let name = this.removePrefix(input.name);
+        if (input.type !== "submit") this.fields[name] = new Field(input, this, this.controller.signal);
     }
 
     * [Symbol.iterator]() {
@@ -283,11 +288,6 @@ export class Form {
                 if (err.code !== 499) {
                     displayError(err.message);
                     throw err;
-                }
-                if (err.reason !== "VALIDATION") {
-                    this.addError(err.message);
-                    this.showErrors();
-                    return;
                 }
                 for (const [field, errors] of Object.entries(err.meta)) {
                     for (const message of errors) {
