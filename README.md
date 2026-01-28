@@ -54,8 +54,11 @@ Tutorials:
 
 Docs:
 
-* [Django Documentation](https://docs.djangoproject.com/en/6.0/ref/)
-* [JavaScript Reference](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/)
+* [Django documentation](https://docs.djangoproject.com/en/6.0/ref/)
+* [Python documentation](https://docs.python.org/3/)
+* [Mozilla JavaScript reference](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/)
+* [Mozilla HTML reference](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/)
+* [Mozilla CSS reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/)
 
 AI:
 
@@ -65,7 +68,7 @@ AI:
 
 Other:
 
-* [Stack Overflow](https://stackoverflow.com)
+* [Stack Overflow](https://stackoverflow.com/)
 * [Medium](https://medium.com/)
 * [Can I Use](https://caniuse.com/)
 
