@@ -168,7 +168,7 @@ export class Form {
 
         this.success_message = "Success!";
         this.action = this.form.action;
-        this.is_submitting = false;
+        this.disabled = false;
         this.result = null;
 
         this.controller = new AbortController();
@@ -271,8 +271,24 @@ export class Form {
         this.clearErrors();
     }
 
+    disable() {
+        this.disabled = true;
+        if (this.submit_button) this.submit_button.disabled = true;
+        for (const field of this) {
+            if (field.input === document.activeElement) {
+                field.input.blur();
+                break;
+            }
+        }
+    }
+
+    enable() {
+        this.disabled = false;
+        if (this.submit_button) this.submit_button.disabled = false;
+    }
+
     onBeforeInput(e) {
-        if (this.is_submitting) e.preventDefault();
+        if (this.disabled) e.preventDefault();
     }
 
     onInput(e) {
@@ -291,21 +307,19 @@ export class Form {
 
     async onSubmit(e) {
         e.preventDefault();
-        if (this.is_submitting) return;
+        if (this.disabled) return;
         if (!this.form_validation_field.input.validity.valid) {
             this.form_validation_field.showErrors();
             return;
         }
         try {
-            this.is_submitting = true;
-            if (this.submit_button) this.submit_button.disabled = true;
+            this.disable();
             this.result = await api(this.action, this.getData(), {attempts: 5});
             this.onSuccess();
         } catch (err) {
             this.onError(err);
         } finally {
-            if (this.submit_button) this.submit_button.disabled = false;
-            this.is_submitting = false;
+            this.enable();
         }
     }
 
