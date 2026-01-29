@@ -16,7 +16,7 @@ export class InfoMessage {
         info_box.appendChild(this.element);
         this.displayed = true;
         this.element.addEventListener("click", this.remove.bind(this));
-        setTimeout(this.remove.bind(this), timeout);
+        if (timeout >= 0) setTimeout(this.remove.bind(this), timeout);
     }
 
     remove() {
@@ -26,18 +26,18 @@ export class InfoMessage {
     }
 }
 
-export function displayInfo(message) {
-    return new InfoMessage(message, "info")
+export function displayInfo(message, timeout = 10000) {
+    return new InfoMessage(message, "info", timeout)
 }
 
-export function displayWarning(message) {
-    return new InfoMessage(message, "warning")
+export function displayWarning(message, timeout = 10000) {
+    return new InfoMessage(message, "warning", timeout)
 }
 
-export function displayError(message) {
-    return new InfoMessage(message, "error")
+export function displayError(message, timeout = 10000) {
+    return new InfoMessage(message, "error", timeout)
 }
 
-export function displaySuccess(message) {
-    return new InfoMessage(message, "success")
+export function displaySuccess(message, timeout = 10000) {
+    return new InfoMessage(message, "success", timeout)
 }
