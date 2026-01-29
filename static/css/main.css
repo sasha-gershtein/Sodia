@@ -19,6 +19,41 @@ body {
     box-shadow: 0 0 10px #171419;
 }
 
+#info-box {
+    position: fixed;
+    left: 15px;
+    bottom: 15px;
+    max-width: 25%;
+}
+
+#info-box .message {
+    margin-top: 8px;
+    padding: 4px 7px;
+    border-radius: 6px;
+    border-width: 2px;
+    border-style: solid;
+    background: var(--bg-color, #f4e3e6);
+    border-color: var(--border-color, #151719);
+    box-shadow: var(--bg-color);
+    width: fit-content;
+    font-size: 85%;
+}
+
+#info-box .message.info {
+    --bg-color: #95aec1;
+    --border-color: #206fe4;
+}
+
+#info-box .message.error {
+    --bg-color: #d6969e;
+    --border-color: #df3131;
+}
+
+#info-box .message.success {
+    --bg-color: #9cc886;
+    --border-color: #217a27;
+}
+
 ul.errorlist:not(:has(li)) {
     display: none;
 }
