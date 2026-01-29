@@ -1,7 +1,7 @@
 // noinspection JSUnusedGlobalSymbols, JSUnusedLocalSymbols
 
 import {api, APIError, BadAPIResponseError, MaxRetriesError} from "./api.js";
-import {displayError} from "./ui.js";
+import {displayError, displaySuccess} from "./ui.js";
 
 function trim(string, chars) {
     let i = 0;
@@ -163,6 +163,9 @@ export class Form {
         this.form = document.getElementById(id);
         if (!this.form) throw ReferenceError(`The form with id ${id} does not exist`);
 
+        this.submit_button = null;
+        this.reset_button = null;
+
         this.success_message = "Success!";
         this.action = this.form.action;
         this.is_submitting = false;
@@ -199,10 +202,17 @@ export class Form {
     }
 
     addField(input) {
-        if (!input.name) return;
         if (input === this.form_validation_field.input) return;
-        let name = this.removePrefix(input.name);
-        if (input.type !== "submit") this.fields[name] = new Field(input, this, this.controller.signal);
+        if (input.type === "submit") {
+            this.submit_button = input;
+            return;
+        }
+        if (input.type === "reset") {
+            this.reset_button = input;
+            return;
+        }
+        if (!input.name) return;
+        this.fields[this.removePrefix(input.name)] = new Field(input, this, this.controller.signal);
     }
 
     * [Symbol.iterator]() {
@@ -286,13 +296,15 @@ export class Form {
             this.form_validation_field.showErrors();
             return;
         }
-        this.is_submitting = true;
         try {
+            this.is_submitting = true;
+            if (this.submit_button) this.submit_button.disabled = true;
             this.result = await api(this.action, this.getData(), {attempts: 5});
             this.onSuccess();
         } catch (err) {
             this.onError(err);
         } finally {
+            if (this.submit_button) this.submit_button.disabled = false;
             this.is_submitting = false;
         }
     }
@@ -302,7 +314,7 @@ export class Form {
             location.href = this.result.redirect.location
             return;
         }
-        alert(this.success_message);
+        displaySuccess(this.success_message);
         this.clear();
     }
 
