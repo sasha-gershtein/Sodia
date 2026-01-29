@@ -51,6 +51,11 @@ body {
     --border-color: #206fe4;
 }
 
+#info-box .info-message.warning {
+    --bg-color: #d6b374;
+    --border-color: #e48220;
+}
+
 #info-box .info-message.error {
     --bg-color: #d6969e;
     --border-color: #df3131;
