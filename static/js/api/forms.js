@@ -1,6 +1,7 @@
 // noinspection JSUnusedGlobalSymbols, JSUnusedLocalSymbols
 
-import {api, APIError, BadAPIResponseError, displayError, MaxRetriesError} from "./api.js";
+import {api, APIError, BadAPIResponseError, MaxRetriesError} from "./api.js";
+import {displayError} from "./ui.js";
 
 function trim(string, chars) {
     let i = 0;
