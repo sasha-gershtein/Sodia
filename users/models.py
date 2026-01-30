@@ -15,8 +15,6 @@ from Sodia.models import IntFlagField
 from settings.models import UserAccountSettings, UserPrivacySettings, UserNotificationSettings, UserChallengesSettings
 
 
-# TODO: make __str__
-
 class AccountFlag(IntFlag):
     UNSAFE = auto()
     NEW = auto()
@@ -47,6 +45,13 @@ class User(models.Model):
     is_pressing_sodia_button = models.BooleanField(default=False)
 
     objects = UserManager()
+
+    def __repr__(self):
+        return (f"<{self.__class__.__name__} {self.account_settings.get_display_name()} "
+                f"(@{self.account_settings.username}, id: {self.id})>")
+
+    def __str__(self):
+        return f"{self.account_settings.get_display_name()} @{self.account_settings.username}"
 
 
 class PasswordField(models.CharField):
@@ -88,6 +93,9 @@ class UserLoginDetails(models.Model):
     email_changed_at = models.DateTimeField(default=timezone.now)
     password = PasswordField()
     password_changed_at = models.DateTimeField(default=timezone.now)
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} of {self.user} ({self.email})>"
 
 
 class SessionManager(models.Manager):
@@ -163,6 +171,11 @@ class Session(models.Model):
         self.logout()
         return False
 
+    def __repr__(self):
+        if self.user is None:
+            return f"<{self.__class__.__name__} ({self.token[:20]}...)>"
+        return f"<{self.__class__.__name__} ({self.token[:20]}...), auth: {self.user}>"
+
 
 class SessionUpdate(models.Model):
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
@@ -173,3 +186,6 @@ class SessionUpdate(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['session', 'update_number'], name='unique_session_update_number'),
         ]
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} {self.update_number} of {self.session}>"

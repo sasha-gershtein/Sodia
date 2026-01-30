@@ -52,6 +52,14 @@ class UserAccountSettings(models.Model):
     year_group = models.ForeignKey(YearGroup, null=True, blank=True, on_delete=models.SET_NULL)
     # free_periods = ??? TODO: JSONField
 
+    def get_display_name(self):
+        if self.display_name:
+            return self.display_name
+        return f"{self.first_name} {self.last_name}"
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} of {self.user}>"
+
 
 class PrivacySetting(IntFlag):
     EVERYONE = auto()
@@ -71,6 +79,9 @@ class UserPrivacySettings(models.Model):
     friends = IntFlagField(enum_class=PrivacySetting, exclusive_choices=True, default=PrivacySetting.FRIENDS_ONLY)
     message = IntFlagField(enum_class=PrivacySetting, exclusive_choices=True, default=PrivacySetting.FRIENDS_ONLY)
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__} of {self.user}>"
+
 
 class UserNotificationSettings(models.Model):
     user = models.OneToOneField("users.User", on_delete=models.CASCADE, related_name="notification_settings",
@@ -80,6 +91,9 @@ class UserNotificationSettings(models.Model):
     new_friend_requests = models.BooleanField(default=True)
     accepted_friend_requests = models.BooleanField(default=True)
     sodia_button_updates = models.BooleanField(default=True)
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} of {self.user}>"
 
 
 class FrequencySetting(IntFlag):
@@ -105,3 +119,6 @@ class UserChallengesSettings(models.Model):
     gender_filter = IntFlagField(enum_class=GenderFilter, default=GenderFilter.ALL)
     subjects_match = models.FloatField(default=0.0)  # TODO: set default
     interests_match = models.FloatField(default=0.0)  # TODO: set default
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} of {self.user}>"
