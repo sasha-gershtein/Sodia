@@ -22,3 +22,4 @@ class ChangePasswordForm extends Form {
 }
 
 const change_password_form = new ChangePasswordForm("change-password");
+const account_settings_form = new Form("account");

@@ -5,7 +5,7 @@
 {% block page_name %}Challenges settings{% endblock %}
 
 {% block settings %}
-    <form method="POST" action="{% url 'api:settings:challenges.save' %}">
+    <form method="POST" action="{% url 'api:settings:challenges' %}">
         {{ challenges_form }}
         <input type="submit" value="Save">
     </form>

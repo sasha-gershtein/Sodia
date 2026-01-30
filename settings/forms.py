@@ -1,23 +1,19 @@
-from django import forms
-from django.core.exceptions import ValidationError
-from django.core.validators import validate_email
+from api.forms import UpdateForm
 
-from api.errors import FormResponseUserError
 from .models import UserAccountSettings, UserPrivacySettings, UserNotificationSettings, UserChallengesSettings
-from settings.models import UserAccountSettings
 
 
-class AccountForm(forms.ModelForm):
+class AccountForm(UpdateForm):
     class Meta:
         model = UserAccountSettings
-        fields = "__all__"
+        fields = ["username", "first_name", "last_name", "display_name"]
 
     def __init__(self, *args, **kwargs):
         kwargs.setdefault("prefix", "account")
         super().__init__(*args, **kwargs)
 
 
-class PrivacyForm(forms.ModelForm):
+class PrivacyForm(UpdateForm):
     class Meta:
         model = UserPrivacySettings
         fields = "__all__"
@@ -27,7 +23,7 @@ class PrivacyForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
 
-class NotificationsForm(forms.ModelForm):
+class NotificationsForm(UpdateForm):
     class Meta:
         model = UserNotificationSettings
         fields = "__all__"
@@ -37,7 +33,7 @@ class NotificationsForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
 
-class ChallengesForm(forms.ModelForm):
+class ChallengesForm(UpdateForm):
     class Meta:
         model = UserChallengesSettings
         fields = "__all__"

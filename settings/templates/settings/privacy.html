@@ -5,7 +5,7 @@
 {% block page_name %}Privacy settings{% endblock %}
 
 {% block settings %}
-    <form method="POST" action="{% url 'api:settings:privacy.save' %}">
+    <form method="POST" action="{% url 'api:settings:privacy' %}">
         {{ privacy_form }}
         <input type="submit" value="Save">
     </form>

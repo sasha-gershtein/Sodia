@@ -5,7 +5,7 @@
 {% block page_name %}Notifications settings{% endblock %}
 
 {% block settings %}
-    <form method="POST" action="{% url 'api:settings:notifications.save' %}">
+    <form method="POST" action="{% url 'api:settings:notifications' %}">
         {{ notifications_form }}
         <input type="submit" value="Save">
     </form>
