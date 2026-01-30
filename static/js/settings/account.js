@@ -1,3 +1,24 @@
 import {Form} from '../api/forms.js';
 
-const change_password_form = new Form("change-password");
+class ChangePasswordForm extends Form {
+    constructor(...args) {
+        super(...args);
+        this.success_message = "Password changed successfully";
+    }
+
+    validateForm() {
+        super.validateForm();
+        const p = this.fields["old_password"].getValue();
+        const p1 = this.fields["new_password"].getValue();
+        const p2 = this.fields["new_password_confirm"].getValue();
+        if (p1 && p2 && p1 !== p2) {
+            this.addError("New passwords don't match");
+        }
+        if (p && p1 && p === p1) {
+            this.addError("New password must be different from the old password");
+        }
+        return this.form_validation_field.input.validity.valid;
+    }
+}
+
+const change_password_form = new ChangePasswordForm("change-password");
