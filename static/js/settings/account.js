@@ -1,10 +1,7 @@
-import {Form} from '../api/forms.js';
+import {Form, UpdateForm} from '../api/forms.js';
 
 class ChangePasswordForm extends Form {
-    constructor(...args) {
-        super(...args);
-        this.success_message = "Password changed successfully";
-    }
+    success_message = "Password changed successfully";
 
     validateForm() {
         super.validateForm();
@@ -22,4 +19,9 @@ class ChangePasswordForm extends Form {
 }
 
 const change_password_form = new ChangePasswordForm("change-password");
-const account_settings_form = new Form("account");
+
+class AccountForm extends UpdateForm {
+    success_message = "Account settings are saved successfully";
+}
+
+const account_settings_form = new AccountForm("account");

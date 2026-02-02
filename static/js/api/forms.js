@@ -28,7 +28,7 @@ export class Field {
         this.input = input;
         this.form = form;
         this.name = input.name;
-        this.label = trim((this.input.labels?.[0]?.textContent || this.name).toLowerCase(), " :.,=?!()*<>[]{}");
+        this.label = trim((this.input.labels?.[0]?.textContent || this.name).toLowerCase(), " \t\n\r:.,=?!()*<>[]{}");
         this.type = input.type;
         this.error_list_element = this.input.parentElement.querySelector(".errorlist");
 
@@ -69,6 +69,7 @@ export class Field {
 
     set value(value) {
         this.changed = false;
+        this.clearErrors();
         this.input.value = value;
     }
 
@@ -129,12 +130,12 @@ export class Field {
 
     onInput(e) {
         // run silent validation
+        this.changed = true;
         if (this.validate()) this.clearErrors();
     }
 
     onChange(e) {
         // show validation result
-        this.changed = true;
         this.showErrors(true);
     }
 
@@ -154,6 +155,7 @@ export class CheckboxField extends Field { // this.type === "checkbox"
 
     set value(value) {
         this.changed = false;
+        this.clearErrors();
         this.input.checked = value;
     }
 }
@@ -169,6 +171,7 @@ export class MultiselectField extends Field { // this.type === "select-multiple"
 
     set value(value) {
         this.changed = false;
+        this.clearErrors();
         for (const option of this.input.options) {
             option.selected = value.includes(option.value);
         }
@@ -192,6 +195,7 @@ export class RadioField extends Field { // this.type === "radio"
 
     set value(value) {
         this.changed = false;
+        this.clearErrors();
         if (value === null) {
             for (const option of this.options) option.checked = false;
             return;
@@ -210,8 +214,8 @@ class FormValidationField extends Field {
         let input = form.form.querySelector(`input[type='hidden'][name='${form.form.id}_form_validation_field']`);
         if (!input) {
             input = document.createElement("input");
-            input.setAttribute("type", "hidden");
-            input.setAttribute("name", `${form.form.id}_form_validation_field`);
+            input.type = "hidden";
+            input.name = `${form.form.id}_form_validation_field`;
             form.form.appendChild(input);
         }
         super(input, form, signal);
@@ -418,12 +422,12 @@ export class Form {
         }
     }
 
-    onSuccess() {
+    onSuccess(show_message = true) {
         if (this.result.redirect) {
-            location.href = this.result.redirect.location
+            location.href = this.result.redirect.location;
             return;
         }
-        displaySuccess(this.success_message);
+        if (show_message && this.success_message) displaySuccess(this.success_message, 3000);
         this.clear();
     }
 
@@ -456,5 +460,90 @@ export class Form {
             return;
         }
         throw err;
+    }
+}
+
+export class UpdateForm extends Form {
+    #init_promise;
+    #polling_interval_id;
+    #is_syncing = false;
+    #autosave_button;
+    #is_autosave = false;
+    success_message = "Data updated successfully";
+
+    constructor(...args) {
+        super(...args);
+        this.disable();
+        this.#autosave_button = document.createElement("input");
+        this.#autosave_button.type = "submit";
+        this.#autosave_button.hidden = true;
+        this.form.appendChild(this.#autosave_button);
+        this.#init_promise = this.sync().then(this.afterInit.bind(this));
+    }
+
+    async sync() {
+        if (this.#is_syncing) return;
+        try {
+            this.#is_syncing = true;
+            this.result = await api(this.action, {}, {attempts: 5});
+            this.updateFields();
+        } catch (err) {
+            this.onError(err);
+            throw err;
+        } finally {
+            this.#is_syncing = false;
+        }
+    }
+
+    afterInit() {
+        this.enable();
+        this.#polling_interval_id = setInterval(this.sync.bind(this), 10000);
+    }
+
+    abort() {
+        super.abort();
+        clearInterval(this.#polling_interval_id);
+    }
+
+    waitInit() {
+        return this.#init_promise;
+    }
+
+    get data() {
+        let data = {};
+        for (const field of this) {
+            if (field.changed) data[field.name] = field.value;
+        }
+        return data;
+    }
+
+    updateFields() {
+        for (const [field, value] of Object.entries(this.result)) {
+            if (field in this.fields &&
+                !this.fields[field].changed && this.fields[field].input !== document.activeElement) {
+                this.fields[field].value = value;
+            }
+        }
+    }
+
+    clear() {
+        void this.sync();
+        this.clearErrors();
+    }
+
+    onChange(e) {
+        super.onChange(e);
+        if (!e.isTrusted) return;
+        this.form.requestSubmit(this.#autosave_button);
+    }
+
+    async onSubmit(e) {
+        this.#is_autosave = e.submitter === this.#autosave_button;
+        return super.onSubmit(e);
+    }
+
+    onSuccess(show_message = true) {
+        super.onSuccess(show_message && !this.#is_autosave);
+        this.updateFields();
     }
 }
