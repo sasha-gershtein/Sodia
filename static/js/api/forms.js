@@ -12,6 +12,18 @@ function trim(string, chars) {
 }
 
 export class Field {
+    input;
+    form;
+    name;
+    label;
+    type;
+    error_list_element;
+    custom_errors = [];
+    changed = false;
+    #is_showErrors_event;
+    ERROR_MESSAGES;
+    controller;
+
     constructor(input, form, signal = null) {
         this.input = input;
         this.form = form;
@@ -19,9 +31,8 @@ export class Field {
         this.label = trim((this.input.labels?.[0]?.textContent || this.name).toLowerCase(), " :.,=?!()*<>[]{}");
         this.type = input.type;
         this.error_list_element = this.input.parentElement.querySelector(".errorlist");
-        this.custom_errors = [];
 
-        this._is_showErrors_event = false;
+        this.#is_showErrors_event = false;
 
         this.ERROR_MESSAGES = {
             badInput: () => "the value you entered cannot be parsed",
@@ -52,8 +63,13 @@ export class Field {
         this.controller.abort();
     }
 
-    getValue() {
+    get value() {
         return this.input.value;
+    }
+
+    set value(value) {
+        this.changed = false;
+        this.input.value = value;
     }
 
     displayError(message) {
@@ -63,7 +79,7 @@ export class Field {
     }
 
     showErrors(exclude_required = false) {
-        if (this._is_showErrors_event) return; // a loop is detected, do not run again!
+        if (this.#is_showErrors_event) return; // a loop is detected, do not run again!
         this.clearErrors();
         if (this.input.validity.valid) return;
         if (this.error_list_element) this.error_list_element.innerHTML = "";
@@ -78,11 +94,11 @@ export class Field {
         }
         this.input.classList.add("show-errors");
         this.error_list_element?.classList.add("show-errors");
-        this._is_showErrors_event = true;
+        this.#is_showErrors_event = true;
         try {
             this.input.reportValidity();
         } finally {
-            this._is_showErrors_event = false;
+            this.#is_showErrors_event = false;
         }
     }
 
@@ -118,6 +134,7 @@ export class Field {
 
     onChange(e) {
         // show validation result
+        this.changed = true;
         this.showErrors(true);
     }
 
@@ -126,6 +143,64 @@ export class Field {
         if (this.error_list_element) {
             e.preventDefault(); // hide default tooltip
             this.showErrors();
+        }
+    }
+}
+
+export class CheckboxField extends Field { // this.type === "checkbox"
+    get value() {
+        return this.input.checked;
+    }
+
+    set value(value) {
+        this.changed = false;
+        this.input.checked = value;
+    }
+}
+
+export class MultiselectField extends Field { // this.type === "select-multiple"
+    get value() {
+        let options = [];
+        for (const option of this.input.options) {
+            if (option.selected) options.push(option.value);
+        }
+        return options;
+    }
+
+    set value(value) {
+        this.changed = false;
+        for (const option of this.input.options) {
+            option.selected = value.includes(option.value);
+        }
+    }
+}
+
+export class RadioField extends Field { // this.type === "radio"
+    options;
+
+    constructor(...args) {
+        super(...args);
+        this.options = this.form.querySelectorAll(`input[type="radio"][name="${this.input.name}"]`);
+    }
+
+    get value() {
+        for (const option of this.options) {
+            if (option.checked) return option.value;
+        }
+        return null;
+    }
+
+    set value(value) {
+        this.changed = false;
+        if (value === null) {
+            for (const option of this.options) option.checked = false;
+            return;
+        }
+        for (const option of this.options) {
+            if (option.value === value) {
+                option.checked = true;
+                return;
+            }
         }
     }
 }
@@ -159,17 +234,23 @@ class FormValidationField extends Field {
 }
 
 export class Form {
+    form;
+    submit_button = null;
+    reset_button = null;
+    success_message = "Success!";
+    action;
+    disabled = false;
+    result = null;
+    controller;
+    error_list_element;
+    form_validation_field;
+    fields;
+
     constructor(id, signal = null) {
         this.form = document.getElementById(id);
         if (!this.form) throw ReferenceError(`The form with id ${id} does not exist`);
 
-        this.submit_button = null;
-        this.reset_button = null;
-
-        this.success_message = "Success!";
         this.action = this.form.action;
-        this.disabled = false;
-        this.result = null;
 
         this.controller = new AbortController();
         const options = {
@@ -211,8 +292,22 @@ export class Form {
             this.reset_button = input;
             return;
         }
-        if (!input.name) return;
-        this.fields[this.removePrefix(input.name)] = new Field(input, this, this.controller.signal);
+        const name = this.removePrefix(input.name);
+        if (!name) return;
+        switch (input.type) {
+            case "checkbox":
+                this.fields[name] = new CheckboxField(input, this, this.controller.signal);
+                break;
+            case "select-multiple":
+                this.fields[name] = new MultiselectField(input, this, this.controller.signal);
+                break;
+            case "radio":
+                if (name in this.fields) break;
+                this.fields[name] = new RadioField(input, this, this.controller.signal);
+                break;
+            default:
+                this.fields[name] = new Field(input, this, this.controller.signal);
+        }
     }
 
     * [Symbol.iterator]() {
@@ -258,10 +353,10 @@ export class Form {
         this.form_validation_field.clearErrors();
     }
 
-    getData() {
+    get data() {
         let data = {};
         for (const field of this) {
-            data[field.name] = field.getValue();
+            data[field.name] = field.value;
         }
         return data;
     }
@@ -314,7 +409,7 @@ export class Form {
         }
         try {
             this.disable();
-            this.result = await api(this.action, this.getData(), {attempts: 5});
+            this.result = await api(this.action, this.data, {attempts: 5});
             this.onSuccess();
         } catch (err) {
             this.onError(err);
