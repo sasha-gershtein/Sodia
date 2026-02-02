@@ -8,9 +8,9 @@ class ChangePasswordForm extends Form {
 
     validateForm() {
         super.validateForm();
-        const p = this.fields["old_password"].getValue();
-        const p1 = this.fields["new_password"].getValue();
-        const p2 = this.fields["new_password_confirm"].getValue();
+        const p = this.fields["old_password"].value;
+        const p1 = this.fields["new_password"].value;
+        const p2 = this.fields["new_password_confirm"].value;
         if (p1 && p2 && p1 !== p2) {
             this.addError("New passwords don't match");
         }
