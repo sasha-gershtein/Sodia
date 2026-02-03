@@ -183,7 +183,7 @@ export class RadioField extends Field { // this.type === "radio"
 
     constructor(...args) {
         super(...args);
-        this.options = this.form.querySelectorAll(`input[type="radio"][name="${this.input.name}"]`);
+        this.options = this.form.form.querySelectorAll(`input[type="radio"][name="${this.input.name}"]`);
     }
 
     get value() {
@@ -513,6 +513,7 @@ export class UpdateForm extends Form {
         let data = {};
         for (const field of this) {
             if (field.changed) data[field.name] = field.value;
+            field.changed = false;
         }
         return data;
     }
