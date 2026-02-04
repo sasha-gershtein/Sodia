@@ -4,4 +4,4 @@ class NotificationsForm extends UpdateForm {
     success_message = "Notifications settings are saved successfully";
 }
 
-window.notifications_settings_form = new NotificationsForm("notifications");
+const notifications_settings_form = new NotificationsForm("notifications");

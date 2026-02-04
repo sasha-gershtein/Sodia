@@ -124,6 +124,14 @@ export class Field {
         return this.input.validity.valid;
     }
 
+    disable() {
+        this.input.disabled = true;
+    }
+
+    enable() {
+        this.input.disabled = false;
+    }
+
     onBeforeInput(e) {
         // filter out invalid input
     }
@@ -374,20 +382,19 @@ export class Form {
         this.disabled = true;
         if (this.submit_button) this.submit_button.disabled = true;
         for (const field of this) {
-            if (field.input === document.activeElement) {
-                field.input.blur();
-                break;
-            }
+            field.disable();
         }
     }
 
     enable() {
         this.disabled = false;
         if (this.submit_button) this.submit_button.disabled = false;
+        for (const field of this) {
+            field.enable();
+        }
     }
 
     onBeforeInput(e) {
-        if (this.disabled) e.preventDefault();
     }
 
     onInput(e) {
