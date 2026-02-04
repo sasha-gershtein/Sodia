@@ -12,7 +12,7 @@ from django.db import models, transaction
 from django.utils import timezone
 
 from Sodia.models import IntFlagField
-from settings.models import UserAccountSettings, UserPrivacySettings, UserNotificationSettings, UserChallengesSettings
+from settings.models import UserAccountSettings, UserPrivacySettings, UserNotificationsSettings, UserChallengesSettings
 
 
 class AccountFlag(IntFlag):
@@ -29,7 +29,7 @@ class UserManager(models.Manager):
         username = email.split('@')[0][:UserAccountSettings._meta.get_field("username").max_length]
         UserAccountSettings.objects.create(user=user, username=username, first_name=first_name, last_name=last_name)
         UserPrivacySettings.objects.create(user=user)
-        UserNotificationSettings.objects.create(user=user)
+        UserNotificationsSettings.objects.create(user=user)
         UserChallengesSettings.objects.create(user=user)
         return user
 

@@ -101,8 +101,8 @@ class UserPrivacySettings(models.Model):
         return f"<{self.__class__.__name__} of {self.user}>"
 
 
-class UserNotificationSettings(models.Model):
-    user = models.OneToOneField("users.User", on_delete=models.CASCADE, related_name="notification_settings",
+class UserNotificationsSettings(models.Model):
+    user = models.OneToOneField("users.User", on_delete=models.CASCADE, related_name="notifications_settings",
                                 primary_key=True)
     unread_messages = models.BooleanField(default=True)
     challenges_updates = models.BooleanField(default=True)

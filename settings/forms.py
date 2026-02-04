@@ -2,7 +2,7 @@ from django import forms
 
 from api.forms import UpdateForm
 
-from .models import UserAccountSettings, UserPrivacySettings, UserNotificationSettings, UserChallengesSettings
+from .models import UserAccountSettings, UserPrivacySettings, UserNotificationsSettings, UserChallengesSettings
 
 
 class AccountForm(UpdateForm):
@@ -52,8 +52,14 @@ class PrivacyForm(UpdateForm):
 
 class NotificationsForm(UpdateForm):
     class Meta:
-        model = UserNotificationSettings
-        fields = "__all__"
+        model = UserNotificationsSettings
+        fields = [
+            "unread_messages",
+            "challenges_updates",
+            "new_friend_requests",
+            "accepted_friend_requests",
+            "sodia_button_updates",
+        ]
 
     def __init__(self, *args, **kwargs):
         kwargs.setdefault("prefix", "notifications")
