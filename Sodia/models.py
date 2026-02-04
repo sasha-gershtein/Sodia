@@ -7,7 +7,7 @@ class IntFlagField(models.IntegerField):
         choices = []
         for e in enum_class:
             self.__setattr__(e.name, e.value)
-            choices.append((e.value, e.name.lower()))
+            choices.append((e.value, e.name.replace("_", " ").capitalize()))
         if exclusive_choices:
             kwargs.setdefault('choices', choices)
         super().__init__(*args, **kwargs)

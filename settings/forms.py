@@ -1,3 +1,5 @@
+from django import forms
+
 from api.forms import UpdateForm
 
 from .models import UserAccountSettings, UserPrivacySettings, UserNotificationSettings, UserChallengesSettings
@@ -6,19 +8,23 @@ from .models import UserAccountSettings, UserPrivacySettings, UserNotificationSe
 class AccountForm(UpdateForm):
     class Meta:
         model = UserAccountSettings
-        fields = ["username",
-                  "first_name",
-                  "last_name",
-                  "display_name",
-                  "is_full_name_hidden",
-                  "gender",
-                  "birth_date",
-                  "country",
-                  "description",
-                  "house",
-                  "boarding_type",
-                  "year_group",
-                  ]
+        fields = [
+            "username",
+            "first_name",
+            "last_name",
+            "display_name",
+            "is_full_name_hidden",
+            "gender",
+            "birth_date",
+            "country",
+            "description",
+            "house",
+            "boarding_type",
+            "year_group",
+        ]
+        widgets = {
+            "birth_date": forms.DateInput(attrs={"type": "date"}),
+        }
 
     def __init__(self, *args, **kwargs):
         kwargs.setdefault("prefix", "account")
@@ -28,7 +34,16 @@ class AccountForm(UpdateForm):
 class PrivacyForm(UpdateForm):
     class Meta:
         model = UserPrivacySettings
-        fields = "__all__"
+        fields = [
+            "full_name",
+            "profile_picture",
+            "birthday",
+            "free_periods",
+            "interests",
+            "description",
+            "friends",
+            "message"
+        ]
 
     def __init__(self, *args, **kwargs):
         kwargs.setdefault("prefix", "privacy")
