@@ -6,7 +6,19 @@ from .models import UserAccountSettings, UserPrivacySettings, UserNotificationSe
 class AccountForm(UpdateForm):
     class Meta:
         model = UserAccountSettings
-        fields = ["username", "first_name", "last_name", "display_name"]
+        fields = ["username",
+                  "first_name",
+                  "last_name",
+                  "display_name",
+                  "is_full_name_hidden",
+                  "gender",
+                  "birth_date",
+                  "country",
+                  "description",
+                  "house",
+                  "boarding_type",
+                  "year_group",
+                  ]
 
     def __init__(self, *args, **kwargs):
         kwargs.setdefault("prefix", "account")

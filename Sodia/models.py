@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class IntFlagField(models.IntegerField):
     def __init__(self, enum_class, exclusive_choices=False, *args, **kwargs):
         self.enum_class = enum_class
@@ -16,7 +17,7 @@ class IntFlagField(models.IntegerField):
         kwargs['enum_class'] = self.enum_class
         return name, path, args, kwargs
 
-    def from_db_value(self, value, expression, connection):
+    def from_db_value(self, value, _expression, _connection):
         if value is None:
             return value
         return self.enum_class(value)
@@ -24,7 +25,7 @@ class IntFlagField(models.IntegerField):
     def to_python(self, value):
         if isinstance(value, self.enum_class) or value is None:
             return value
-        return self.enum_class(value)
+        return self.enum_class(int(value))
 
     def get_prep_value(self, value):
         if value is None:

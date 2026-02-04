@@ -8,7 +8,10 @@ def update_model(form):
     if not form.is_valid():
         raise parse_form_errors(form)
     form.save()
-    return form.cleaned_data
+    return {
+        key: value.get_json_value() if hasattr(value, "get_json_value") else value
+        for key, value in form.cleaned_data.items()
+    }
 
 
 @api_login_required

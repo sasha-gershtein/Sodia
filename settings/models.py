@@ -11,6 +11,12 @@ class Country(models.Model):
     name = models.CharField(max_length=100)
     code = models.CharField(max_length=2, unique=True)
 
+    def __str__(self):
+        return self.name
+
+    def get_json_value(self):
+        return self.id
+
 
 class HouseBoardingType(IntFlag):
     BOARDING = auto()
@@ -22,6 +28,12 @@ class House(models.Model):
     name = models.CharField(max_length=20)
     boarding_type = IntFlagField(HouseBoardingType, exclusive_choices=True)
 
+    def __str__(self):
+        return self.name
+
+    def get_json_value(self):
+        return self.id
+
 
 class PupilBoardingType(IntFlag):
     FULL = auto()
@@ -32,6 +44,12 @@ class PupilBoardingType(IntFlag):
 class YearGroup(models.Model):
     year_group_number = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.name
+
+    def get_json_value(self):
+        return self.year_group_number
 
 
 class UserAccountSettings(models.Model):
