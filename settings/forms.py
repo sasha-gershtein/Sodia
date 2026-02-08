@@ -69,7 +69,12 @@ class NotificationsForm(UpdateForm):
 class ChallengesForm(UpdateForm):
     class Meta:
         model = UserChallengesSettings
-        fields = "__all__"
+        fields = [
+            "frequency",
+            "gender_filter",
+            "subjects_match",
+            "interests_match"
+        ]
 
     def __init__(self, *args, **kwargs):
         kwargs.setdefault("prefix", "challenges")

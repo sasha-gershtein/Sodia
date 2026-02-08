@@ -38,7 +38,7 @@ class User(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     is_activated = models.BooleanField(default=False)
-    flag = IntFlagField(enum_class=AccountFlag, exclusive_choices=True, default=AccountFlag.UNSAFE)
+    flag = IntFlagField(enum_class=AccountFlag, is_multiple=True, default=AccountFlag.UNSAFE)
     # TODO: make separate table Challenge
     challenge_partner = models.OneToOneField("self", on_delete=models.SET_NULL, null=True, related_name="+")
     challenge_streak = models.IntegerField(default=0)
