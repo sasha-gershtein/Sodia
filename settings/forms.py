@@ -75,6 +75,10 @@ class ChallengesForm(UpdateForm):
             "subjects_match",
             "interests_match"
         ]
+        widgets = {
+            "subjects_match": forms.NumberInput(attrs={"type": "range"}),
+            "interests_match": forms.NumberInput(attrs={"type": "range"}),
+        }
 
     def __init__(self, *args, **kwargs):
         kwargs.setdefault("prefix", "challenges")

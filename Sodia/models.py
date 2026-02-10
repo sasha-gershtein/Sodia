@@ -2,9 +2,35 @@ from enum import IntFlag, IntEnum
 from functools import reduce
 from collections.abc import Sequence
 
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.exceptions import ValidationError
 from django.db import models
 from django import forms
+
+
+class FloatField(models.FloatField):
+    def __init__(self, min_value=None, max_value=None, *args, **kwargs):
+        self.min_value = min_value
+        self.max_value = max_value
+        validators = kwargs.setdefault("validators", [])
+        if min_value is not None:
+            validators.append(MinValueValidator(min_value))
+        if max_value is not None:
+            validators.append(MaxValueValidator(max_value))
+        super().__init__(*args, **kwargs)
+
+    def deconstruct(self):
+        name, path, args, kwargs = super().deconstruct()
+        if self.min_value is not None:
+            kwargs["min_value"] = self.min_value
+        if self.max_value is not None:
+            kwargs["max_value"] = self.max_value
+        return name, path, args, kwargs
+
+    def formfield(self, **kwargs):
+        defaults = {'min_value': self.min_value, 'max_value': self.max_value}
+        defaults.update(kwargs)
+        return super().formfield(**defaults)
 
 
 class SingleChoiceField(models.IntegerField):
