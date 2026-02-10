@@ -470,7 +470,7 @@ export class Form {
     }
 }
 
-export class UpdateForm extends Form {
+export class UpdateForm extends Form {  // TODO: do not disable on submit
     #init_promise;
     #polling_interval_id;
     #is_syncing = false;
