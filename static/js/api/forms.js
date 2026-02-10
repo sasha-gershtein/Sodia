@@ -181,7 +181,7 @@ export class MultiselectField extends Field { // this.type === "select-multiple"
         this.changed = false;
         this.clearErrors();
         for (const option of this.input.options) {
-            option.selected = value.includes(option.value);
+            option.selected = value.includes(parseInt(option.value));
         }
     }
 }

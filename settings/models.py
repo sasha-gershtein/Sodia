@@ -3,6 +3,7 @@ from enum import IntFlag, auto
 from django.core.validators import MinLengthValidator
 from django.db import models
 
+from Sodia._models import MultipleChoiceField
 from Sodia.models import int_flag, IntFlagField
 
 
@@ -131,7 +132,6 @@ class GenderFilter(IntFlag):
     MALE = auto()
     FEMALE = auto()
     OTHER = auto()
-    ALL = MALE | FEMALE | OTHER
 
 
 class UserChallengesSettings(models.Model):
@@ -139,7 +139,7 @@ class UserChallengesSettings(models.Model):
                                 primary_key=True)
     frequency = IntFlagField(enum_class=FrequencySetting, default=FrequencySetting.THREE_DAYS)
     # year_groups = TODO: JSONField
-    gender_filter = IntFlagField(enum_class=GenderFilter, default=GenderFilter.ALL)
+    gender_filter = MultipleChoiceField(choices=["Male", "Female", "Other"])
     subjects_match = models.FloatField(default=0.0)  # TODO: set default
     interests_match = models.FloatField(default=0.0)  # TODO: set default
 
