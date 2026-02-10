@@ -1,95 +1,113 @@
+from enum import IntFlag, IntEnum
+from functools import reduce
 from collections.abc import Sequence
 
-from enum import IntFlag as IntFlag
-
+from django.core.exceptions import ValidationError
 from django.db import models
 from django import forms
 
 
-def int_flag(is_multiple=False):
-    def decorator(cls: type[IntFlag]):
-        if is_multiple:
-            def get_json_value(self: IntFlag) -> list[int]:
-                return [int(flag) for flag in cls if flag in self]
-        else:
-            def get_json_value(self: IntFlag) -> int:
-                return int(self)
-
-        cls.is_multiple = is_multiple
-        cls.get_json_value = get_json_value
-        return cls
-
-    return decorator
-
-
-class IntFlagField(models.IntegerField):
-    def __init__(self, enum_class, is_multiple=None, *args, **kwargs):
+class SingleChoiceField(models.IntegerField):
+    def __init__(self, enum_class: type[IntEnum | IntFlag], *args, **kwargs):
         self.enum_class = enum_class
-        if is_multiple is None:
-            is_multiple = getattr(enum_class, "is_multiple", None)
-            assert is_multiple is not None, "enum_class must be decorated with @int_flag() if is_multiple is not passed"
-        self.is_multiple = is_multiple
-        self.flags: list[tuple[int, str]] = []
-        for flag in enum_class:
-            self.flags.append((int(flag), flag.name.replace("_", " ").capitalize()))
-        if not self.is_multiple:
-            kwargs.setdefault("choices", self.flags)
+        defaults = {
+            "choices": [
+                (int(choice), choice.name.replace("_", " ").capitalize()) for choice in enum_class
+            ],
+        }
+        defaults.update(kwargs)
+        super().__init__(*args, **defaults)
+
+    def deconstruct(self):
+        name, path, args, kwargs = super().deconstruct()
+        kwargs["enum_class"] = self.enum_class
+        return name, path, args, kwargs
+
+    def from_db_value(self, value, _expression, _connection):
+        return self.to_python(value)
+
+    def to_python(self, value):
+        if value is None:
+            return None
+        if not value:
+            return self.enum_class(0)
+        return self.enum_class(int(value))
+
+
+class IntFlagList(list):
+    def __init__(self, *args, enum_class: type[IntFlag] | None = None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.enum_class = enum_class
+
+    def enum(self, enum_class: type[IntFlag] | None = None):
+        enum_class = enum_class or self.enum_class
+        if not self:
+            assert enum_class is not None, "enum_class must be defined"
+            return enum_class(0)
+        return reduce(lambda x, y: x | y, self)
+
+    def __int__(self):
+        return int(self.enum())
+
+    def __lt__(self, other):
+        if isinstance(other, int):
+            return int(self) < other
+        return super() < other
+
+    def __gt__(self, other):
+        if isinstance(other, int):
+            return int(self) > other
+        return super() > other
+
+    def __eq__(self, other):
+        if isinstance(other, int):
+            return int(self) == other
+        return super() == other
+
+
+class MultipleChoiceField(models.IntegerField):
+    def __init__(self, enum_class: type[IntFlag], *args, **kwargs):
+        self.enum_class = enum_class
+        self.flags: list[tuple[int, str]] = [
+            (flag, flag.name.replace("_", " ").capitalize()) for flag in enum_class
+        ]
         super().__init__(*args, **kwargs)
 
     def deconstruct(self):
         name, path, args, kwargs = super().deconstruct()
         kwargs["enum_class"] = self.enum_class
-        kwargs["is_multiple"] = self.is_multiple
         return name, path, args, kwargs
 
-    def from_db_value(self, value, _expression, _connection) -> IntFlag | None:
-        if self.enum_class.__name__ == "GenderFilter":
-            ...
-        if value is None:
-            return value
-        return (
-            [flag for flag in self.enum_class if flag in self.enum_class(int(value))] if self.is_multiple
-            else self.enum_class(int(value))
-        )
+    def from_db_value(self, value, _expression, _connection):
+        return self.to_python(value)
 
-    def to_python(self, value) -> IntFlag | None:
-        if self.enum_class.__name__ == "GenderFilter":
-            ...
-        if isinstance(value, self.enum_class) or value is None:
-            return value
-        if not isinstance(value, str) and isinstance(value, Sequence):
-            union = self.enum_class(0)
-            print(value)
-            for flag in value:
-                union |= self.enum_class(int(flag))
-            return union
-        return (
-            [flag for flag in self.enum_class if flag in self.enum_class(int(value))] if self.is_multiple
-            else self.enum_class(int(value))
+    def to_python(self, value):
+        if value is None:
+            return None
+        if not value:
+            return IntFlagList([], enum_class=self.enum_class)
+        if isinstance(value, Sequence):
+            return IntFlagList([self.enum_class(int(flag)) for flag in value], enum_class=self.enum_class)
+        return IntFlagList(
+            [self.enum_class(flag) for flag, name in self.flags if int(value) & flag],
+            enum_class=self.enum_class
         )
 
     def get_prep_value(self, value):
         if value is None:
             return None
-        return int(value)
+        return int(self.to_python(value))
+
+    def validate(self, value, model_instance):
+        super().validate(value, model_instance)
+        if not 0 <= self.get_prep_value(value) < self.flags[-1][0] << 1:
+            raise ValidationError(f"Invalid flag value")
 
     def formfield(self, **kwargs):
-        if not self.is_multiple:
-            widget = forms.Select(choices=self.flags)
-        else:
-            widget = forms.SelectMultiple(choices=self.flags)
         defaults = {
-            "widget": widget,
+            "form_class": forms.TypedMultipleChoiceField,
+            "choices": self.flags,
+            "coerce": int,
         }
-        if self.is_multiple:
-            defaults.update({
-                "form_class": forms.TypedMultipleChoiceField,
-                "choices": self.flags,
-                "coerce": lambda x: (print(f"coerce({x})"), self.to_python(x))[1],
-            })
         defaults.update(kwargs)
         return super().formfield(**defaults)
-
-    def clean(self, value, model_instance):
-        print(f"cleaning {value}: {repr(self.to_python(value))}")
-        return self.to_python(value)

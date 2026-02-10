@@ -3,8 +3,7 @@ from enum import IntFlag, auto
 from django.core.validators import MinLengthValidator
 from django.db import models
 
-from Sodia._models import MultipleChoiceField
-from Sodia.models import int_flag, IntFlagField
+from Sodia.models import MultipleChoiceField, SingleChoiceField
 
 
 # Create your models here.
@@ -19,7 +18,6 @@ class Country(models.Model):
         return self.id
 
 
-@int_flag(is_multiple=False)
 class HouseBoardingType(IntFlag):
     BOARDING = auto()
     DAY = auto()
@@ -28,7 +26,7 @@ class HouseBoardingType(IntFlag):
 
 class House(models.Model):
     name = models.CharField(max_length=20)
-    boarding_type = IntFlagField(HouseBoardingType)
+    boarding_type = SingleChoiceField(HouseBoardingType)
 
     def __str__(self):
         return self.name
@@ -37,7 +35,6 @@ class House(models.Model):
         return self.id
 
 
-@int_flag(is_multiple=False)
 class PupilBoardingType(IntFlag):
     FULL = auto()
     WEEKLY = auto()
@@ -69,7 +66,7 @@ class UserAccountSettings(models.Model):
     country = models.ForeignKey(Country, null=True, blank=True, on_delete=models.SET_NULL)
     description = models.TextField(null=True, blank=True, max_length=2000)
     house = models.ForeignKey(House, null=True, blank=True, on_delete=models.SET_NULL)
-    boarding_type = IntFlagField(PupilBoardingType, null=True, blank=True)
+    boarding_type = SingleChoiceField(PupilBoardingType, null=True, blank=True)
     year_group = models.ForeignKey(YearGroup, null=True, blank=True, on_delete=models.SET_NULL)
     # free_periods = ??? TODO: JSONField
 
@@ -82,7 +79,6 @@ class UserAccountSettings(models.Model):
         return f"<{self.__class__.__name__} of {self.user}>"
 
 
-@int_flag(is_multiple=False)
 class PrivacySetting(IntFlag):
     EVERYONE = auto()
     FRIENDS_ONLY = auto()
@@ -92,14 +88,14 @@ class PrivacySetting(IntFlag):
 class UserPrivacySettings(models.Model):
     user = models.OneToOneField("users.User", on_delete=models.CASCADE, related_name="privacy_settings",
                                 primary_key=True)
-    full_name = IntFlagField(enum_class=PrivacySetting, default=PrivacySetting.EVERYONE)
-    profile_picture = IntFlagField(enum_class=PrivacySetting, default=PrivacySetting.EVERYONE)
-    birthday = IntFlagField(enum_class=PrivacySetting, default=PrivacySetting.EVERYONE)
-    free_periods = IntFlagField(enum_class=PrivacySetting, default=PrivacySetting.FRIENDS_ONLY)
-    interests = IntFlagField(enum_class=PrivacySetting, default=PrivacySetting.EVERYONE)
-    description = IntFlagField(enum_class=PrivacySetting, default=PrivacySetting.EVERYONE)
-    friends = IntFlagField(enum_class=PrivacySetting, default=PrivacySetting.FRIENDS_ONLY)
-    message = IntFlagField(enum_class=PrivacySetting, default=PrivacySetting.FRIENDS_ONLY)
+    full_name = SingleChoiceField(enum_class=PrivacySetting, default=PrivacySetting.EVERYONE)
+    profile_picture = SingleChoiceField(enum_class=PrivacySetting, default=PrivacySetting.EVERYONE)
+    birthday = SingleChoiceField(enum_class=PrivacySetting, default=PrivacySetting.EVERYONE)
+    free_periods = SingleChoiceField(enum_class=PrivacySetting, default=PrivacySetting.FRIENDS_ONLY)
+    interests = SingleChoiceField(enum_class=PrivacySetting, default=PrivacySetting.EVERYONE)
+    description = SingleChoiceField(enum_class=PrivacySetting, default=PrivacySetting.EVERYONE)
+    friends = SingleChoiceField(enum_class=PrivacySetting, default=PrivacySetting.FRIENDS_ONLY)
+    message = SingleChoiceField(enum_class=PrivacySetting, default=PrivacySetting.FRIENDS_ONLY)
 
     def __repr__(self):
         return f"<{self.__class__.__name__} of {self.user}>"
@@ -118,7 +114,6 @@ class UserNotificationsSettings(models.Model):
         return f"<{self.__class__.__name__} of {self.user}>"
 
 
-@int_flag(is_multiple=False)
 class FrequencySetting(IntFlag):
     IMMEDIATE = auto()
     DAY = auto()
@@ -137,7 +132,7 @@ class GenderFilter(IntFlag):
 class UserChallengesSettings(models.Model):
     user = models.OneToOneField("users.User", on_delete=models.CASCADE, related_name="challenges_settings",
                                 primary_key=True)
-    frequency = IntFlagField(enum_class=FrequencySetting, default=FrequencySetting.THREE_DAYS)
+    frequency = SingleChoiceField(enum_class=FrequencySetting, default=FrequencySetting.THREE_DAYS)
     # year_groups = TODO: JSONField
     gender_filter = MultipleChoiceField(enum_class=GenderFilter, default=GenderFilter.ALL)
     subjects_match = models.FloatField(default=0.0)  # TODO: set default

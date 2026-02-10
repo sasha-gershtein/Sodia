@@ -11,7 +11,7 @@ from .passwords import Password
 from django.db import models, transaction
 from django.utils import timezone
 
-from Sodia.models import IntFlagField
+from Sodia.models import MultipleChoiceField
 from settings.models import UserAccountSettings, UserPrivacySettings, UserNotificationsSettings, UserChallengesSettings
 
 
@@ -38,7 +38,7 @@ class User(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     is_activated = models.BooleanField(default=False)
-    flag = IntFlagField(enum_class=AccountFlag, is_multiple=True, default=AccountFlag.UNSAFE)
+    flag = MultipleChoiceField(enum_class=AccountFlag, default=AccountFlag.UNSAFE)
     # TODO: make separate table Challenge
     challenge_partner = models.OneToOneField("self", on_delete=models.SET_NULL, null=True, related_name="+")
     challenge_streak = models.IntegerField(default=0)
