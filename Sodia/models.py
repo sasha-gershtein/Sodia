@@ -19,14 +19,16 @@ from django import forms
 
 
 class FloatField(models.FloatField):
-    def __init__(self, min_value=None, max_value=None, *args, **kwargs):
+    def __init__(self, min_value=None, max_value=None, *args, _initialized=False, **kwargs):
         self.min_value = min_value
         self.max_value = max_value
-        validators = kwargs.setdefault("validators", [])
-        if min_value is not None:
-            validators.append(MinValueValidator(min_value))
-        if max_value is not None:
-            validators.append(MaxValueValidator(max_value))
+        if not _initialized:
+            validators = list(kwargs.pop("validators", []))
+            if min_value is not None:
+                validators.append(MinValueValidator(min_value))
+            if max_value is not None:
+                validators.append(MaxValueValidator(max_value))
+            kwargs["validators"] = validators
         super().__init__(*args, **kwargs)
 
     def deconstruct(self):
@@ -35,6 +37,7 @@ class FloatField(models.FloatField):
             kwargs["min_value"] = self.min_value
         if self.max_value is not None:
             kwargs["max_value"] = self.max_value
+        kwargs["_initialized"] = True
         return name, path, args, kwargs
 
     def formfield(self, **kwargs):

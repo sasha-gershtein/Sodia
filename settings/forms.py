@@ -13,7 +13,6 @@ class AccountForm(UpdateForm):
             "first_name",
             "last_name",
             "display_name",
-            "is_full_name_hidden",
             "gender",
             "birth_date",
             "country",

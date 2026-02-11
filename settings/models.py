@@ -94,7 +94,6 @@ class UserAccountSettings(models.Model):
     first_name = models.CharField(max_length=50, validators=[MinLengthValidator(2)])
     last_name = models.CharField(max_length=50, validators=[MinLengthValidator(2)])
     display_name = models.CharField(null=True, blank=True, max_length=100, validators=[MinLengthValidator(5)])
-    is_full_name_hidden = models.BooleanField(default=False)
     # profile_picture = models.??? TODO
     gender = models.CharField(null=True, blank=True, max_length=30)
     birth_date = models.DateField(null=True, blank=True)
