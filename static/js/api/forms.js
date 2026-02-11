@@ -223,6 +223,18 @@ export class MultiCheckboxField extends Field { // this.type === "checkbox"
             option.checked = value.includes(parseInt(option.value));
         }
     }
+
+    disable() {
+        for (const option of this.options) {
+            option.disabled = true;
+        }
+    }
+
+    enable() {
+        for (const option of this.options) {
+            option.disabled = false;
+        }
+    }
 }
 
 export class RadioField extends Field { // this.type === "radio"
@@ -259,6 +271,18 @@ export class RadioField extends Field { // this.type === "radio"
                 option.checked = true;
                 return;
             }
+        }
+    }
+
+    disable() {
+        for (const option of this.options) {
+            option.disabled = true;
+        }
+    }
+
+    enable() {
+        for (const option of this.options) {
+            option.disabled = false;
         }
     }
 }
