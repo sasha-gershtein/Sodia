@@ -428,11 +428,13 @@ export class Form {
         this.clearErrors();
     }
 
-    disable() {
+    disable(disable_fields = true) {
         this.disabled = true;
         if (this.submit_button) this.submit_button.disabled = true;
-        for (const field of this) {
-            field.disable();
+        if (disable_fields) {
+            for (const field of this) {
+                field.disable();
+            }
         }
     }
 
@@ -520,7 +522,7 @@ export class Form {
     }
 }
 
-export class UpdateForm extends Form {  // TODO: do not disable on submit
+export class UpdateForm extends Form {
     #init_promise;
     #polling_interval_id;
     #is_syncing = false;
@@ -530,7 +532,7 @@ export class UpdateForm extends Form {  // TODO: do not disable on submit
 
     constructor(...args) {
         super(...args);
-        this.disable();
+        this.disable(true);
         this.#autosave_button = document.createElement("input");
         this.#autosave_button.type = "submit";
         this.#autosave_button.hidden = true;
@@ -550,6 +552,10 @@ export class UpdateForm extends Form {  // TODO: do not disable on submit
         } finally {
             this.#is_syncing = false;
         }
+    }
+
+    disable(disable_fields = false) {
+        super.disable(disable_fields);
     }
 
     afterInit() {
