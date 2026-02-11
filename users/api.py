@@ -1,9 +1,10 @@
 from api.decorators import api_view, api_login_required
-from api.errors import parse_form_errors
+from api.errors import parse_form_errors, BadRequestError, NotFoundError
 from django.urls import reverse
 
-from .forms import LoginForm, RegistrationForm, ChangePasswordForm
+from settings.models import UserAccountSettings
 
+from .forms import LoginForm, RegistrationForm, ChangePasswordForm
 from .middleware import SessionData
 from .models import User
 
@@ -44,7 +45,7 @@ def register(request, data):
     session_data.session.authenticate(user)
     return {
         "redirect": {
-            "location": reverse("users:home")
+            "location": reverse("users:home")  # TODO: registration
         }
     }
 
@@ -58,3 +59,23 @@ def change_password(request, user: User, data):
     user.login_details.save()
     session_data: SessionData = request.session_data
     session_data.session.authenticate(user)
+
+
+@api_login_required
+def partial_user_info(_request, _user, data):
+    try:
+        if data.get("id") is not None:
+            requested_user = User.objects.activated().get(pk=data["id"])
+        elif data.get("username") is not None:
+            requested_user = UserAccountSettings.objects.activated().get(username=data["username"]).user
+        else:
+            raise BadRequestError("User must be identified via id or username")
+    except (User.DoesNotExist, UserAccountSettings.DoesNotExist):
+        raise NotFoundError("User does not exist")
+    return {
+        "id": requested_user.id,
+        "username": requested_user.account_settings.username,
+        "first_name": requested_user.account_settings.first_name,
+        "last_name": requested_user.account_settings.last_name,
+        "display_name": requested_user.account_settings.get_display_name(),
+    }

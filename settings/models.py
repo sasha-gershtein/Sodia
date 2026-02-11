@@ -1,6 +1,7 @@
+import re
 from enum import IntFlag, auto
 
-from django.core.validators import MinLengthValidator
+from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import models
 
 from Sodia.models import MultipleChoiceField, SingleChoiceField, FloatField
@@ -52,10 +53,44 @@ class YearGroup(models.Model):
         return self.year_group_number
 
 
+class SettingsManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("user")
+
+
+class AccountManager(SettingsManager):
+    def generate_username(self, email: str):
+        max_length = self.model._meta.get_field("username").max_length
+        # remove possible illegal characters: :/?#[]@!$&'()*+,;=
+        base = re.sub(
+            "[^a-zA-Z0-9._-]", "", email.split('@')[0]
+        )[:max_length]
+        username = base
+        if not base:
+            base = "user"
+            username = "user-1"
+        i = 2
+        while self.filter(username=username).exists():
+            suffix = f"-{i}"
+            username = base[:max_length - len(suffix)] + suffix
+            i += 1
+        return username
+
+    def create_account_settings(self, email, **kwargs):
+        username = self.generate_username(email)
+        return self.create(username=username, **kwargs)
+
+    def activated(self):
+        return self.filter(user__is_activated=True)
+
+
 class UserAccountSettings(models.Model):
     user = models.OneToOneField("users.User", on_delete=models.CASCADE, related_name='account_settings',
                                 primary_key=True)
-    username = models.CharField(max_length=30, validators=[MinLengthValidator(4)], unique=True)
+    username = models.CharField(max_length=30, validators=[
+        MinLengthValidator(4),
+        RegexValidator("^[a-zA-Z0-9._-]+$")
+    ], unique=True)
     first_name = models.CharField(max_length=50, validators=[MinLengthValidator(2)])
     last_name = models.CharField(max_length=50, validators=[MinLengthValidator(2)])
     display_name = models.CharField(null=True, blank=True, max_length=100, validators=[MinLengthValidator(5)])
@@ -69,6 +104,8 @@ class UserAccountSettings(models.Model):
     boarding_type = SingleChoiceField(PupilBoardingType, null=True, blank=True)
     year_group = models.ForeignKey(YearGroup, null=True, blank=True, on_delete=models.SET_NULL)
     # free_periods = ??? TODO: JSONField
+
+    objects = AccountManager()
 
     def get_display_name(self):
         if self.display_name:
@@ -97,6 +134,8 @@ class UserPrivacySettings(models.Model):
     friends = SingleChoiceField(enum_class=PrivacySetting, default=PrivacySetting.FRIENDS_ONLY)
     message = SingleChoiceField(enum_class=PrivacySetting, default=PrivacySetting.FRIENDS_ONLY)
 
+    objects = SettingsManager()
+
     def __repr__(self):
         return f"<{self.__class__.__name__} of {self.user}>"
 
@@ -109,6 +148,8 @@ class UserNotificationsSettings(models.Model):
     new_friend_requests = models.BooleanField(default=True)
     accepted_friend_requests = models.BooleanField(default=True)
     sodia_button_updates = models.BooleanField(default=True)
+
+    objects = SettingsManager()
 
     def __repr__(self):
         return f"<{self.__class__.__name__} of {self.user}>"
@@ -137,6 +178,8 @@ class UserChallengesSettings(models.Model):
     gender_filter = MultipleChoiceField(enum_class=GenderFilter, default=GenderFilter.ALL)
     subjects_match = FloatField(default=0.0, min_value=-1.0, max_value=1.0)  # TODO: set default
     interests_match = FloatField(default=0.0, min_value=-1.0, max_value=1.0)  # TODO: set default
+
+    objects = SettingsManager()
 
     def __repr__(self):
         return f"<{self.__class__.__name__} of {self.user}>"

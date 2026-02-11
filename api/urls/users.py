@@ -9,4 +9,5 @@ urlpatterns = [
     path('logout/', api.logout, name='logout'),
     path('register/', api.register, name='register'),
     path('change-password/', api.change_password, name='change_password'),
+    path('partial-info/', api.partial_user_info, name='partial_info'),
 ]

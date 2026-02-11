@@ -11,7 +11,7 @@ from .passwords import Password
 from django.db import models, transaction
 from django.utils import timezone
 
-from Sodia.models import MultipleChoiceField
+from Sodia.models import SingleChoiceField
 from settings.models import UserAccountSettings, UserPrivacySettings, UserNotificationsSettings, UserChallengesSettings
 
 
@@ -22,23 +22,31 @@ class AccountFlag(IntFlag):
 
 
 class UserManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related(
+            "account_settings", "privacy_settings", "notifications_settings", "challenges_settings"
+        )
+
     @transaction.atomic
     def create_user(self, *, first_name, last_name, email, password, **kwargs):
         user = self.create(**kwargs)
         UserLoginDetails.objects.create(user=user, email=email, password=password)
-        username = email.split('@')[0][:UserAccountSettings._meta.get_field("username").max_length]
-        UserAccountSettings.objects.create(user=user, username=username, first_name=first_name, last_name=last_name)
+        UserAccountSettings.objects.create_account_settings(email=email,
+                                                            user=user, first_name=first_name, last_name=last_name)
         UserPrivacySettings.objects.create(user=user)
         UserNotificationsSettings.objects.create(user=user)
         UserChallengesSettings.objects.create(user=user)
         return user
+
+    def activated(self):
+        return self.filter(is_activated=True)
 
 
 class User(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     is_activated = models.BooleanField(default=False)
-    flag = MultipleChoiceField(enum_class=AccountFlag, default=AccountFlag.UNSAFE)
+    flag = SingleChoiceField(enum_class=AccountFlag, default=AccountFlag.UNSAFE)
     # TODO: make separate table Challenge
     challenge_partner = models.OneToOneField("self", on_delete=models.SET_NULL, null=True, related_name="+")
     challenge_streak = models.IntegerField(default=0)
