@@ -1,19 +1,23 @@
+import math
+
 from django.core.exceptions import ValidationError
 from django.forms import forms
 from django.http import JsonResponse
+from django.urls import reverse_lazy
 
 
 class ApiError(Exception):
     code: int = 500
     reason: str = "GENERIC"
     message: str = "Internal Server Error"
+    meta = None
 
     def __init__(self, message=None, *args, code=None, reason=None, meta=None):
         super().__init__(*args)
         self.code = code if code is not None else self.code
         self.reason = reason if reason is not None else self.reason
         self.message = message if message is not None else self.message
-        self.meta = meta
+        self.meta = meta if meta is not None else self.meta
 
 
 class InternalServerError(ApiError):
@@ -41,6 +45,11 @@ class UnauthorizedError(ClientError):
     code = 401
     reason = "UNAUTHORIZED"
     message = "Unauthorized"
+    meta = {
+        "redirect": {
+            "location": reverse_lazy("users:home")
+        }
+    }
 
 
 class ForbiddenError(ClientError):
@@ -70,7 +79,7 @@ class TooManyRequestsError(ClientError):
 class BadUserInputError(ClientError):
     code = 499
     reason = "BAD_USER_INPUT"
-    message = "Bad User Input"
+    message = "Bad input. Please check and try again"
 
 
 class APIValidationError(BadUserInputError):
@@ -79,14 +88,28 @@ class APIValidationError(BadUserInputError):
 
 
 class FormResponseUserError(ValidationError):
-    ...
+    """Subclass of django.core.exceptions.ValidationError.
+    Used for semantic validation errors, i.e. validation that can only be completed by the server, not the client.
+    These errors might be treated differently by the client than simple ValidationErrors."""
+
+    def __init__(self, *args, priority: int | float = 0, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.priority = priority
 
 
-def parse_form_errors(form: forms.Form):
-    non_field = form.non_field_errors().as_data()
-    if len(non_field) and isinstance(non_field[0], FormResponseUserError):
-        return BadUserInputError(non_field[0].message, reason=non_field[0].code.upper() if non_field[0].code else None)
-    return APIValidationError(meta=form.errors)
+def parse_form_errors(form: forms.BaseForm):
+    assert form.errors, "parse_form_errors should only be called on invalid forms"
+    user_error = FormResponseUserError(message="", priority=-math.inf)
+    for field_errors in form.errors.as_data().values():
+        for error in field_errors:
+            if not isinstance(error, FormResponseUserError):
+                return APIValidationError(meta=form.errors)
+
+            if error.priority > user_error.priority:
+                user_error = error
+
+    # TODO: change forms.js to reflect new protocol
+    return BadUserInputError(meta=form.errors, reason=user_error.code.upper() if user_error.code else None)
 
 
 def ErrorResponse(e: ApiError):

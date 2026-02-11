@@ -1,8 +1,8 @@
-from api.decorators import api_view
+from api.decorators import api_view, api_login_required
 from api.errors import parse_form_errors
 from django.urls import reverse
 
-from .forms import LoginForm, RegistrationForm
+from .forms import LoginForm, RegistrationForm, ChangePasswordForm
 
 from .middleware import SessionData
 from .models import User
@@ -21,8 +21,9 @@ def login(request, data):
         }
     }
 
+
 @api_view
-def logout(request, data):
+def logout(request, _data):
     session_data: SessionData = request.session_data
     session_data.session.logout()
     session_data.reset_cookies = True
@@ -31,6 +32,7 @@ def logout(request, data):
             "location": reverse("users:home")
         }
     }
+
 
 @api_view
 def register(request, data):
@@ -45,3 +47,14 @@ def register(request, data):
             "location": reverse("users:home")
         }
     }
+
+
+@api_login_required
+def change_password(request, user: User, data):
+    form = ChangePasswordForm(data, user=user)
+    if not form.is_valid():
+        raise parse_form_errors(form)
+    user.login_details.password = form.cleaned_data["new_password"]
+    user.login_details.save()
+    session_data: SessionData = request.session_data
+    session_data.session.authenticate(user)

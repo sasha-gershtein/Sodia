@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 
 from api.errors import FormResponseUserError
-from .models import UserLoginDetails
+from .models import User, UserLoginDetails
 from settings.models import UserAccountSettings
 
 
@@ -21,7 +21,7 @@ class LoginForm(forms.Form):
         identifier = cleaned_data.get("identifier")
         password = cleaned_data.get("password")
 
-        if not identifier or not password:
+        if identifier is None or password is None:
             return cleaned_data
 
         is_email = True
@@ -36,15 +36,18 @@ class LoginForm(forms.Form):
             else:
                 user = UserAccountSettings.objects.get(username__iexact=identifier).user
         except (UserLoginDetails.DoesNotExist, UserAccountSettings.DoesNotExist):
-            raise FormResponseUserError("Incorrect username or password. Please check your details and try again",
-                                        code="invalid_credentials")
+            user = None
 
-        if not user.login_details.password.verify(password):
-            raise FormResponseUserError("Incorrect username or password. Please check your details and try again",
-                                        code="invalid_credentials")
+        if user is None or not user.login_details.password.verify(password):
+            self.add_error(None,
+                           FormResponseUserError(
+                               "Incorrect username or password. Please check your details and try again",
+                               code="invalid_credentials")
+                           )
+            return
 
         cleaned_data["user"] = user
-        return cleaned_data
+
 
 class RegistrationForm(forms.Form):
     first_name = forms.CharField(min_length=2, max_length=50,
@@ -64,16 +67,63 @@ class RegistrationForm(forms.Form):
         cleaned_data = super().clean()
         email = cleaned_data.get("email")
         password = cleaned_data.get("password")
-        password_confirm = cleaned_data.get("password_confirm")
+        password_confirm = cleaned_data.pop("password_confirm", None)
+
+        if email is None or password is None or password_confirm is None:
+            return
 
         if UserLoginDetails.objects.filter(email=email).exists():
-            raise FormResponseUserError(
-                "An account with this email address already exists. You can try to sign in instead",
-                code="email_exists")
+            self.add_error(
+                "email",
+                FormResponseUserError(
+                    "An account with this email address already exists. You can try to sign in instead",
+                    code="email_exists"
+                )
+            )
 
         if password != password_confirm:
-            raise ValidationError("Passwords don't match. Please check and try again",
-                                  code="password_mismatch")
+            self.add_error(
+                "password",
+                ValidationError("Passwords don't match. Please check and try again", code="password_mismatch")
+            )
 
-        cleaned_data.pop("password_confirm")
-        return cleaned_data
+
+class ChangePasswordForm(forms.Form):
+    old_password = forms.CharField(min_length=4, max_length=100, widget=forms.PasswordInput)
+    new_password = forms.CharField(min_length=4, max_length=100, widget=forms.PasswordInput)
+    new_password_confirm = forms.CharField(min_length=4, max_length=100, widget=forms.PasswordInput)
+
+    def __init__(self, *args, user: User | None = None, **kwargs):
+        kwargs.setdefault("prefix", "change-password")
+        super().__init__(*args, **kwargs)
+        self.user = user
+
+    def clean(self):
+        cleaned_data = super().clean()
+        old_password = cleaned_data.get("old_password")
+        new_password = cleaned_data.get("new_password")
+        new_password_confirm = cleaned_data.pop("new_password_confirm", None)
+
+        assert self.user is not None, "ChangePasswordForm.user cannot be None on validation"
+
+        if old_password is None or new_password is None or new_password_confirm is None:
+            return
+
+        if not self.user.login_details.password.verify(old_password):
+            self.add_error(
+                "old_password",
+                FormResponseUserError("Incorrect password. Please check and try again", code="invalid_password")
+            )
+
+        if new_password != new_password_confirm:
+            self.add_error("new_password_confirm", ValidationError(
+                "Passwords don't match. Please check and try again",
+                code="password_mismatch"
+            ))
+            return
+
+        if old_password == new_password:
+            self.add_error(
+                None,
+                FormResponseUserError("New password must be different from the old password", code="password_unchanged")
+            )

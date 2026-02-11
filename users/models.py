@@ -11,11 +11,9 @@ from .passwords import Password
 from django.db import models, transaction
 from django.utils import timezone
 
-from Sodia.models import IntFlagField
-from settings.models import UserAccountSettings, UserPrivacySettings, UserNotificationSettings, UserChallengesSettings
+from Sodia.models import MultipleChoiceField
+from settings.models import UserAccountSettings, UserPrivacySettings, UserNotificationsSettings, UserChallengesSettings
 
-
-# TODO: make __str__
 
 class AccountFlag(IntFlag):
     UNSAFE = auto()
@@ -31,7 +29,7 @@ class UserManager(models.Manager):
         username = email.split('@')[0][:UserAccountSettings._meta.get_field("username").max_length]
         UserAccountSettings.objects.create(user=user, username=username, first_name=first_name, last_name=last_name)
         UserPrivacySettings.objects.create(user=user)
-        UserNotificationSettings.objects.create(user=user)
+        UserNotificationsSettings.objects.create(user=user)
         UserChallengesSettings.objects.create(user=user)
         return user
 
@@ -40,13 +38,20 @@ class User(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     is_activated = models.BooleanField(default=False)
-    flag = IntFlagField(enum_class=AccountFlag, exclusive_choices=True, default=AccountFlag.UNSAFE)
+    flag = MultipleChoiceField(enum_class=AccountFlag, default=AccountFlag.UNSAFE)
     # TODO: make separate table Challenge
     challenge_partner = models.OneToOneField("self", on_delete=models.SET_NULL, null=True, related_name="+")
     challenge_streak = models.IntegerField(default=0)
     is_pressing_sodia_button = models.BooleanField(default=False)
 
     objects = UserManager()
+
+    def __repr__(self):
+        return (f"<{self.__class__.__name__} {self.account_settings.get_display_name()} "
+                f"(@{self.account_settings.username}, id: {self.id})>")
+
+    def __str__(self):
+        return f"{self.account_settings.get_display_name()} @{self.account_settings.username}"
 
 
 class PasswordField(models.CharField):
@@ -88,6 +93,9 @@ class UserLoginDetails(models.Model):
     email_changed_at = models.DateTimeField(default=timezone.now)
     password = PasswordField()
     password_changed_at = models.DateTimeField(default=timezone.now)
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} of {self.user} ({self.email})>"
 
 
 class SessionManager(models.Manager):
@@ -163,6 +171,11 @@ class Session(models.Model):
         self.logout()
         return False
 
+    def __repr__(self):
+        if self.user is None:
+            return f"<{self.__class__.__name__} ({self.token[:20]}...)>"
+        return f"<{self.__class__.__name__} ({self.token[:20]}...), auth: {self.user}>"
+
 
 class SessionUpdate(models.Model):
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
@@ -173,3 +186,6 @@ class SessionUpdate(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['session', 'update_number'], name='unique_session_update_number'),
         ]
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} {self.update_number} of {self.session}>"

@@ -1,6 +1,7 @@
 // noinspection JSUnusedGlobalSymbols, JSUnusedLocalSymbols
 
-import {api, APIError, BadAPIResponseError, displayError, MaxRetriesError} from "./api.js";
+import {api, APIError, BadAPIResponseError, MaxRetriesError} from "./api.js";
+import {displayError, displaySuccess} from "./ui.js";
 
 function trim(string, chars) {
     let i = 0;
@@ -11,16 +12,27 @@ function trim(string, chars) {
 }
 
 export class Field {
+    input;
+    form;
+    name;
+    label;
+    type;
+    error_list_element;
+    custom_errors = [];
+    changed = false;
+    #is_showErrors_event;
+    ERROR_MESSAGES;
+    controller;
+
     constructor(input, form, signal = null) {
         this.input = input;
         this.form = form;
         this.name = input.name;
-        this.label = trim((this.input.labels?.[0]?.textContent || this.name).toLowerCase(), " :.,=?!()*<>[]{}");
+        this.label = trim((this.input.labels?.[0]?.textContent || this.name).toLowerCase(), " \t\n\r:.,=?!()*<>[]{}");
         this.type = input.type;
         this.error_list_element = this.input.parentElement.querySelector(".errorlist");
-        this.custom_errors = [];
 
-        this._is_showErrors_event = false;
+        this.#is_showErrors_event = false;
 
         this.ERROR_MESSAGES = {
             badInput: () => "the value you entered cannot be parsed",
@@ -36,23 +48,33 @@ export class Field {
         }
 
         this.controller = new AbortController();
-        const options = {
+        const params = {
             signal: this.controller.signal
         };
         signal?.addEventListener("abort", this.abort.bind(this));
 
-        this.input.addEventListener("beforeinput", this.onBeforeInput.bind(this), options);
-        this.input.addEventListener("input", this.onInput.bind(this), options);
-        this.input.addEventListener("change", this.onChange.bind(this), options);
-        this.input.addEventListener("invalid", this.onInvalid.bind(this), options);
+        this.addEventListeners(this.input, params);
     }
 
     abort() {
         this.controller.abort();
     }
 
-    getValue() {
+    addEventListeners(element, params) {
+        element.addEventListener("beforeinput", this.onBeforeInput.bind(this), params);
+        element.addEventListener("input", this.onInput.bind(this), params);
+        element.addEventListener("change", this.onChange.bind(this), params);
+        element.addEventListener("invalid", this.onInvalid.bind(this), params);
+    }
+
+    get value() {
         return this.input.value;
+    }
+
+    set value(value) {
+        this.changed = false;
+        this.clearErrors();
+        this.input.value = value;
     }
 
     displayError(message) {
@@ -62,7 +84,7 @@ export class Field {
     }
 
     showErrors(exclude_required = false) {
-        if (this._is_showErrors_event) return; // a loop is detected, do not run again!
+        if (this.#is_showErrors_event) return; // a loop is detected, do not run again!
         this.clearErrors();
         if (this.input.validity.valid) return;
         if (this.error_list_element) this.error_list_element.innerHTML = "";
@@ -77,11 +99,11 @@ export class Field {
         }
         this.input.classList.add("show-errors");
         this.error_list_element?.classList.add("show-errors");
-        this._is_showErrors_event = true;
+        this.#is_showErrors_event = true;
         try {
             this.input.reportValidity();
         } finally {
-            this._is_showErrors_event = false;
+            this.#is_showErrors_event = false;
         }
     }
 
@@ -106,12 +128,21 @@ export class Field {
         return this.input.validity.valid;
     }
 
+    disable() {
+        this.input.disabled = true;
+    }
+
+    enable() {
+        this.input.disabled = false;
+    }
+
     onBeforeInput(e) {
         // filter out invalid input
     }
 
     onInput(e) {
         // run silent validation
+        this.changed = true;
         if (this.validate()) this.clearErrors();
     }
 
@@ -129,13 +160,140 @@ export class Field {
     }
 }
 
+export class CheckboxField extends Field { // this.type === "checkbox"
+    get value() {
+        return this.input.checked;
+    }
+
+    set value(value) {
+        this.changed = false;
+        this.clearErrors();
+        this.input.checked = value;
+    }
+}
+
+export class MultiselectField extends Field { // this.type === "select-multiple"
+    get value() {
+        let options = [];
+        for (const option of this.input.options) {
+            if (option.selected) options.push(option.value);
+        }
+        return options;
+    }
+
+    set value(value) {
+        this.changed = false;
+        this.clearErrors();
+        for (const option of this.input.options) {
+            option.selected = value.includes(parseInt(option.value));
+        }
+    }
+}
+
+export class MultiCheckboxField extends Field { // this.type === "checkbox"
+    options;
+
+    constructor(...args) {
+        super(...args);
+        this.options = this.form.form.querySelectorAll(`input[type="checkbox"][name="${this.input.name}"]`);
+        const params = {
+            signal: this.controller.signal
+        };
+        for (const element of this.options) {
+            if (element === this.input) continue;
+            this.addEventListeners(element, params);
+        }
+    }
+
+    get value() {
+        let options = [];
+        for (const option of this.options) {
+            if (option.checked) options.push(option.value);
+        }
+        return options;
+    }
+
+    set value(value) {
+        this.changed = false;
+        this.clearErrors();
+        if (value === null) {
+            for (const option of this.options) option.checked = false;
+        }
+        for (const option of this.options) {
+            option.checked = value.includes(parseInt(option.value));
+        }
+    }
+
+    disable() {
+        for (const option of this.options) {
+            option.disabled = true;
+        }
+    }
+
+    enable() {
+        for (const option of this.options) {
+            option.disabled = false;
+        }
+    }
+}
+
+export class RadioField extends Field { // this.type === "radio"
+    options;
+
+    constructor(...args) {
+        super(...args);
+        this.options = this.form.form.querySelectorAll(`input[type="radio"][name="${this.input.name}"]`);
+        const params = {
+            signal: this.controller.signal
+        };
+        for (const element of this.options) {
+            if (element === this.input) continue;
+            this.addEventListeners(element, params);
+        }
+    }
+
+    get value() {
+        for (const option of this.options) {
+            if (option.checked) return option.value;
+        }
+        return null;
+    }
+
+    set value(value) {
+        this.changed = false;
+        this.clearErrors();
+        if (value === null) {
+            for (const option of this.options) option.checked = false;
+            return;
+        }
+        for (const option of this.options) {
+            if (option.value === value) {
+                option.checked = true;
+                return;
+            }
+        }
+    }
+
+    disable() {
+        for (const option of this.options) {
+            option.disabled = true;
+        }
+    }
+
+    enable() {
+        for (const option of this.options) {
+            option.disabled = false;
+        }
+    }
+}
+
 class FormValidationField extends Field {
     constructor(form, signal = null) {
         let input = form.form.querySelector(`input[type='hidden'][name='${form.form.id}_form_validation_field']`);
         if (!input) {
             input = document.createElement("input");
-            input.setAttribute("type", "hidden");
-            input.setAttribute("name", `${form.form.id}_form_validation_field`);
+            input.type = "hidden";
+            input.name = `${form.form.id}_form_validation_field`;
             form.form.appendChild(input);
         }
         super(input, form, signal);
@@ -158,16 +316,26 @@ class FormValidationField extends Field {
 }
 
 export class Form {
+    form;
+    submit_button = null;
+    reset_button = null;
+    success_message = "Success!";
+    action;
+    disabled = false;
+    result = null;
+    controller;
+    error_list_element;
+    form_validation_field;
+    fields;
+
     constructor(id, signal = null) {
         this.form = document.getElementById(id);
         if (!this.form) throw ReferenceError(`The form with id ${id} does not exist`);
 
         this.action = this.form.action;
-        this.is_submitting = false;
-        this.result = null;
 
         this.controller = new AbortController();
-        const options = {
+        const params = {
             signal: this.controller.signal
         };
         signal?.addEventListener("abort", this.abort.bind(this));
@@ -180,22 +348,52 @@ export class Form {
             this.addField(input);
         }
 
-        this.form.addEventListener("beforeinput", this.onBeforeInput.bind(this), options);
-        this.form.addEventListener("input", this.onInput.bind(this), options);
-        this.form.addEventListener("change", this.onChange.bind(this), options);
-        this.form.addEventListener("reset", this.onReset.bind(this), options);
-        this.form.addEventListener("invalid", this.onInvalid.bind(this), options);
-        this.form.addEventListener("submit", this.onSubmit.bind(this), options);
+        this.form.addEventListener("beforeinput", this.onBeforeInput.bind(this), params);
+        this.form.addEventListener("input", this.onInput.bind(this), params);
+        this.form.addEventListener("change", this.onChange.bind(this), params);
+        this.form.addEventListener("reset", this.onReset.bind(this), params);
+        this.form.addEventListener("invalid", this.onInvalid.bind(this), params);
+        this.form.addEventListener("submit", this.onSubmit.bind(this), params);
     }
 
     abort() {
         this.controller.abort();
     }
 
+    removePrefix(name) {
+        return name.startsWith(`${this.form.id}-`) ? name.substring(this.form.id.length + 1) : name;
+    }
+
     addField(input) {
-        if (!input.name) return;
         if (input === this.form_validation_field.input) return;
-        if (input.type !== "submit") this.fields[input.name] = new Field(input, this, this.controller.signal);
+        if (input.type === "submit") {
+            this.submit_button = input;
+            return;
+        }
+        if (input.type === "reset") {
+            this.reset_button = input;
+            return;
+        }
+        const name = this.removePrefix(input.name);
+        if (!name) return;
+        if (name in this.fields) return;
+        switch (input.type) {
+            case "checkbox":
+                if (input.dataset.multiple !== undefined) {
+                    this.fields[name] = new MultiCheckboxField(input, this, this.controller.signal);
+                    break;
+                }
+                this.fields[name] = new CheckboxField(input, this, this.controller.signal);
+                break;
+            case "select-multiple":
+                this.fields[name] = new MultiselectField(input, this, this.controller.signal);
+                break;
+            case "radio":
+                this.fields[name] = new RadioField(input, this, this.controller.signal);
+                break;
+            default:
+                this.fields[name] = new Field(input, this, this.controller.signal);
+        }
     }
 
     * [Symbol.iterator]() {
@@ -241,16 +439,38 @@ export class Form {
         this.form_validation_field.clearErrors();
     }
 
-    getData() {
+    get data() {
         let data = {};
         for (const field of this) {
-            data[field.name] = field.getValue();
+            data[field.name] = field.value;
         }
         return data;
     }
 
+    clear() {
+        this.form.reset();
+        this.clearErrors();
+    }
+
+    disable(disable_fields = true) {
+        this.disabled = true;
+        if (this.submit_button) this.submit_button.disabled = true;
+        if (disable_fields) {
+            for (const field of this) {
+                field.disable();
+            }
+        }
+    }
+
+    enable() {
+        this.disabled = false;
+        if (this.submit_button) this.submit_button.disabled = false;
+        for (const field of this) {
+            field.enable();
+        }
+    }
+
     onBeforeInput(e) {
-        if (this.is_submitting) e.preventDefault();
     }
 
     onInput(e) {
@@ -269,51 +489,149 @@ export class Form {
 
     async onSubmit(e) {
         e.preventDefault();
-        if (this.is_submitting) return;
+        if (this.disabled) return;
         if (!this.form_validation_field.input.validity.valid) {
             this.form_validation_field.showErrors();
             return;
         }
-        this.is_submitting = true;
         try {
-            this.result = await api(this.action, this.getData(), {attempts: 5});
-            if (this.result.redirect) location.href = this.result.redirect.location;
+            this.disable();
+            this.result = await api(this.action, this.data, {attempts: 5});
+            this.onSuccess();
         } catch (err) {
-            if (err instanceof APIError) {
-                if (err.code !== 499) {
-                    displayError(err.message);
-                    throw err;
-                }
-                if (err.reason !== "VALIDATION") {
-                    this.addError(err.message);
-                    this.showErrors();
-                    return;
-                }
-                for (const [field, errors] of Object.entries(err.meta)) {
-                    for (const message of errors) {
-                        if (field === "__all__" || !this.fields[field]) {
-                            this.addError(message);
-                            continue;
-                        }
-                        this.fields[field].addError(message);
+            this.onError(err);
+        } finally {
+            this.enable();
+        }
+    }
+
+    onSuccess(show_message = true) {
+        if (this.result.redirect) {
+            location.href = this.result.redirect.location;
+            return;
+        }
+        if (show_message && this.success_message) displaySuccess(this.success_message, 3000);
+        this.clear();
+    }
+
+    onError(err) {
+        if (err instanceof APIError) {
+            if (err.code !== 499) {
+                displayError(err.message);
+                throw err;
+            }
+            for (const [field, errors] of Object.entries(err.meta)) {
+                for (const message of errors) {
+                    if (field === "__all__" || !this.fields[field]) {
+                        this.addError(message);
+                        continue;
                     }
+                    this.fields[field].addError(message);
                 }
-                this.showErrors();
-                return;
             }
-            if (err instanceof BadAPIResponseError) {
-                displayError("The server returned an invalid response. Please try again later.");
-                console.error(`${err.name}: ${err.message}`);
-                return;
-            }
-            if (err instanceof MaxRetriesError) {
-                displayError("Unable to connect to the server. Please try again later.");
-                console.error(`${err.name}: ${err.message}`);
-                return;
-            }
+            this.showErrors();
+            return;
+        }
+        if (err instanceof BadAPIResponseError) {
+            displayError("The server returned an invalid response. Please try again later.");
+            console.error(`${err.name}: ${err.message}`);
+            return;
+        }
+        if (err instanceof MaxRetriesError) {
+            displayError("Unable to connect to the server. Please try again later.");
+            console.error(`${err.name}: ${err.message}`);
+            return;
+        }
+        throw err;
+    }
+}
+
+export class UpdateForm extends Form {
+    #init_promise;
+    #polling_interval_id;
+    #is_syncing = false;
+    #autosave_button;
+    #is_autosave = false;
+    success_message = "Data updated successfully";
+
+    constructor(...args) {
+        super(...args);
+        this.disable(true);
+        this.#autosave_button = document.createElement("input");
+        this.#autosave_button.type = "submit";
+        this.#autosave_button.hidden = true;
+        this.form.appendChild(this.#autosave_button);
+        this.#init_promise = this.sync().then(this.afterInit.bind(this));
+    }
+
+    async sync() {
+        if (this.#is_syncing) return;
+        try {
+            this.#is_syncing = true;
+            this.result = await api(this.action, {}, {attempts: 5});
+            this.updateFields();
+        } catch (err) {
+            this.onError(err);
             throw err;
         } finally {
-            this.is_submitting = false;
+            this.#is_syncing = false;
         }
+    }
+
+    disable(disable_fields = false) {
+        super.disable(disable_fields);
+    }
+
+    afterInit() {
+        this.enable();
+        this.#polling_interval_id = setInterval(this.sync.bind(this), 10000);
+    }
+
+    abort() {
+        super.abort();
+        clearInterval(this.#polling_interval_id);
+    }
+
+    waitInit() {
+        return this.#init_promise;
+    }
+
+    get data() {
+        let data = {};
+        for (const field of this) {
+            if (field.changed) data[field.name] = field.value;
+            field.changed = false;
+        }
+        return data;
+    }
+
+    updateFields() {
+        for (const [field, value] of Object.entries(this.result)) {
+            if (field in this.fields &&
+                !this.fields[field].changed && this.fields[field].input !== document.activeElement) {
+                this.fields[field].value = value;
+            }
+        }
+    }
+
+    clear() {
+        void this.sync();
+        this.clearErrors();
+    }
+
+    onChange(e) {
+        super.onChange(e);
+        if (!e.isTrusted) return;
+        this.form.requestSubmit(this.#autosave_button);
+    }
+
+    async onSubmit(e) {
+        this.#is_autosave = e.submitter === this.#autosave_button;
+        return super.onSubmit(e);
+    }
+
+    onSuccess(show_message = true) {
+        super.onSuccess(show_message && !this.#is_autosave);
+        this.updateFields();
     }
 }

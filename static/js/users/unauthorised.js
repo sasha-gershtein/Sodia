@@ -3,8 +3,8 @@ import {Form} from '../api/forms.js';
 class RegistrationForm extends Form {
     validateForm() {
         super.validateForm();
-        const p1 = this.fields["registration-password"].getValue();
-        const p2 = this.fields["registration-password_confirm"].getValue();
+        const p1 = this.fields["password"].value;
+        const p2 = this.fields["password_confirm"].value;
         if (p1 && p2 && p1 !== p2) {
             this.addError("Passwords don't match");
         }
@@ -12,5 +12,5 @@ class RegistrationForm extends Form {
     }
 }
 
-const login_form = new Form('login');
-const registration_form = new RegistrationForm('registration');
+const login_form = new Form("login");
+const registration_form = new RegistrationForm("registration");
