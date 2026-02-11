@@ -3,9 +3,6 @@ This module defines models and model fields not specific to any app in the proje
 It extends model field types built into Django:
 * FloatField can now be passed min_value and max_value, which are reflected on form fields generated from model fields
 * SingleChoiceField and MultipleChoiceField accept an enum type and implement choice model fields
-  Django does not implement models.MultipleChoiceField,
-  and the integration with forms.TypedMultipleChoiceField is not behaving very well,
-  so the MultipleChoiceField class uses a hack (a custom int-like list of selected flags)
 """
 
 from enum import IntFlag, IntEnum
@@ -88,23 +85,15 @@ class IntFlagList(list):
     def __int__(self):
         return int(self.enum())
 
-    def __lt__(self, other):
-        if isinstance(other, int):
-            return int(self) < other
-        return super() < other
-
-    def __gt__(self, other):
-        if isinstance(other, int):
-            return int(self) > other
-        return super() > other
-
-    def __eq__(self, other):
-        if isinstance(other, int):
-            return int(self) == other
-        return super() == other
-
 
 class MultipleChoiceField(models.IntegerField):
+    """Django does not implement models.MultipleChoiceField,
+    integration with forms.TypedMultipleChoiceField requires .to_python() to return a list of selected choices
+    IntegerField expects .to_python() to return an integer for validation
+    I want .to_python() to be of the enum type
+    ->  MultipleChoiceField.to_python() returns a list-inherited object which defines .enum() and int()
+        .clean(), which is used for validation, does not call super().clean() to avoid broken default validation"""
+
     def __init__(self, enum_class: type[IntFlag], *args, **kwargs):
         self.enum_class = enum_class
         self.flags: list[tuple[int, str]] = [
@@ -121,8 +110,8 @@ class MultipleChoiceField(models.IntegerField):
         return self.to_python(value)
 
     def to_python(self, value):
-        if value is None:
-            return None
+        if value is None or isinstance(value, IntFlagList):
+            return value
         if not value:
             return IntFlagList([], enum_class=self.enum_class)
         if isinstance(value, Sequence):
@@ -150,3 +139,8 @@ class MultipleChoiceField(models.IntegerField):
         }
         defaults.update(kwargs)
         return super().formfield(**defaults)
+
+    def clean(self, value, model_instance):
+        value = self.to_python(value)
+        self.validate(value, model_instance)
+        return value
