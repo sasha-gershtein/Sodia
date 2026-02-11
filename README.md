@@ -31,6 +31,8 @@ Things I'm using or implementing for the first time in a big project for Sodia:
 
 Things I decided against:
 
+* Any frontend frameworks
+* Django REST Framework
 * Websockets for live updates (I use polling instead)
 * Asynchronous or multithread request handling
 * Supporting HTTPS
