@@ -1,3 +1,13 @@
+"""
+This module defines models and model fields not specific to any app in the project.
+It extends model field types built into Django:
+* FloatField can now be passed min_value and max_value, which are reflected on form fields generated from model fields
+* SingleChoiceField and MultipleChoiceField accept an enum type and implement choice model fields
+  Django does not implement models.MultipleChoiceField,
+  and the integration with forms.TypedMultipleChoiceField is not behaving very well,
+  so the MultipleChoiceField class uses a hack (a custom int-like list of selected flags)
+"""
+
 from enum import IntFlag, IntEnum
 from functools import reduce
 from collections.abc import Sequence
