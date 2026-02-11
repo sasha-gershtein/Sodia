@@ -48,19 +48,23 @@ export class Field {
         }
 
         this.controller = new AbortController();
-        const options = {
+        const params = {
             signal: this.controller.signal
         };
         signal?.addEventListener("abort", this.abort.bind(this));
 
-        this.input.addEventListener("beforeinput", this.onBeforeInput.bind(this), options);
-        this.input.addEventListener("input", this.onInput.bind(this), options);
-        this.input.addEventListener("change", this.onChange.bind(this), options);
-        this.input.addEventListener("invalid", this.onInvalid.bind(this), options);
+        this.addEventListeners(this.input, params);
     }
 
     abort() {
         this.controller.abort();
+    }
+
+    addEventListeners(element, params) {
+        element.addEventListener("beforeinput", this.onBeforeInput.bind(this), params);
+        element.addEventListener("input", this.onInput.bind(this), params);
+        element.addEventListener("change", this.onChange.bind(this), params);
+        element.addEventListener("invalid", this.onInvalid.bind(this), params);
     }
 
     get value() {
@@ -186,12 +190,54 @@ export class MultiselectField extends Field { // this.type === "select-multiple"
     }
 }
 
+export class MultiCheckboxField extends Field { // this.type === "checkbox"
+    options;
+
+    constructor(...args) {
+        super(...args);
+        this.options = this.form.form.querySelectorAll(`input[type="checkbox"][name="${this.input.name}"]`);
+        const params = {
+            signal: this.controller.signal
+        };
+        for (const element of this.options) {
+            if (element === this.input) continue;
+            this.addEventListeners(element, params);
+        }
+    }
+
+    get value() {
+        let options = [];
+        for (const option of this.options) {
+            if (option.checked) options.push(option.value);
+        }
+        return options;
+    }
+
+    set value(value) {
+        this.changed = false;
+        this.clearErrors();
+        if (value === null) {
+            for (const option of this.options) option.checked = false;
+        }
+        for (const option of this.options) {
+            option.checked = value.includes(parseInt(option.value));
+        }
+    }
+}
+
 export class RadioField extends Field { // this.type === "radio"
     options;
 
     constructor(...args) {
         super(...args);
         this.options = this.form.form.querySelectorAll(`input[type="radio"][name="${this.input.name}"]`);
+        const params = {
+            signal: this.controller.signal
+        };
+        for (const element of this.options) {
+            if (element === this.input) continue;
+            this.addEventListeners(element, params);
+        }
     }
 
     get value() {
@@ -265,7 +311,7 @@ export class Form {
         this.action = this.form.action;
 
         this.controller = new AbortController();
-        const options = {
+        const params = {
             signal: this.controller.signal
         };
         signal?.addEventListener("abort", this.abort.bind(this));
@@ -278,12 +324,12 @@ export class Form {
             this.addField(input);
         }
 
-        this.form.addEventListener("beforeinput", this.onBeforeInput.bind(this), options);
-        this.form.addEventListener("input", this.onInput.bind(this), options);
-        this.form.addEventListener("change", this.onChange.bind(this), options);
-        this.form.addEventListener("reset", this.onReset.bind(this), options);
-        this.form.addEventListener("invalid", this.onInvalid.bind(this), options);
-        this.form.addEventListener("submit", this.onSubmit.bind(this), options);
+        this.form.addEventListener("beforeinput", this.onBeforeInput.bind(this), params);
+        this.form.addEventListener("input", this.onInput.bind(this), params);
+        this.form.addEventListener("change", this.onChange.bind(this), params);
+        this.form.addEventListener("reset", this.onReset.bind(this), params);
+        this.form.addEventListener("invalid", this.onInvalid.bind(this), params);
+        this.form.addEventListener("submit", this.onSubmit.bind(this), params);
     }
 
     abort() {
@@ -306,15 +352,19 @@ export class Form {
         }
         const name = this.removePrefix(input.name);
         if (!name) return;
+        if (name in this.fields) return;
         switch (input.type) {
             case "checkbox":
+                if (input.dataset.multiple !== undefined) {
+                    this.fields[name] = new MultiCheckboxField(input, this, this.controller.signal);
+                    break;
+                }
                 this.fields[name] = new CheckboxField(input, this, this.controller.signal);
                 break;
             case "select-multiple":
                 this.fields[name] = new MultiselectField(input, this, this.controller.signal);
                 break;
             case "radio":
-                if (name in this.fields) break;
                 this.fields[name] = new RadioField(input, this, this.controller.signal);
                 break;
             default:

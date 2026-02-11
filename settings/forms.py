@@ -76,6 +76,7 @@ class ChallengesForm(UpdateForm):
             "interests_match"
         ]
         widgets = {
+            "gender_filter": forms.CheckboxSelectMultiple(attrs={"data-multiple": True}),
             "subjects_match": forms.NumberInput(attrs={"type": "range"}),
             "interests_match": forms.NumberInput(attrs={"type": "range"}),
         }
