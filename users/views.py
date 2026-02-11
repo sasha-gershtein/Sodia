@@ -30,3 +30,11 @@ class Home(View):
             "user": user,
         }
         return render(request, 'users/home.html', context)
+
+@login_required
+def profile(request, user, username: str, *args, **kwargs):
+    context = {
+        "user": user,
+        "username": username,
+    }
+    return render(request, 'users/profile.html', context)
