@@ -32,6 +32,9 @@ export class APIError extends Error {
         this.code = code;
         this.meta = meta;
         this.name = "APIError";
+        if (this.meta?.redirect) {
+            location.href = this.meta.redirect.location;
+        }
     }
 }
 

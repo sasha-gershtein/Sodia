@@ -3,19 +3,21 @@ import math
 from django.core.exceptions import ValidationError
 from django.forms import forms
 from django.http import JsonResponse
+from django.urls import reverse_lazy
 
 
 class ApiError(Exception):
     code: int = 500
     reason: str = "GENERIC"
     message: str = "Internal Server Error"
+    meta = None
 
     def __init__(self, message=None, *args, code=None, reason=None, meta=None):
         super().__init__(*args)
         self.code = code if code is not None else self.code
         self.reason = reason if reason is not None else self.reason
         self.message = message if message is not None else self.message
-        self.meta = meta
+        self.meta = meta if meta is not None else self.meta
 
 
 class InternalServerError(ApiError):
@@ -43,6 +45,11 @@ class UnauthorizedError(ClientError):
     code = 401
     reason = "UNAUTHORIZED"
     message = "Unauthorized"
+    meta = {
+        "redirect": {
+            "location": reverse_lazy("users:home")
+        }
+    }
 
 
 class ForbiddenError(ClientError):
