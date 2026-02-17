@@ -22,6 +22,12 @@ const change_password_form = new ChangePasswordForm("change-password");
 
 class AccountForm extends UpdateForm {
     success_message = "Account settings are saved successfully";
+
+    constructor(...args) {
+        super(...args);
+        this.fields.username.ERROR_MESSAGES.patternMismatch =
+            () => `${this.label} can only contain English letters, digits, periods, dashes and underscores`;
+    }
 }
 
 const account_settings_form = new AccountForm("account");

@@ -1,16 +1,15 @@
 import re
 from enum import IntFlag, auto
 
-from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import models
 
-from Sodia.models import MultipleChoiceField, SingleChoiceField, FloatField
+from Sodia.models import FloatField, CharField, SingleChoiceField, MultipleChoiceField
 
 
 # Create your models here.
 class Country(models.Model):
-    name = models.CharField(max_length=100)
-    code = models.CharField(max_length=2, unique=True)
+    name = CharField(max_length=100)
+    code = CharField(max_length=2, unique=True)
 
     def __str__(self):
         return self.name
@@ -44,7 +43,7 @@ class PupilBoardingType(IntFlag):
 
 class YearGroup(models.Model):
     year_group_number = models.IntegerField(primary_key=True)
-    name = models.CharField(max_length=20)
+    name = CharField(max_length=20)
 
     def __str__(self):
         return self.name
@@ -63,7 +62,7 @@ class AccountManager(SettingsManager):
         max_length = self.model._meta.get_field("username").max_length
         # remove possible illegal characters: :/?#[]@!$&'()*+,;=
         base = re.sub(
-            "[^a-zA-Z0-9._-]", "", email.split('@')[0]
+            "[^\w.\-]", "", email.split('@')[0]
         )[:max_length]
         username = base
         if not base:
@@ -87,15 +86,19 @@ class AccountManager(SettingsManager):
 class UserAccountSettings(models.Model):
     user = models.OneToOneField("users.User", on_delete=models.CASCADE, related_name='account_settings',
                                 primary_key=True)
-    username = models.CharField(max_length=30, validators=[
-        MinLengthValidator(4),
-        RegexValidator("^[a-zA-Z0-9._-]+$")
-    ], unique=True)
-    first_name = models.CharField(max_length=50, validators=[MinLengthValidator(2)])
-    last_name = models.CharField(max_length=50, validators=[MinLengthValidator(2)])
-    display_name = models.CharField(null=True, blank=True, max_length=100, validators=[MinLengthValidator(5)])
+    username = CharField(
+        min_length=4, max_length=30,
+        pattern=(
+            "^[\w.\-]*$",
+            "Username can only contain English letters, digits, periods, dashes and underscores"
+        ),
+        unique=True
+    )
+    first_name = CharField(min_length=2, max_length=50)
+    last_name = CharField(min_length=2, max_length=50)
+    display_name = CharField(null=True, blank=True, min_length=5, max_length=100)
     # profile_picture = models.??? TODO
-    gender = models.CharField(null=True, blank=True, max_length=30)
+    gender = CharField(null=True, blank=True, max_length=30)
     birth_date = models.DateField(null=True, blank=True)
     country = models.ForeignKey(Country, null=True, blank=True, on_delete=models.SET_NULL)
     description = models.TextField(null=True, blank=True, max_length=2000)

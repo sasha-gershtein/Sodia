@@ -19,7 +19,8 @@ export class Field {
     type;
     error_list_element;
     custom_errors = [];
-    changed = false;
+    is_changed = false;
+    is_submitting = false;
     #is_showErrors_event;
     ERROR_MESSAGES;
     controller;
@@ -30,7 +31,7 @@ export class Field {
         this.name = input.name;
         this.label = trim((this.input.labels?.[0]?.textContent || this.name).toLowerCase(), " \t\n\r:.,=?!()*<>[]{}");
         this.type = input.type;
-        this.error_list_element = this.input.parentElement.querySelector(".errorlist");
+        this.error_list_element = this.input.closest('.field')?.querySelector(".errorlist");
 
         this.#is_showErrors_event = false;
 
@@ -72,7 +73,7 @@ export class Field {
     }
 
     set value(value) {
-        this.changed = false;
+        this.is_changed = false;
         this.clearErrors();
         this.input.value = value;
     }
@@ -142,7 +143,7 @@ export class Field {
 
     onInput(e) {
         // run silent validation
-        this.changed = true;
+        this.is_changed = true;
         if (this.validate()) this.clearErrors();
     }
 
@@ -166,7 +167,7 @@ export class CheckboxField extends Field { // this.type === "checkbox"
     }
 
     set value(value) {
-        this.changed = false;
+        this.is_changed = false;
         this.clearErrors();
         this.input.checked = value;
     }
@@ -182,7 +183,7 @@ export class MultiselectField extends Field { // this.type === "select-multiple"
     }
 
     set value(value) {
-        this.changed = false;
+        this.is_changed = false;
         this.clearErrors();
         for (const option of this.input.options) {
             option.selected = value.includes(parseInt(option.value));
@@ -214,7 +215,7 @@ export class MultiCheckboxField extends Field { // this.type === "checkbox"
     }
 
     set value(value) {
-        this.changed = false;
+        this.is_changed = false;
         this.clearErrors();
         if (value === null) {
             for (const option of this.options) option.checked = false;
@@ -260,7 +261,7 @@ export class RadioField extends Field { // this.type === "radio"
     }
 
     set value(value) {
-        this.changed = false;
+        this.is_changed = false;
         this.clearErrors();
         if (value === null) {
             for (const option of this.options) option.checked = false;
@@ -443,6 +444,8 @@ export class Form {
         let data = {};
         for (const field of this) {
             data[field.name] = field.value;
+            field.is_changed = false;
+            if (this.disabled) field.is_submitting = true;
         }
         return data;
     }
@@ -453,6 +456,9 @@ export class Form {
     }
 
     disable(disable_fields = true) {
+        // disable form during submission
+        // unsuitable for regular disabling as is
+        // code relies on .disabled meaning 'is being submitted'
         this.disabled = true;
         if (this.submit_button) this.submit_button.disabled = true;
         if (disable_fields) {
@@ -489,32 +495,37 @@ export class Form {
 
     async onSubmit(e) {
         e.preventDefault();
-        if (this.disabled) return;
-        if (!this.form_validation_field.input.validity.valid) {
-            this.form_validation_field.showErrors();
-            return;
+        if (this.disabled) return false;
+        if (!this.validate()) {
+            return false;
         }
         try {
             this.disable();
             this.result = await api(this.action, this.data, {attempts: 5});
-            this.onSuccess();
+            return this.onSuccess();
         } catch (err) {
-            this.onError(err);
+            return this.onError(err);
         } finally {
             this.enable();
         }
     }
 
-    onSuccess(show_message = true) {
+    onSuccess(show_message = true, clear = true) {
+        for (const field of this) field.is_submitting = false;
         if (this.result.redirect) {
             location.href = this.result.redirect.location;
-            return;
+            return false;
         }
         if (show_message && this.success_message) displaySuccess(this.success_message, 3000);
-        this.clear();
+        if (clear) this.clear();
+        return false;
     }
 
     onError(err) {
+        for (const field of this) {
+            if (field.is_submitting) field.is_changed = true;
+            field.is_submitting = false;
+        }
         if (err instanceof APIError) {
             if (err.code !== 499) {
                 displayError(err.message);
@@ -530,17 +541,16 @@ export class Form {
                 }
             }
             this.showErrors();
-            return;
         }
         if (err instanceof BadAPIResponseError) {
             displayError("The server returned an invalid response. Please try again later.");
             console.error(`${err.name}: ${err.message}`);
-            return;
+            return false;
         }
         if (err instanceof MaxRetriesError) {
             displayError("Unable to connect to the server. Please try again later.");
             console.error(`${err.name}: ${err.message}`);
-            return;
+            return false;
         }
         throw err;
     }
@@ -561,11 +571,11 @@ export class UpdateForm extends Form {
         this.#autosave_button.type = "submit";
         this.#autosave_button.hidden = true;
         this.form.appendChild(this.#autosave_button);
-        this.#init_promise = this.sync().then(this.afterInit.bind(this));
+        this.#init_promise = this.sync(true).then(this.afterInit.bind(this));
     }
 
-    async sync() {
-        if (this.#is_syncing) return;
+    async sync(ignore_disabled = false) {
+        if (this.#is_syncing || (this.disabled && !ignore_disabled)) return;
         try {
             this.#is_syncing = true;
             this.result = await api(this.action, {}, {attempts: 5});
@@ -599,8 +609,11 @@ export class UpdateForm extends Form {
     get data() {
         let data = {};
         for (const field of this) {
-            if (field.changed) data[field.name] = field.value;
-            field.changed = false;
+            if (field.is_changed) {
+                data[field.name] = field.value;
+                field.is_changed = false;
+                if (this.disabled) field.is_submitting = true;
+            }
         }
         return data;
     }
@@ -608,13 +621,14 @@ export class UpdateForm extends Form {
     updateFields() {
         for (const [field, value] of Object.entries(this.result)) {
             if (field in this.fields &&
-                !this.fields[field].changed && this.fields[field].input !== document.activeElement) {
+                !this.fields[field].is_changed && this.fields[field].input !== document.activeElement) {
                 this.fields[field].value = value;
             }
         }
     }
 
     clear() {
+        for (const field of this) field.is_changed = false;
         void this.sync();
         this.clearErrors();
     }
@@ -627,11 +641,31 @@ export class UpdateForm extends Form {
 
     async onSubmit(e) {
         this.#is_autosave = e.submitter === this.#autosave_button;
-        return super.onSubmit(e);
+        if (await super.onSubmit(e)) {
+            this.form.requestSubmit(this.#autosave_button);
+        }
+        return false;
     }
 
-    onSuccess(show_message = true) {
-        super.onSuccess(show_message && !this.#is_autosave);
+    onSuccess(show_message = true, clear = false) {
+        let changed = false;
+        for (const field of this) {
+            changed ||= field.is_changed;
+            field.is_submitting = false;
+        }
+        super.onSuccess(show_message && !this.#is_autosave, clear);
         this.updateFields();
+        return changed;
+    }
+
+    onError(err) {
+        let changed = false;
+        for (const field of this) {
+            changed ||= field.is_changed;
+            if (field.is_submitting) field.is_changed = true;
+            field.is_submitting = false;
+        }
+        super.onError(err);
+        return changed;
     }
 }

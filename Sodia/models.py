@@ -2,23 +2,25 @@
 This module defines models and model fields not specific to any app in the project.
 It extends model field types built into Django:
 * FloatField can now be passed min_value and max_value, which are reflected on form fields generated from model fields
+* CharField can now be passed min_length and pattern (RegEx validation), which  are reflected on the form fields
 * SingleChoiceField and MultipleChoiceField accept an enum type and implement choice model fields
 """
 
 from enum import IntFlag, IntEnum
 from functools import reduce
-from collections.abc import Sequence
+from collections.abc import Sequence, Mapping
 
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator, MinLengthValidator, RegexValidator
 from django.core.exceptions import ValidationError
 from django.db import models
 from django import forms
 
 
 class FloatField(models.FloatField):
-    def __init__(self, min_value=None, max_value=None, *args, _initialized=False, **kwargs):
+    def __init__(self, *args, min_value=None, max_value=None, _initialized=False, **kwargs):
         self.min_value = min_value
         self.max_value = max_value
+
         if not _initialized:
             validators = list(kwargs.pop("validators", []))
             if min_value is not None:
@@ -26,6 +28,7 @@ class FloatField(models.FloatField):
             if max_value is not None:
                 validators.append(MaxValueValidator(max_value))
             kwargs["validators"] = validators
+
         super().__init__(*args, **kwargs)
 
     def deconstruct(self):
@@ -38,9 +41,57 @@ class FloatField(models.FloatField):
         return name, path, args, kwargs
 
     def formfield(self, **kwargs):
-        defaults = {'min_value': self.min_value, 'max_value': self.max_value}
+        defaults = {
+            "min_value": self.min_value,
+            "max_value": self.max_value,
+        }
         defaults.update(kwargs)
         return super().formfield(**defaults)
+
+
+class CharField(models.CharField):
+    def __init__(self, *args, min_length: int | None = None,
+                 pattern: str | Sequence | Mapping | RegexValidator | None = None,
+                 _initialized=False, **kwargs):
+        self.min_length = min_length
+        self.pattern: str | None = pattern if isinstance(pattern, str) else None
+
+        if not _initialized:
+            validators = list(kwargs.pop("validators", []))
+            if min_length is not None:
+                validators.append(MinLengthValidator(min_length))
+            if pattern is not None:
+                if isinstance(pattern, str):
+                    validators.append(RegexValidator(pattern))
+                elif isinstance(pattern, Sequence):
+                    validators.append(RegexValidator(*pattern))
+                elif isinstance(pattern, Mapping):
+                    validators.append(RegexValidator(**pattern))
+                elif isinstance(pattern, RegexValidator):
+                    validators.append(pattern)
+                self.pattern = validators[-1].regex.pattern
+            kwargs["validators"] = validators
+
+        super().__init__(*args, **kwargs)
+
+    def deconstruct(self):
+        name, path, args, kwargs = super().deconstruct()
+        if self.min_length is not None:
+            kwargs["min_length"] = self.min_length
+        if self.pattern is not None:
+            kwargs["pattern"] = self.pattern
+        kwargs["_initialized"] = True
+        return name, path, args, kwargs
+
+    def formfield(self, **kwargs):
+        defaults = {
+            "min_length": self.min_length,
+        }
+        defaults.update(kwargs)
+        field = super().formfield(**defaults)
+        if self.pattern is not None:
+            field.widget.attrs["pattern"] = self.pattern.strip("^$")
+        return field
 
 
 class SingleChoiceField(models.IntegerField):
