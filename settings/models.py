@@ -1,9 +1,10 @@
+import datetime
 import re
 from enum import IntFlag, auto
 
 from django.db import models
 
-from Sodia.models import FloatField, CharField, SingleChoiceField, MultipleChoiceField
+from Sodia.models import FloatField, DateField, CharField, SingleChoiceField, MultipleChoiceField
 
 
 # Create your models here.
@@ -99,7 +100,7 @@ class UserAccountSettings(models.Model):
     display_name = CharField(null=True, blank=True, min_length=5, max_length=100)
     # profile_picture = models.??? TODO
     gender = CharField(null=True, blank=True, max_length=30)
-    birth_date = models.DateField(null=True, blank=True)
+    birth_date = DateField(null=True, blank=True, min_value=datetime.date(1900, 1, 1), max_value=datetime.date.today)
     country = models.ForeignKey(Country, null=True, blank=True, on_delete=models.SET_NULL)
     description = models.TextField(null=True, blank=True, max_length=2000)
     house = models.ForeignKey(House, null=True, blank=True, on_delete=models.SET_NULL)

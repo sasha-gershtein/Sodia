@@ -1,8 +1,9 @@
 """
 This module defines models and model fields not specific to any app in the project.
 It extends model field types built into Django:
-* FloatField can now be passed min_value and max_value, which are reflected on form fields generated from model fields
-* CharField can now be passed min_length and pattern (RegEx validation), which  are reflected on the form fields
+* FloatField can be passed min_value and max_value, which are reflected on form fields generated from model fields
+* DateField can be passed min_value and max_value, which are reflected on form fields; DateField widgets use type="date"
+* CharField can be passed min_length and pattern (RegEx validation), which  are reflected on the form fields
 * SingleChoiceField and MultipleChoiceField accept an enum type and implement choice model fields
 """
 
@@ -16,7 +17,7 @@ from django.db import models
 from django import forms
 
 
-class FloatField(models.FloatField):
+class MinMaxMixin:
     def __init__(self, *args, min_value=None, max_value=None, _initialized=False, **kwargs):
         self.min_value = min_value
         self.max_value = max_value
@@ -32,6 +33,7 @@ class FloatField(models.FloatField):
         super().__init__(*args, **kwargs)
 
     def deconstruct(self):
+        # noinspection PyUnresolvedReferences
         name, path, args, kwargs = super().deconstruct()
         if self.min_value is not None:
             kwargs["min_value"] = self.min_value
@@ -46,7 +48,33 @@ class FloatField(models.FloatField):
             "max_value": self.max_value,
         }
         defaults.update(kwargs)
-        return super().formfield(**defaults)
+        # noinspection PyUnresolvedReferences
+        return super().formfield(**{key: value for key, value in defaults.items() if value is not None})
+
+
+class FloatField(MinMaxMixin, models.FloatField):
+    pass
+
+
+class DateField(MinMaxMixin, models.DateField):
+    def formfield(self, **kwargs):
+        attrs = {
+            "type": "date"
+        }
+        min_value = self.min_value() if callable(self.min_value) else self.min_value
+        if min_value is not None:
+            attrs["min"] = min_value
+        max_value = self.max_value() if callable(self.max_value) else self.max_value
+        if max_value is not None:
+            attrs["max"] = max_value
+        defaults = {
+            "min_value": None,
+            "max_value": None,
+            "widget": forms.DateInput(attrs=attrs),
+        }
+        defaults.update(kwargs)
+        field = super().formfield(**defaults)
+        return field
 
 
 class CharField(models.CharField):

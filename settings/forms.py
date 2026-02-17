@@ -21,9 +21,6 @@ class AccountForm(UpdateForm):
             "boarding_type",
             "year_group",
         ]
-        widgets = {
-            "birth_date": forms.DateInput(attrs={"type": "date"}),
-        }
 
     def __init__(self, *args, **kwargs):
         kwargs.setdefault("prefix", "account")
