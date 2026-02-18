@@ -7,7 +7,7 @@ It extends model field types built into Django:
 * SingleChoiceField and MultipleChoiceField accept an enum type and implement choice model fields
 """
 
-from enum import IntFlag, IntEnum
+from enum import IntFlag, IntEnum, Enum
 from functools import reduce
 from collections.abc import Sequence, Mapping
 
@@ -122,6 +122,14 @@ class CharField(models.CharField):
         return field
 
 
+class JsonEnumMixin(Enum):
+    def get_json_value(self):
+        return {
+            "id": self.value,
+            "name": self.name,
+        }
+
+
 class SingleChoiceField(models.IntegerField):
     def __init__(self, enum_class: type[IntEnum | IntFlag], *args, **kwargs):
         self.enum_class = enum_class
@@ -144,8 +152,6 @@ class SingleChoiceField(models.IntegerField):
     def to_python(self, value):
         if value is None:
             return None
-        if not value:
-            return self.enum_class(0)
         return self.enum_class(int(value))
 
 
@@ -163,6 +169,19 @@ class IntFlagList(list):
 
     def __int__(self):
         return int(self.enum())
+
+    def get_json_value(self):
+        return [
+            {
+                "id": flag.value,
+                "name": flag.name,
+            } for flag in self
+        ]
+
+
+class TypedMultipleChoiceFormField(forms.TypedMultipleChoiceField):
+    def clean(self, *args, **kwargs):
+        return IntFlagList(super().clean(*args, **kwargs))
 
 
 class MultipleChoiceField(models.IntegerField):
@@ -212,9 +231,9 @@ class MultipleChoiceField(models.IntegerField):
 
     def formfield(self, **kwargs):
         defaults = {
-            "form_class": forms.TypedMultipleChoiceField,
+            "form_class": TypedMultipleChoiceFormField,
             "choices": self.flags,
-            "coerce": int,
+            "coerce": lambda choice: self.enum_class(int(choice)),
         }
         defaults.update(kwargs)
         return super().formfield(**defaults)

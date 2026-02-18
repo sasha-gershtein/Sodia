@@ -75,7 +75,7 @@ class UserManager(models.Manager):
 class User(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    is_activated = models.BooleanField(default=False)
+    is_activated = models.BooleanField(default=True)  # TODO: default should be False
     flag = SingleChoiceField(enum_class=AccountFlag, default=AccountFlag.UNSAFE)
     # TODO: make separate table Challenge
     challenge_partner = models.OneToOneField("self", on_delete=models.SET_NULL, null=True, related_name="+")

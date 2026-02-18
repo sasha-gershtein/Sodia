@@ -4,7 +4,7 @@ from enum import IntFlag, auto
 
 from django.db import models
 
-from Sodia.models import FloatField, DateField, CharField, SingleChoiceField, MultipleChoiceField
+from Sodia.models import FloatField, DateField, CharField, SingleChoiceField, MultipleChoiceField, JsonEnumMixin
 
 
 # Create your models here.
@@ -16,10 +16,14 @@ class Country(models.Model):
         return self.name
 
     def get_json_value(self):
-        return self.id
+        return {
+            "id": self.id,
+            "name": self.name,
+            "code": self.code,
+        }
 
 
-class HouseBoardingType(IntFlag):
+class HouseBoardingType(JsonEnumMixin, IntFlag):
     BOARDING = auto()
     DAY = auto()
     MIXED = auto()
@@ -33,10 +37,14 @@ class House(models.Model):
         return self.name
 
     def get_json_value(self):
-        return self.id
+        return {
+            "id": self.id,
+            "name": self.name,
+            "boarding_type": self.boarding_type,
+        }
 
 
-class PupilBoardingType(IntFlag):
+class PupilBoardingType(JsonEnumMixin, IntFlag):
     FULL = auto()
     WEEKLY = auto()
     DAY = auto()
@@ -50,7 +58,10 @@ class YearGroup(models.Model):
         return self.name
 
     def get_json_value(self):
-        return self.year_group_number
+        return {
+            "id": self.year_group_number,
+            "name": self.name,
+        }
 
 
 class SettingsManager(models.Manager):
@@ -127,7 +138,7 @@ class UserAccountSettings(models.Model):
         return f"<{self.__class__.__name__} of {self.user}>"
 
 
-class PrivacySetting(IntFlag):
+class PrivacySetting(JsonEnumMixin, IntFlag):
     EVERYONE = auto()
     FRIENDS_ONLY = auto()
     NOBODY = auto()
@@ -166,7 +177,7 @@ class UserNotificationsSettings(models.Model):
         return f"<{self.__class__.__name__} of {self.user}>"
 
 
-class FrequencySetting(IntFlag):
+class FrequencySetting(JsonEnumMixin, IntFlag):
     IMMEDIATE = auto()
     DAY = auto()
     THREE_DAYS = auto()
@@ -174,7 +185,7 @@ class FrequencySetting(IntFlag):
     NEVER = auto()
 
 
-class GenderFilter(IntFlag):
+class GenderFilter(JsonEnumMixin, IntFlag):
     MALE = auto()
     FEMALE = auto()
     OTHER = auto()

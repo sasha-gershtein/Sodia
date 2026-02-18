@@ -1,10 +1,15 @@
-from django.urls import reverse
+from dataclasses import asdict
 
-from api.decorators import api_view, api_login_required
-from api.errors import parse_form_errors
+from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
+
 from .forms import LoginForm, RegistrationForm, ChangePasswordForm
 from .middleware import SessionData
 from .models import User
+
+from api.decorators import api_view, api_login_required
+from api.errors import parse_form_errors
+from interactions.models import UserInfo
 
 
 @api_view
@@ -59,15 +64,55 @@ def change_password(request, user: User, data):
     session_data.session.authenticate(user)
 
 
-@api_login_required
-def partial_user_info(_request, _user, data):
-    requested_user = User.objects.get_user_by_data(data)
-    # ^^^ validates data and raises appropriate exceptions
-    # if no errors, a user is found
+def get_user_info(requesting_user, data, keys):
+    user_data = UserInfo(
+        User.objects.get_user_by_data(data),  # validates and raises appropriate exceptions
+        requesting_user
+    )
     return {
-        "id": requested_user.id,
-        "username": requested_user.account_settings.username,
-        "first_name": requested_user.account_settings.first_name,
-        "last_name": requested_user.account_settings.last_name,
-        "display_name": requested_user.account_settings.get_display_name(),
+        key: value.get_json_value() if hasattr(value, "get_json_value") else value
+        for key in keys
+        if (value := getattr(user_data, key)) is not None
     }
+
+
+PARTIAL = {
+    "id",
+    "username",
+    "first_name",
+    "last_name",
+    "display_name",
+    "relation",
+    "can_message",
+}
+
+
+@csrf_exempt  # TODO: for debug only
+@api_login_required
+def partial_user_info(_request, user, data):
+    return get_user_info(user, data, PARTIAL)
+
+
+FULL = {  # TODO
+    "id",
+    "username",
+    "first_name",
+    "last_name",
+    "display_name",
+    "gender",
+    "birth_date",
+    "description",
+    "challenge_streak",
+    "year_group",
+    "house",
+    "boarding_type",
+    "country",
+    "relation",
+    "can_message",
+}
+
+
+@csrf_exempt  # TODO: for debug only
+@api_login_required
+def full_user_info(_request, user, data):
+    return get_user_info(user, data, FULL)

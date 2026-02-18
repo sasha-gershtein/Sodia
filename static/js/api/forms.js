@@ -185,8 +185,9 @@ export class MultiselectField extends Field { // this.type === "select-multiple"
     set value(value) {
         this.is_changed = false;
         this.clearErrors();
+        let selected = value.map(option => option.id);
         for (const option of this.input.options) {
-            option.selected = value.includes(parseInt(option.value));
+            option.selected = selected.includes(parseInt(option.value));
         }
     }
 }
@@ -220,8 +221,9 @@ export class MultiCheckboxField extends Field { // this.type === "checkbox"
         if (value === null) {
             for (const option of this.options) option.checked = false;
         }
+        let selected = value.map(option => option.id);
         for (const option of this.options) {
-            option.checked = value.includes(parseInt(option.value));
+            option.checked = selected.includes(parseInt(option.value));
         }
     }
 
@@ -234,6 +236,26 @@ export class MultiCheckboxField extends Field { // this.type === "checkbox"
     enable() {
         for (const option of this.options) {
             option.disabled = false;
+        }
+    }
+}
+
+export class SelectField extends Field { // this.type === "select-one"
+    get value() {
+        for (const option of this.input.options) {
+            if (option.selected) return option.value;
+        }
+    }
+
+    set value(value) {
+        this.is_changed = false;
+        this.clearErrors();
+        if (value === null) {
+            for (const option of this.input.options) option.selected = false;
+            return;
+        }
+        for (const option of this.input.options) {
+            option.selected = parseInt(option.value) === value.id;
         }
     }
 }
@@ -268,7 +290,7 @@ export class RadioField extends Field { // this.type === "radio"
             return;
         }
         for (const option of this.options) {
-            if (option.value === value) {
+            if (option.value === value.id) {
                 option.checked = true;
                 return;
             }
@@ -388,6 +410,9 @@ export class Form {
                 break;
             case "select-multiple":
                 this.fields[name] = new MultiselectField(input, this, this.controller.signal);
+                break;
+            case "select-one":
+                this.fields[name] = new SelectField(input, this, this.controller.signal);
                 break;
             case "radio":
                 this.fields[name] = new RadioField(input, this, this.controller.signal);
