@@ -24,19 +24,12 @@ class LoginForm(forms.Form):
         if identifier is None or password is None:
             return cleaned_data
 
-        is_email = True
         try:
             validate_email(identifier)
         except ValidationError:
-            is_email = False
-
-        try:
-            if is_email:
-                user = UserLoginDetails.objects.get(email__iexact=identifier).user
-            else:
-                user = UserAccountSettings.objects.get(username__iexact=identifier).user
-        except (UserLoginDetails.DoesNotExist, UserAccountSettings.DoesNotExist):
-            user = None
+            user = User.objects.get_user_by_username(identifier, only_activated=False)
+        else:
+            user = User.objects.get_user_by_email(identifier, only_activated=False)
 
         if user is None or not user.login_details.password.verify(password):
             self.add_error(None,

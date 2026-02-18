@@ -57,13 +57,16 @@ class SettingsManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().select_related("user")
 
+    def activated(self):
+        return self.filter(user__is_activated=True)
+
 
 class AccountManager(SettingsManager):
     def generate_username(self, email: str):
         max_length = self.model._meta.get_field("username").max_length
         # remove possible illegal characters: :/?#[]@!$&'()*+,;=
         base = re.sub(
-            "[^\w.\-]", "", email.split('@')[0]
+            r"[^\w.\-]", "", email.split('@')[0]
         )[:max_length]
         username = base
         if not base:
@@ -80,8 +83,13 @@ class AccountManager(SettingsManager):
         username = self.generate_username(email)
         return self.create(username=username, **kwargs)
 
-    def activated(self):
-        return self.filter(user__is_activated=True)
+    def get_user_by_username(self, username: str, default=None, *, only_activated=True):
+        objects = self.activated() if only_activated else self.all()
+        try:
+            user = objects.get(username=username).user
+        except UserAccountSettings.DoesNotExist:
+            user = default
+        return user
 
 
 class UserAccountSettings(models.Model):
@@ -90,7 +98,7 @@ class UserAccountSettings(models.Model):
     username = CharField(
         min_length=4, max_length=30,
         pattern=(
-            "^[\w.\-]*$",
+            r"^[\w.\-]*$",
             "Username can only contain English letters, digits, periods, dashes and underscores"
         ),
         unique=True

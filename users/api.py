@@ -1,9 +1,7 @@
-from api.decorators import api_view, api_login_required
-from api.errors import parse_form_errors, BadRequestError, NotFoundError
 from django.urls import reverse
 
-from settings.models import UserAccountSettings
-
+from api.decorators import api_view, api_login_required
+from api.errors import parse_form_errors
 from .forms import LoginForm, RegistrationForm, ChangePasswordForm
 from .middleware import SessionData
 from .models import User
@@ -63,15 +61,9 @@ def change_password(request, user: User, data):
 
 @api_login_required
 def partial_user_info(_request, _user, data):
-    try:
-        if data.get("id") is not None:
-            requested_user = User.objects.activated().get(pk=data["id"])
-        elif data.get("username") is not None:
-            requested_user = UserAccountSettings.objects.activated().get(username=data["username"]).user
-        else:
-            raise BadRequestError("User must be identified via id or username")
-    except (User.DoesNotExist, UserAccountSettings.DoesNotExist):
-        raise NotFoundError("User does not exist")
+    requested_user = User.objects.get_user_by_data(data)
+    # ^^^ validates data and raises appropriate exceptions
+    # if no errors, a user is found
     return {
         "id": requested_user.id,
         "username": requested_user.account_settings.username,

@@ -5,14 +5,17 @@ import hashlib
 import uuid
 import hmac
 
-from Sodia.settings import SECRET_KEY
 from .passwords import Password
+from Sodia.settings import SECRET_KEY
+from Sodia.models import SingleChoiceField
+from settings.models import (
+    UserAccountSettings, UserPrivacySettings, UserNotificationsSettings, UserChallengesSettings, SettingsManager
+)
+
+from api.errors import BadRequestError, NotFoundError
 
 from django.db import models, transaction
 from django.utils import timezone
-
-from Sodia.models import SingleChoiceField
-from settings.models import UserAccountSettings, UserPrivacySettings, UserNotificationsSettings, UserChallengesSettings
 
 
 class AccountFlag(IntFlag):
@@ -40,6 +43,33 @@ class UserManager(models.Manager):
 
     def activated(self):
         return self.filter(is_activated=True)
+
+    def get_user_by_id(self, pk: str, default=None, *, only_activated=True):
+        objects = self.activated() if only_activated else self.all()
+        try:
+            user = objects.get(pk=pk)
+        except User.DoesNotExist:
+            user = default
+        return user
+
+    @staticmethod
+    def get_user_by_username(username: str, default=None, *, only_activated=True):
+        return UserAccountSettings.objects.get_user_by_username(username, default, only_activated=only_activated)
+
+    @staticmethod
+    def get_user_by_email(email: str, default=None, *, only_activated=True):
+        return UserLoginDetails.objects.get_user_by_email(email, default, only_activated=only_activated)
+
+    def get_user_by_data(self, data):
+        if data.get("id") is not None:
+            user = self.get_user_by_id(data["id"])
+        elif data.get("username") is not None:
+            user = self.get_user_by_username(data["username"])
+        else:
+            raise BadRequestError("User must be identified via id or username")
+        if user is None:
+            raise NotFoundError("User does not exist")
+        return user
 
 
 class User(models.Model):
@@ -94,6 +124,16 @@ class PasswordField(models.CharField):
         return str(value)
 
 
+class UserLoginDetailsManager(SettingsManager):
+    def get_user_by_email(self, email: str, default=None, *, only_activated=True):
+        objects = self.activated() if only_activated else self.all()
+        try:
+            user = objects.get(email=email).user
+        except UserLoginDetails.DoesNotExist:
+            user = default
+        return user
+
+
 class UserLoginDetails(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="login_details", primary_key=True)
     email = models.EmailField(unique=True)
@@ -101,6 +141,8 @@ class UserLoginDetails(models.Model):
     email_changed_at = models.DateTimeField(default=timezone.now)
     password = PasswordField()
     password_changed_at = models.DateTimeField(default=timezone.now)
+
+    objects = UserLoginDetailsManager()
 
     def __repr__(self):
         return f"<{self.__class__.__name__} of {self.user} ({self.email})>"
