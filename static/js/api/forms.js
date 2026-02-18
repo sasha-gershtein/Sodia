@@ -185,7 +185,7 @@ export class MultiselectField extends Field { // this.type === "select-multiple"
     set value(value) {
         this.is_changed = false;
         this.clearErrors();
-        let selected = value.map(option => option.id);
+        let selected = value.map(option => option.id ?? option);
         for (const option of this.input.options) {
             option.selected = selected.includes(parseInt(option.value));
         }
@@ -221,7 +221,7 @@ export class MultiCheckboxField extends Field { // this.type === "checkbox"
         if (value === null) {
             for (const option of this.options) option.checked = false;
         }
-        let selected = value.map(option => option.id);
+        let selected = value.map(option => option.id ?? option);
         for (const option of this.options) {
             option.checked = selected.includes(parseInt(option.value));
         }
@@ -255,7 +255,7 @@ export class SelectField extends Field { // this.type === "select-one"
             return;
         }
         for (const option of this.input.options) {
-            option.selected = parseInt(option.value) === value.id;
+            option.selected = parseInt(option.value) === (value.id ?? option);
         }
     }
 }
@@ -290,7 +290,7 @@ export class RadioField extends Field { // this.type === "radio"
             return;
         }
         for (const option of this.options) {
-            if (option.value === value.id) {
+            if (option.value === (value.id ?? option)) {
                 option.checked = true;
                 return;
             }
