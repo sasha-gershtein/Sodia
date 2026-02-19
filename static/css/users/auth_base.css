@@ -1,3 +1,20 @@
 nav {
     background: #fff1e5;
 }
+
+.template:empty {
+    display: none;
+}
+
+.hide-empty:not(:has(
+    .template:not(:empty))
+) {
+    display: none;
+}
+
+.comma:has( /*   t r u s t   */
+    ~ .comma:not(.hide-empty),
+    ~ .comma.hide-empty .template:not(:empty)
+)::after {
+    content: ", ";
+}
