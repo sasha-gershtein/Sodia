@@ -7,21 +7,25 @@
     <link rel="stylesheet" href="{% static 'css/users/profile.css' %}">
 {% endblock %}{% endcomment %}
 
+{% block title %}Profile — Sodia{% endblock %}
+
 {% block content %}
-    <h1><span class="template" id="display_name">Name S.</span>
-        (<span class="template" id="full-name">Name Surname</span>)</h1>
+    <h1>
+        <span class="template" id="display_name"></span>
+        <span class="hide-empty">(<span class="template" id="full-name"></span>)</span>
+    </h1>
     <div>
-        <span class="hide-empty comma">gender: <span class="template" id="gender">male</span></span>
-        <span class="hide-empty comma">birthday: <span class="template" id="birth-date">1970.01.01</span></span>
-        <span class="hide-empty comma">streak: <span class="template" id="challenge-streak">3</span></span>
-        <span class="hide-empty comma"><span class="template" id="year">Year 12</span></span>
+        <span class="hide-empty comma">gender: <span class="template" id="gender"></span></span>
+        <span class="hide-empty comma">birthday: <span class="template" id="birth-date"></span></span>
+        <span class="hide-empty comma">streak: <span class="template" id="challenge-streak"></span></span>
+        <span class="hide-empty comma"><span class="template" id="year"></span></span>
         <span class="comma hide-empty">
-            <span class="hide-empty"><span class="template" id="house">Granville</span></span>
-            <span class="hide-empty"> (<span class="template" id="boarding-type">full boarder</span>)</span>
+            <span class="hide-empty"><span class="template" id="house"></span></span>
+            <span class="hide-empty"> (<span class="template" id="boarding-type"></span>)</span>
         </span>
     </div>
     <button id="main-action">Main Button</button>
     <button id="hidden-menu">...</button>
     <hr>
-    <div class="hide-empty"><p class="template" id="description">Lorem ipsum dolor sit amet...</p></div>
+    <div class="hide-empty"><p class="template" id="description"></p></div>
 {% endblock %}
