@@ -41,3 +41,19 @@ export function displayError(message, timeout = 10000) {
 export function displaySuccess(message, timeout = 10000) {
     return new InfoMessage(message, "success", timeout)
 }
+
+export let loading = document.querySelector("#loading");
+let loading_state = 1;
+
+export function showPageLoading() {
+    if (loading_state++) return;
+    loading.hidden = false;
+}
+
+export function hidePageLoading(force = false) {
+    if (force) loading_state = 0;
+    else if (--loading_state) return;
+    loading.hidden = true;
+}
+
+document.addEventListener("DOMContentLoaded", _ => hidePageLoading());

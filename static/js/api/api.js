@@ -2,7 +2,7 @@
 
 "use strict";
 
-import {displayInfo} from "./ui.js";
+import {displayError, displayInfo, hidePageLoading, showPageLoading} from "./ui.js";
 
 function getCookie(name) {
     return document.cookie.split('; ')
@@ -78,19 +78,18 @@ export async function api(url, payload = {}, options = {}) {
     }, 250);
     try {
         const body = JSON.stringify(payload);
-        const full_url = url;
         while (attempts !== 0) {
             attempts--;
             try {
-                const response = await makeRequest(full_url, body, timeout);
+                const response = await makeRequest(url, body, timeout);
                 let parsed = {}
                 try {
                     parsed = await response.json();
                 } catch (err) {
-                    throw new BadAPIResponseError(`Non-JSON response on ${full_url}`);
+                    throw new BadAPIResponseError(`Non-JSON response on ${url}`);
                 }
                 if (parsed.success === undefined || parsed.result === undefined || parsed.error === undefined) {
-                    throw new BadAPIResponseError(`Bad response on ${full_url}`);
+                    throw new BadAPIResponseError(`Bad response on ${url}`);
                 }
                 if (parsed.success) return parsed.result;
                 const message = parsed.error.message;
@@ -98,7 +97,7 @@ export async function api(url, payload = {}, options = {}) {
                 const code = parsed.error.code;
                 const meta = parsed.error.meta;
                 if (message === undefined || reason === undefined || code === undefined || meta === undefined) {
-                    throw new BadAPIResponseError(`Bad response on ${full_url}`);
+                    throw new BadAPIResponseError(`Bad response on ${url}`);
                 }
                 throw new APIError(message, reason, code, meta);
             } catch (err) {
@@ -111,5 +110,46 @@ export async function api(url, payload = {}, options = {}) {
     } finally {
         clearTimeout(show_loading_timeout_id);
         if (loading_message !== null) loading_message.remove();
+    }
+}
+
+export function processError(err) {
+    if (err instanceof APIError) {
+        displayError(err.message);
+        throw err;
+    }
+    if (err instanceof BadAPIResponseError) {
+        displayError("The server returned an invalid response. Please try again later.");
+        console.error(`${err.name}: ${err.message}`);
+        return;
+    }
+    if (err instanceof MaxRetriesError) {
+        displayError("Unable to connect to the server. Please try again later.");
+        console.error(`${err.name}: ${err.message}`);
+        return;
+    }
+    throw err;
+}
+
+export async function loadTemplate(url, payload = {}, options = {}) {
+    let {
+        title = _ => "Sodia",
+        translators = {},
+    } = options;
+    showPageLoading();
+    try {
+        let response = await api(url, payload, {attempts: 100});
+        document.querySelectorAll(".template").forEach(field => {
+            const id = field.id.replaceAll("-", "_");
+            if (!id) return;
+            const value = response[id];
+            const string = translators[id] ? translators[id](value) : value?.name?.toLowerCase() ?? value;
+            if (string != null) field.innerText = string;
+        });
+        document.title = title(response);
+        hidePageLoading();
+        return response;
+    } catch (err) {
+        processError(err);
     }
 }

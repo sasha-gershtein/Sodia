@@ -1,6 +1,6 @@
 // noinspection JSUnusedGlobalSymbols, JSUnusedLocalSymbols
 
-import {api, APIError, BadAPIResponseError, MaxRetriesError} from "./api.js";
+import {api, APIError, processError} from "./api.js";
 import {displayError, displaySuccess} from "./ui.js";
 
 function trim(string, chars) {
@@ -551,11 +551,7 @@ export class Form {
             if (field.is_submitting) field.is_changed = true;
             field.is_submitting = false;
         }
-        if (err instanceof APIError) {
-            if (err.code !== 499) {
-                displayError(err.message);
-                throw err;
-            }
+        if (err instanceof APIError && err.code === 499) {
             for (const [field, errors] of Object.entries(err.meta)) {
                 for (const message of errors) {
                     if (field === "__all__" || !this.fields[field]) {
@@ -566,18 +562,10 @@ export class Form {
                 }
             }
             this.showErrors();
-        }
-        if (err instanceof BadAPIResponseError) {
-            displayError("The server returned an invalid response. Please try again later.");
-            console.error(`${err.name}: ${err.message}`);
             return false;
         }
-        if (err instanceof MaxRetriesError) {
-            displayError("Unable to connect to the server. Please try again later.");
-            console.error(`${err.name}: ${err.message}`);
-            return false;
-        }
-        throw err;
+        processError(err);
+        return false;
     }
 }
 

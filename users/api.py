@@ -48,7 +48,7 @@ def register(request, data):
     session_data.session.authenticate(user)
     return {
         "redirect": {
-            "location": reverse("users:home")  # TODO: registration
+            "location": reverse("settings:account")  # TODO: registration
         }
     }
 
@@ -87,13 +87,12 @@ PARTIAL = {
 }
 
 
-@csrf_exempt  # TODO: for debug only
 @api_login_required
 def partial_user_info(_request, user, data):
     return get_user_info(user, data, PARTIAL)
 
 
-FULL = {  # TODO
+FULL = {
     "id",
     "username",
     "first_name",
@@ -112,7 +111,6 @@ FULL = {  # TODO
 }
 
 
-@csrf_exempt  # TODO: for debug only
 @api_login_required
 def full_user_info(_request, user, data):
     return get_user_info(user, data, FULL)

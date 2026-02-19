@@ -108,7 +108,6 @@ def parse_form_errors(form: forms.BaseForm):
             if error.priority > user_error.priority:
                 user_error = error
 
-    # TODO: change forms.js to reflect new protocol
     return BadUserInputError(meta=form.errors, reason=user_error.code.upper() if user_error.code else None)
 
 

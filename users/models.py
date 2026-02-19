@@ -68,7 +68,7 @@ class UserManager(models.Manager):
         else:
             raise BadRequestError("User must be identified via id or username")
         if user is None:
-            raise NotFoundError("User does not exist")
+            raise NotFoundError("User does not exist", reason="USER_NOT_FOUND")
         return user
 
 

@@ -1,11 +1,11 @@
 {% extends 'users/auth_base.html' %}
 
-{% comment %}{% load static %}
+{% load static %}
 
 {% block head %}
     {{ block.super }}
-    <link rel="stylesheet" href="{% static 'css/users/profile.css' %}">
-{% endblock %}{% endcomment %}
+    <script type="module" src="{% static 'js/users/profile.js' %}"></script>
+{% endblock %}
 
 {% block title %}Profile — Sodia{% endblock %}
 
@@ -14,11 +14,12 @@
         <span class="template" id="display_name"></span>
         <span class="hide-empty">(<span class="template" id="full-name"></span>)</span>
     </h1>
+    <div>@<span class="template" id="username"></span></div>
     <div>
         <span class="hide-empty comma">gender: <span class="template" id="gender"></span></span>
         <span class="hide-empty comma">birthday: <span class="template" id="birth-date"></span></span>
         <span class="hide-empty comma">streak: <span class="template" id="challenge-streak"></span></span>
-        <span class="hide-empty comma"><span class="template" id="year"></span></span>
+        <span class="hide-empty comma"><span class="template" id="year-group"></span></span>
         <span class="comma hide-empty">
             <span class="hide-empty"><span class="template" id="house"></span></span>
             <span class="hide-empty"> (<span class="template" id="boarding-type"></span>)</span>

@@ -1,22 +1,28 @@
-.hidden {
-    display: none;
-}
-
 body {
     background: #e4e6f2;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
-#error-box {
+#loading {
+    position: fixed;
+    inset: 0;
+    background: white;
+}
+
+#loading > div {
     position: absolute;
+    top: 20%;
     left: 50%;
     transform: translateX(-50%);
-    background: #f44336;
-    border-radius: 15px;
-    color: #f2dede;
-    padding: 5px 10px;
+    font-size: 150%;
+    font-weight: 900;
+    text-align: center;
+    width: max-content;
     max-width: 70%;
-    box-shadow: 0 0 10px #171419;
+}
+
+#loading:not([hidden]) ~ :not(#info-box) {
+    display: none;
 }
 
 #info-box {
