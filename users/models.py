@@ -5,6 +5,8 @@ import hashlib
 import uuid
 import hmac
 
+from typing import Self
+
 from .passwords import Password
 from Sodia.settings import SECRET_KEY
 from Sodia.models import SingleChoiceField
@@ -15,6 +17,7 @@ from settings.models import (
 from api.errors import BadRequestError, NotFoundError
 
 from django.db import models, transaction
+from django.db.models import Q
 from django.utils import timezone
 
 
@@ -48,7 +51,7 @@ class UserManager(models.Manager):
         objects = self.activated() if only_activated else self.all()
         try:
             user = objects.get(pk=pk)
-        except User.DoesNotExist:
+        except self.model.DoesNotExist:
             user = default
         return user
 
@@ -91,6 +94,39 @@ class User(models.Model):
     def __str__(self):
         return f"{self.account_settings.get_display_name()} @{self.account_settings.username}"
 
+    def get_friends(self):
+        from interactions.models import FriendRequestStatus
+        return User.objects.activated().filter(
+            Q(requests_sent__status=FriendRequestStatus.ACCEPTED)
+            & (Q(requests_sent__sender=self) | Q(requests_sent__recipient=self))
+        )
+
+    def get_pending_sent(self):
+        from interactions.models import FriendRequestStatus
+        return User.objects.activated().filter(
+            requests_sent__status=FriendRequestStatus.PENDING,
+            requests_sent__sender=self
+        )
+
+    def get_pending_received(self):
+        from interactions.models import FriendRequestStatus
+        return User.objects.activated().filter(
+            requests_sent__status=FriendRequestStatus.PENDING,
+            requests_sent__recipient=self
+        )
+
+    def is_friends_with(self, other: Self):
+        from interactions.models import FriendRequest
+        return FriendRequest.objects.check_friendship_between(self, other)
+
+    def is_friend_request_sendable_to(self, recipient: Self):
+        from interactions.models import FriendRequest
+        return FriendRequest.objects.is_sendable_between(self, recipient)
+
+    def send_friend_request_to(self, recipient):
+        from interactions.models import FriendRequest
+        return FriendRequest.objects.send_request(self, recipient)
+
 
 class PasswordField(models.CharField):
     def __init__(self, *args, **kwargs):
@@ -129,7 +165,7 @@ class UserLoginDetailsManager(SettingsManager):
         objects = self.activated() if only_activated else self.all()
         try:
             user = objects.get(email=email).user
-        except UserLoginDetails.DoesNotExist:
+        except self.model.DoesNotExist:
             user = default
         return user
 

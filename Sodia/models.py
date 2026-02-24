@@ -212,7 +212,7 @@ class MultipleChoiceField(models.IntegerField):
             return value
         if not value:
             return IntFlagList([], enum_class=self.enum_class)
-        if isinstance(value, Sequence):
+        if isinstance(value, Sequence) and not isinstance(value, str):
             return IntFlagList([self.enum_class(int(flag)) for flag in value], enum_class=self.enum_class)
         return IntFlagList(
             [self.enum_class(flag) for flag, name in self.flags if int(value) & flag],

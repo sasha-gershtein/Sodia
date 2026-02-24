@@ -98,7 +98,7 @@ class AccountManager(SettingsManager):
         objects = self.activated() if only_activated else self.all()
         try:
             user = objects.get(username=username).user
-        except UserAccountSettings.DoesNotExist:
+        except self.model.DoesNotExist:
             user = default
         return user
 

@@ -34,7 +34,7 @@ class SessionMiddleware:
                                   msg=token_plaintext.encode("ascii"),
                                   digestmod=hashlib.sha256).digest()
             try:
-                session = Session.objects.select_related("user").get(token=token_hash)
+                session = Session.objects.select_related("user").get(token=token_hash)  # TODO: implement in manager
                 if session.expire():
                     session = None
             except Session.DoesNotExist:

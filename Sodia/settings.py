@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'users',
     'settings',
     'api',
+    'interactions',
 ]
 
 MIDDLEWARE = [
