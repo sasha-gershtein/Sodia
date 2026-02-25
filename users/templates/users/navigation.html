@@ -1,8 +1,13 @@
-<nav>
-    <a href="{% url 'users:home' %}">home</a>
-    <a href="{% url 'settings:index' %}">settings</a>
-    <form id="logout" action="{% url 'api:users:logout' %}" method="post">
-        <input type="submit" value="Sign out">
-    </form>
-    <hr>
-</nav>
+<header>
+    <nav>
+        <div class="template-container" id="navigation">
+            <a href="{% url 'users:home' %}">home</a><br>
+            <a href="{% url 'settings:index' %}">settings</a><br>
+            <a class="hide-empty" id="profile-link">@<span class="template" id="navigation-username"></span></a>
+            <form id="logout" action="{% url 'api:users:logout' %}" method="post">
+                <input type="submit" value="Sign out">
+            </form>
+            <hr>
+        </div>
+    </nav>
+</header>

@@ -131,25 +131,37 @@ export function processError(err) {
     throw err;
 }
 
+function removePrefix(id, prefix) {
+    return prefix == null ? id : (
+        id.startsWith(`${prefix}-`) ? id.substring(prefix.length + 1) : null
+    );
+}
+
 export async function loadTemplate(url, payload = {}, options = {}) {
     let {
-        title = _ => "Sodia",
+        prefix = null,
+        title = null,
         translators = {},
     } = options;
     showPageLoading();
+    let response;
     try {
-        let response = await api(url, payload, {attempts: 100});
-        document.querySelectorAll(".template").forEach(field => {
-            const id = field.id.replaceAll("-", "_");
-            if (!id) return;
-            const value = response[id];
-            const string = translators[id] ? translators[id](value) : value?.name?.toLowerCase() ?? value;
-            if (string != null) field.innerText = string;
-        });
-        document.title = title(response);
-        hidePageLoading();
-        return response;
+        response = await api(url, payload, {attempts: 100});
     } catch (err) {
         processError(err);
+        return;
     }
+    const container = prefix != null ? document.querySelector(`.template-container#${prefix}`) : document;
+    container.querySelectorAll(".template").forEach(field => {
+        const id = removePrefix(field.id, prefix)?.replaceAll("-", "_");
+        if (!id) return;
+        const value = response[id];
+        const string = translators[id] ? translators[id](value) : value?.name?.toLowerCase() ?? value;
+        if (string != null) field.innerText = string;
+    });
+    if (title != null) { // noinspection JSValidateTypes
+        document.title = title(response);
+    }
+    hidePageLoading();
+    return response;
 }

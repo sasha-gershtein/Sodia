@@ -246,7 +246,8 @@ class UserInfo:
         self.country = account.country
 
         self.friends_visible = relation >= privacy.friends
-        self.can_message = relation >= privacy.message  # TODO
+        # TODO: can message if relation is enough, *not blocked back*, or in special conditions
+        self.can_message = relation not in {Relation.SAME_USER, Relation.BLOCKED} and relation >= privacy.message
 
     @property
     def friends(self):

@@ -9,6 +9,7 @@ loadTemplate(
         username: username
     },
     {
+        prefix: "profile",
         title: _ => `${username} — Sodia`,
         translators: {
             house: house => house?.name,

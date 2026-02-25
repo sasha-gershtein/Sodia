@@ -10,23 +10,25 @@
 {% block title %}Profile — Sodia{% endblock %}
 
 {% block content %}
-    <h1>
-        <span class="template" id="display_name"></span>
-        <span class="hide-empty">(<span class="template" id="full-name"></span>)</span>
-    </h1>
-    <div>@<span class="template" id="username"></span></div>
-    <div>
-        <span class="hide-empty comma">gender: <span class="template" id="gender"></span></span>
-        <span class="hide-empty comma">birthday: <span class="template" id="birth-date"></span></span>
-        <span class="hide-empty comma">streak: <span class="template" id="challenge-streak"></span></span>
-        <span class="hide-empty comma"><span class="template" id="year-group"></span></span>
-        <span class="comma hide-empty">
-            <span class="hide-empty"><span class="template" id="house"></span></span>
-            <span class="hide-empty"> (<span class="template" id="boarding-type"></span>)</span>
-        </span>
+    <div class="template-container" id="profile">
+        <h1 class="hidden">
+            <span class="template" id="profile-display-name"></span>
+            <span class="hide-empty">(<span class="template" id="profile-full-name"></span>)</span>
+        </h1>
+        <div class="hide-empty">@<span class="template" id="profile-username"></span></div>
+        <div>
+            <span class="hide-empty comma">gender: <span class="template" id="profile-gender"></span></span>
+            <span class="hide-empty comma">birthday: <span class="template" id="profile-birth-date"></span></span>
+            <span class="hide-empty comma">streak: <span class="template" id="profile-challenge-streak"></span></span>
+            <span class="hide-empty comma"><span class="template" id="profile-year-group"></span></span>
+            <span class="comma hide-empty">
+                <span class="hide-empty"><span class="template" id="profile-house"></span></span>
+                <span class="hide-empty"> (<span class="template" id="profile-boarding-type"></span>)</span>
+            </span>
+        </div>
+        <button id="main-action">Main Button</button>
+        <button id="hidden-menu">...</button>
+        <hr>
+        <div class="hide-empty"><p class="template" id="description"></p></div>
     </div>
-    <button id="main-action">Main Button</button>
-    <button id="hidden-menu">...</button>
-    <hr>
-    <div class="hide-empty"><p class="template" id="description"></p></div>
 {% endblock %}
