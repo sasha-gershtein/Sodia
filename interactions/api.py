@@ -1,14 +1,11 @@
-from django.views.decorators.csrf import csrf_exempt
-
 from api.decorators import api_login_required
-from api.errors import BadRequestError, NotFoundError
+from api.errors import BadRequestError, NotFoundError, ForbiddenError
 
 from users.models import User
 
-from interactions.models import FriendRequest
+from interactions.models import FriendRequest, UserInfo
 
 
-@csrf_exempt  # TODO: debug only
 @api_login_required
 def send_friend_request(_request, user, data):
     recipient = User.objects.get_user_by_data(data)
@@ -17,7 +14,6 @@ def send_friend_request(_request, user, data):
     FriendRequest.objects.send_request(user, recipient, is_api=True)
 
 
-@csrf_exempt  # TODO: debug only
 @api_login_required
 def respond_to_friend_request(_request, user, data):
     sender = User.objects.get_user_by_data(data)
@@ -32,7 +28,6 @@ def respond_to_friend_request(_request, user, data):
         raise NotFoundError("Friend request does not exist")
 
 
-@csrf_exempt  # TODO: debug only
 @api_login_required
 def withdraw_friend_request(_request, user, data):
     receiver = User.objects.get_user_by_data(data)
@@ -42,7 +37,6 @@ def withdraw_friend_request(_request, user, data):
         raise NotFoundError("Friend request does not exist")
 
 
-@csrf_exempt  # TODO: debug only
 @api_login_required
 def remove_friend(_request, user, data):
     friend = User.objects.get_user_by_data(data)
@@ -50,3 +44,17 @@ def remove_friend(_request, user, data):
         FriendRequest.objects.remove_friend(user, friend)
     except FriendRequest.DoesNotExist:
         raise NotFoundError("Friend does not exist")
+
+
+@api_login_required
+def get_friends(_request, user, data):
+    user_data = UserInfo(
+        User.objects.get_user_by_data(data),  # validates and raises appropriate exceptions
+        user
+    )
+    if not user_data.friends_visible:
+        raise ForbiddenError("Friends list is not visible", reason="FRIENDS_LIST_HIDDEN")
+    return [
+        UserInfo(friend, user).partial
+        for friend in user_data.friends
+    ]

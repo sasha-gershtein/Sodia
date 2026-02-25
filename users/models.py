@@ -97,8 +97,14 @@ class User(models.Model):
     def get_friends(self):
         from interactions.models import FriendRequestStatus
         return User.objects.activated().filter(
-            Q(requests_sent__status=FriendRequestStatus.ACCEPTED)
-            & (Q(requests_sent__sender=self) | Q(requests_sent__recipient=self))
+            Q(  # those who received accepted requests from self
+                requests_received__sender=self,
+                requests_received__status=FriendRequestStatus.ACCEPTED
+            )
+            | Q(  # OR those who sent accepted requests to self
+                requests_sent__recipient=self,
+                requests_sent__status=FriendRequestStatus.ACCEPTED
+            )
         )
 
     def get_pending_sent(self):

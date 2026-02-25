@@ -190,6 +190,35 @@ class Relation(Enum):
 
 
 class UserInfo:
+    PARTIAL = {
+        "id",
+        "username",
+        "first_name",
+        "last_name",
+        "display_name",
+        "relation",
+        "can_message",
+    }
+    FULL = {
+        "id",
+        "username",
+        "first_name",
+        "last_name",
+        "display_name",
+        "gender",
+        "birth_date",
+        "description",
+        "challenge_streak",
+        "year_group",
+        "house",
+        "boarding_type",
+        "country",
+        "relation",
+        "can_message",
+    }
+
+    _friends: list[User] | None = None
+
     def __init__(self, user: User, requesting_user: User):
         self.user = user
         self.requesting_user = requesting_user
@@ -216,4 +245,28 @@ class UserInfo:
         self.boarding_type = account.boarding_type
         self.country = account.country
 
+        self.friends_visible = relation >= privacy.friends
         self.can_message = relation >= privacy.message  # TODO
+
+    @property
+    def friends(self):
+        if self.friends_visible and self._friends is None:
+            self._friends = self.user.get_friends()
+        return self._friends
+
+    def get_json_value(self, keys=None):
+        if keys is None:
+            keys = self.PARTIAL
+        return {
+            key: value.get_json_value() if hasattr(value, "get_json_value") else value
+            for key in keys
+            if (value := getattr(self, key)) is not None
+        }
+
+    @property
+    def partial(self):
+        return self.get_json_value(self.PARTIAL)
+
+    @property
+    def full(self):
+        return self.get_json_value(self.FULL)

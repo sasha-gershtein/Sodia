@@ -61,53 +61,17 @@ def change_password(request, user: User, data):
     session_data.session.authenticate(user)
 
 
-def get_user_info(requesting_user, data, keys):
-    user_data = UserInfo(
-        User.objects.get_user_by_data(data),  # validates and raises appropriate exceptions
-        requesting_user
-    )
-    return {
-        key: value.get_json_value() if hasattr(value, "get_json_value") else value
-        for key in keys
-        if (value := getattr(user_data, key)) is not None
-    }
-
-
-PARTIAL = {
-    "id",
-    "username",
-    "first_name",
-    "last_name",
-    "display_name",
-    "relation",
-    "can_message",
-}
-
-
 @api_login_required
 def partial_user_info(_request, user, data):
-    return get_user_info(user, data, PARTIAL)
-
-
-FULL = {
-    "id",
-    "username",
-    "first_name",
-    "last_name",
-    "display_name",
-    "gender",
-    "birth_date",
-    "description",
-    "challenge_streak",
-    "year_group",
-    "house",
-    "boarding_type",
-    "country",
-    "relation",
-    "can_message",
-}
+    return UserInfo(
+        User.objects.get_user_by_data(data),  # validates and raises appropriate exceptions
+        user
+    ).partial
 
 
 @api_login_required
 def full_user_info(_request, user, data):
-    return get_user_info(user, data, FULL)
+    return UserInfo(
+        User.objects.get_user_by_data(data),  # validates and raises appropriate exceptions
+        user
+    ).full

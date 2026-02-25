@@ -8,4 +8,5 @@ urlpatterns = [
     path('friend/send/', api.send_friend_request, name='send_friend_request'),
     path('friend/respond/', api.respond_to_friend_request, name='respond_to_friend_request'),
     path('friend/withdraw/', api.withdraw_friend_request, name='withdraw_friend_request'),
+    path('get-friends/', api.get_friends, name='get_friends'),
 ]
