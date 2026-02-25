@@ -8,4 +8,5 @@ urlpatterns = [
     path('', api_root_404, name='root'),
     path('users/', include('api.urls.users', namespace='users')),
     path('settings/', include('api.urls.settings', namespace='settings')),
+    path('interactions/', include('api.urls.interactions', namespace='interactions')),
 ]

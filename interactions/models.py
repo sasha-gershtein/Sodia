@@ -4,12 +4,15 @@ from enum import Enum, IntEnum, auto
 from typing import Self
 
 from django.db import models, transaction
-from django.db.models import Q
+from django.db.models import Q, F
+from django.db.models.functions import Least, Greatest
 from django.utils import timezone
 
 from Sodia.models import JsonEnumMixin, SingleChoiceField
 from settings.models import PrivacySetting
 from users.models import User
+
+from api.errors import ConflictError
 
 
 class FriendRequestStatus(JsonEnumMixin, IntEnum):
@@ -26,6 +29,8 @@ class FriendsManager(models.Manager):
         return super().get_queryset().select_related("sender", "recipient")
 
     def get_between(self, user_1: User, user_2: User):
+        if user_1 == user_2:
+            raise ValueError("Users must be different")
         try:
             return self.get(
                 Q(sender=user_1, recipient=user_2) |
@@ -45,9 +50,12 @@ class FriendsManager(models.Manager):
         return self.get_between(sender, recipient).is_resendable(sender)
 
     @transaction.atomic
-    def send_request(self, sender: User, recipient: User):
+    def send_request(self, sender: User, recipient: User, *, is_api=False):
         request = self.get_between(sender, recipient)
         if not request.is_resendable(sender):
+            if is_api:
+                raise ConflictError(f"Could not send a friend request. Please try refreshing the page",
+                                    reason="FRIEND_REQUEST_NOT_SENDABLE")
             raise ValueError(f"Cannot send friend request from {sender} to {recipient}")
         if request.pk is not None:
             request.delete()
@@ -90,7 +98,16 @@ class FriendRequest(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['sender', 'recipient'], name='unique_friend_request'),
+            # models.UniqueConstraint(fields=['sender', 'recipient'], name='unique_friend_request'),
+            models.UniqueConstraint(
+                Least("sender", "recipient"),
+                Greatest("sender", "recipient"),
+                name="unique_friend_request",
+            ),
+            models.CheckConstraint(
+                condition=~Q(sender=F('recipient')),
+                name='prevent_self_friend_request',
+            ),
         ]
 
     def is_resendable(self, sender: User):
@@ -147,7 +164,7 @@ class Relation(Enum):
                 return 3
             case Relation.FRIENDS:
                 return 2
-            case Relation.PENDING_SENT, Relation.PENDING_RECEIVED:
+            case Relation.PENDING_SENT | Relation.PENDING_RECEIVED:
                 return 1
             case Relation.NONE:
                 return 0
@@ -155,6 +172,8 @@ class Relation(Enum):
                 return -1
             case Relation.BLOCKED:
                 return -2
+            case _:
+                raise ValueError("Undefined relation")
 
     def __ge__(self, other: Self | PrivacySetting):
         if isinstance(other, Relation):

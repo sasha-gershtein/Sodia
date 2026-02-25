@@ -1,7 +1,4 @@
-from dataclasses import asdict
-
 from django.urls import reverse
-from django.views.decorators.csrf import csrf_exempt
 
 from .forms import LoginForm, RegistrationForm, ChangePasswordForm
 from .middleware import SessionData

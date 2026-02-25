@@ -11,5 +11,5 @@ def api_root_404(_request):
 
 def handle404(request, exception):
     if request.path.startswith(reverse('api:root')):
-        return ErrorResponse(NotFoundError())
+        return ErrorResponse(NotFoundError(exception.message))
     return page_not_found(request, exception)
