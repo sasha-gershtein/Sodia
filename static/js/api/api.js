@@ -1,7 +1,5 @@
 // noinspection ExceptionCaughtLocallyJS
 
-"use strict";
-
 import {displayError, displayInfo, hidePageLoading, showPageLoading} from "./ui.js";
 
 function getCookie(name) {

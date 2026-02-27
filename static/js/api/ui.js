@@ -1,5 +1,7 @@
 // noinspection JSUnusedGlobalSymbols
 
+import {api, processError} from "./api.js";
+
 const info_box = document.getElementById("info-box");
 
 export class InfoMessage {
@@ -42,7 +44,183 @@ export function displaySuccess(message, timeout = 10000) {
     return new InfoMessage(message, "success", timeout)
 }
 
-export let loading = document.querySelector("#loading");
+export class Button {
+    constructor(options = {}) {
+        let {
+            id = null,
+            label,
+            callback = _ => null,
+            classes = [],
+        } = options;
+
+        this.button = document.createElement("button");
+        this.button.innerText = label;
+        if (id) this.button.id = id;
+        this.callback = callback.bind(this);
+        classes.forEach(cls => this.button.classList.add(cls));
+
+        this.controller = new AbortController();
+        const params = {
+            signal: this.controller.signal
+        };
+        this.button.addEventListener("click", this.onClick.bind(this), params);
+    }
+
+    abort() {
+        this.controller.abort();
+    }
+
+    appendTo(element) {
+        element.appendChild(this.button);
+    }
+
+    onClick(e) {
+        return this.callback(e);
+    }
+
+    get disabled() {
+        return this.button.disabled;
+    }
+
+    set disabled(value) {
+        this.button.disabled = value;
+    }
+}
+
+export class LinkButton extends Button {
+    constructor(options = {}) {
+        let {
+            url,
+            id = null,
+            label,
+            classes = [],
+        } = options;
+
+        super({
+            id, label, classes,
+            callback: () => location.href = this.url,
+        });
+
+        this.url = url;
+    }
+}
+
+export class APIButton extends Button {
+    constructor(options = {}) {
+        let {
+            url,
+            payload = {},
+            id = null,
+            label,
+            callback = _ => null,
+            success_message = "Success!",
+            classes = [],
+        } = options;
+
+        super({
+            id, label, classes,
+            callback: (e) => this.APICallback(e),
+        });
+
+        this.url = url;
+        this.payload = payload;
+        this.success_message = success_message;
+        this.success_callback = callback.bind(this);
+    }
+
+    async APICallback() {
+        if (this.disabled) return false;
+        try {
+            this.disabled = true;
+            this.result = await api(this.url, this.payload, {attempts: 1});
+            this.onSuccess();
+        } catch (err) {
+            return this.onError(err);
+        } finally {
+            this.disabled = false;
+        }
+    }
+
+    onSuccess() {
+        if (this.result.redirect) location.href = this.result.redirect.location;
+        if (this.success_message) displaySuccess(this.success_message, 3000);
+        this.success_callback(this.result);
+    }
+
+    onError(err) {
+        processError(err);
+    }
+}
+
+export function makeMenu(buttons, id = null, classes = [], tag = "div") {
+    let menu = document.createElement(tag);
+    if (id) menu.id = id;
+    classes.forEach(cls => menu.classList.add(cls));
+    buttons.forEach(button => {
+        button.appendTo(menu);
+    })
+    return menu;
+}
+
+export class ContextMenuButton extends Button {
+    constructor(options = {}) {
+        let {
+            menu,
+            id = null,
+            label,
+            classes = [],
+        } = options;
+
+        super({
+            id, label, classes,
+            callback: (e) => this.onClick(e)
+        });
+        this.menu = menu;
+        if (!this.menu.id) this.menu.id = (this.id ?? `id-${Math.ceil(Math.random() * 1e5)}`) + "-menu";
+        this.button.setAttribute("aria-controls", this.menu.id);
+        this.expanded = false;
+
+        const params = {
+            signal: this.controller.signal
+        };
+        document.addEventListener("click", this.pageClickHandler.bind(this), params)
+        document.addEventListener("keydown", this.keydownHandler.bind(this), params)
+    }
+
+    get expanded() {
+        return !this.menu.hidden;
+    }
+
+    set expanded(value) {
+        this.menu.hidden = !value;
+        this.button.setAttribute("aria-expanded", (!!value).toString());
+    }
+
+    toggle() {
+        this.expanded = !this.expanded;
+    }
+
+    onClick(e) {
+        e.stopPropagation();
+        this.toggle();
+    }
+
+    pageClickHandler(e) {
+        if (this.menu.parentElement.contains(e.target)) { // clicked within the menu...
+            if (!e.target.closest("button")) return; // ... and not on a button => don't close
+        }
+        this.menu.hidden = true; // hide on click away
+    }
+
+    keydownHandler(e) {
+        if (this.expanded && e.key === "Escape") {
+            this.expanded = false;
+            this.button.focus();
+        }
+    }
+}
+
+let loading = document.querySelector("#loading");
 let loading_state = 1;
 
 export function showPageLoading() {

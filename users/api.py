@@ -63,20 +63,14 @@ def change_password(request, user: User, data):
 
 @api_login_required
 def get_own_info(_request, user, _data):
-    return UserInfo(user, user).partial
+    return user.info(user).partial
 
 
 @api_login_required
 def partial_user_info(_request, user, data):
-    return UserInfo(
-        User.objects.get_user_by_data(data),  # validates and raises appropriate exceptions
-        user
-    ).partial
+    return User.objects.get_user_by_data(data).info(user).partial  # validates and raises appropriate exceptions
 
 
 @api_login_required
 def full_user_info(_request, user, data):
-    return UserInfo(
-        User.objects.get_user_by_data(data),  # validates and raises appropriate exceptions
-        user
-    ).full
+    return User.objects.get_user_by_data(data).info(user).full  # validates and raises appropriate exceptions

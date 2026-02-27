@@ -133,6 +133,10 @@ class User(models.Model):
         from interactions.models import FriendRequest
         return FriendRequest.objects.send_request(self, recipient)
 
+    def info(self, requesting_user):
+        from interactions.models import UserInfo
+        return UserInfo(self, requesting_user)
+
 
 class PasswordField(models.CharField):
     def __init__(self, *args, **kwargs):

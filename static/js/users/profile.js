@@ -1,5 +1,5 @@
 import {loadTemplate} from "../api/api.js";
-import {loading} from "../api/ui.js";
+import {insertInteractionButtons} from "../interactions/interactions.js";
 
 const list = window.location.pathname.split("/");
 const username = list[list.findIndex(e => e === "profile") + 1];
@@ -15,9 +15,6 @@ loadTemplate(
             house: house => house?.name,
         }
     }
-).catch(err => {
-    if (err.code === 404 && err.reason === "USER_NOT_FOUND") {
-        loading.querySelector("div").innerText = "404 Error\nThis user does not exist";
-    }
-    throw err;
+).then(user_info => {
+    insertInteractionButtons(user_info, document.querySelector("#profile-buttons"));
 });
