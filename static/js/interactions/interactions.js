@@ -1,4 +1,4 @@
-import {APIButton, ContextMenuButton, displayError, LinkButton, makeMenu} from "../api/ui.js";
+import {APIButton, ContextMenuButton, displayError, LinkButton, makeContextMenu} from "../api/ui.js";
 
 export class Relation {
     static SAME_USER = "SAME_USER";
@@ -68,9 +68,9 @@ export function makeInteractionButtons(user_info, rebuild) {
                 callback: rebuild,
                 success_message: "Friend request ignored",
             });
-            main_menu = makeMenu([accept, deny], "respond-friend-menu");
+            main_menu = makeContextMenu([accept, deny], "respond-friend-menu");
             main_btn = new ContextMenuButton({
-                menu: main_menu,
+                menu: main_menu.menu,
                 id: main_id,
                 label: "Respond to request...",
             });
@@ -147,9 +147,9 @@ export function makeInteractionButtons(user_info, rebuild) {
     }
 
     if (menu_buttons.length) {
-        menu = makeMenu(menu_buttons, "hidden-actions-menu");
+        menu = makeContextMenu(menu_buttons, "hidden-actions-menu");
         menu_btn = new ContextMenuButton({
-            menu: menu,
+            menu: menu.menu,
             id: "hidden-actions-btn",
             label: "...",
         })
@@ -158,16 +158,30 @@ export function makeInteractionButtons(user_info, rebuild) {
     return {main_btn, main_menu, menu_btn, menu}
 }
 
-export function insertInteractionButtons(user_info, container) {
+export function insertInteractionButtons(user_info, container, add_menu = true) {
     // noinspection JSUnresolvedReference
     let buttons = makeInteractionButtons(user_info,
-        (user_info) => insertInteractionButtons(user_info, container)
+        (user_info) => insertInteractionButtons(user_info, container, add_menu)
     );
     container.innerHTML = "";
     if (buttons.main_btn) buttons.main_btn.appendTo(container);
-    if (buttons.main_menu) container.appendChild(buttons.main_menu);
+    if (buttons.main_menu) container.appendChild(buttons.main_menu.wrapper);
+    if (!add_menu) return;
     if (buttons.menu_btn) {
         buttons.menu_btn.appendTo(container);
-        container.appendChild(buttons.menu);
+        container.appendChild(buttons.menu.wrapper);
     }
+}
+
+export function insertUser(user_info, container) {
+    let box = document.createElement("div");
+    box.classList.add("user");
+    let name = document.createElement("span");
+    // noinspection JSUnresolvedReference
+    name.innerText = user_info.display_name;
+    box.appendChild(name);
+    let button_container = document.createElement("div");
+    insertInteractionButtons(user_info, button_container, false);
+    box.appendChild(button_container);
+    container.appendChild(box);
 }

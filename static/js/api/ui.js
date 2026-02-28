@@ -48,14 +48,19 @@ export class Button {
     constructor(options = {}) {
         let {
             id = null,
-            label,
+            label = null,
             callback = _ => null,
             classes = [],
+            create = true,
         } = options;
 
-        this.button = document.createElement("button");
-        this.button.innerText = label;
-        if (id) this.button.id = id;
+        if (!create && id) this.button = document.getElementById(id);
+        if (!this.button) {
+            this.button = document.createElement("button");
+            if (id) this.button.id = id;
+        }
+        if (label) this.button.innerText = label;
+
         this.callback = callback.bind(this);
         classes.forEach(cls => this.button.classList.add(cls));
 
@@ -91,15 +96,10 @@ export class LinkButton extends Button {
     constructor(options = {}) {
         let {
             url,
-            id = null,
-            label,
-            classes = [],
         } = options;
 
-        super({
-            id, label, classes,
-            callback: () => location.href = this.url,
-        });
+        options.callback = () => location.href = this.url;
+        super(options);
 
         this.url = url;
     }
@@ -110,17 +110,12 @@ export class APIButton extends Button {
         let {
             url,
             payload = {},
-            id = null,
-            label,
             callback = _ => null,
             success_message = "Success!",
-            classes = [],
         } = options;
 
-        super({
-            id, label, classes,
-            callback: (e) => this.APICallback(e),
-        });
+        options.callback = (e) => this.APICallback(e);
+        super(options);
 
         this.url = url;
         this.payload = payload;
@@ -152,33 +147,43 @@ export class APIButton extends Button {
     }
 }
 
-export function makeMenu(buttons, id = null, classes = [], tag = "div") {
-    let menu = document.createElement(tag);
-    if (id) menu.id = id;
+export function makeContextMenu(buttons, id = null, classes = [], tag = "div", create = true) {
+    let menu = null;
+    let wrapper = null;
+    if (!create && id) menu = document.getElementById(id);
+    if (!menu) {
+        menu = document.createElement(tag);
+        if (id) menu.id = id;
+        wrapper = document.createElement("div");
+        if (id) wrapper.id = id + "-wrapper";
+        wrapper.classList.add("context-menu-wrapper");
+        wrapper.appendChild(menu);
+    }
+    menu.classList.add("context-menu");
     classes.forEach(cls => menu.classList.add(cls));
     buttons.forEach(button => {
         button.appendTo(menu);
     })
-    return menu;
+    return {menu, wrapper};
 }
 
 export class ContextMenuButton extends Button {
     constructor(options = {}) {
         let {
             menu,
-            id = null,
-            label,
-            classes = [],
+            hide_on_buttons = true,
+            callback = _ => null,
         } = options;
 
-        super({
-            id, label, classes,
-            callback: (e) => this.onClick(e)
-        });
+        options.callback = (e) => this.onClick(e);
+        super(options);
+
+        this.success_callback = callback;
         this.menu = menu;
         if (!this.menu.id) this.menu.id = (this.id ?? `id-${Math.ceil(Math.random() * 1e5)}`) + "-menu";
         this.button.setAttribute("aria-controls", this.menu.id);
         this.expanded = false;
+        this.hide_on_buttons = hide_on_buttons;
 
         const params = {
             signal: this.controller.signal
@@ -203,11 +208,13 @@ export class ContextMenuButton extends Button {
     onClick(e) {
         e.stopPropagation();
         this.toggle();
+        this.success_callback();
     }
 
     pageClickHandler(e) {
-        if (this.menu.parentElement.contains(e.target)) { // clicked within the menu...
-            if (!e.target.closest("button")) return; // ... and not on a button => don't close
+        if (this.menu.parentElement.contains(e.target)) { // clicked within the menu and...
+            if (!this.hide_on_buttons) return; // ...should not hide on a button click
+            if (!e.target.closest("button")) return; // ...not on a button => don't hide
         }
         this.menu.hidden = true; // hide on click away
     }

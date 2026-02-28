@@ -18,3 +18,18 @@ nav {
 )::after {
     content: ", ";
 }
+
+.user {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    min-width: 35%;
+    padding: 6px 10px;
+    border-radius: 3px;
+    border: 1px solid #151729;
+    margin: 5px 0;
+}
+
+.user > * {
+    margin: 0 6px;
+}

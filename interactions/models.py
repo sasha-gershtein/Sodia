@@ -214,6 +214,8 @@ class UserInfo:
         "boarding_type",
         "country",
         "relation",
+        "friends_count",
+        "friends_visible",
         "can_message",
     }
 
@@ -245,6 +247,7 @@ class UserInfo:
         self.boarding_type = account.boarding_type
         self.country = account.country
 
+        self.friends_count = self.user.get_friends().count()
         self.friends_visible = relation >= privacy.friends
         # TODO: can message if relation is enough, *not blocked back*, or in special conditions
         self.can_message = relation not in {Relation.SAME_USER, Relation.BLOCKED} and relation >= privacy.message
