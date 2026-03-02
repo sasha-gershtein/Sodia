@@ -6,7 +6,7 @@ export class Relation {
     static PENDING_SENT = "PENDING_SENT";
     static PENDING_RECEIVED = "PENDING_RECEIVED";
     static NONE = "NONE";
-    static FAILED_REQUEST = "FAILED_REQUEST";
+    static FRIEND_REQUEST_FORBIDDEN = "FRIEND_REQUEST_FORBIDDEN";
     static BLOCKED = "BLOCKED";
 }
 
@@ -89,7 +89,7 @@ export function makeInteractionButtons(user_info, rebuild) {
             break;
         case Relation.FRIENDS:
             break;
-        case Relation.FAILED_REQUEST:
+        case Relation.FRIEND_REQUEST_FORBIDDEN:
             break;
         case Relation.BLOCKED:
             break;
@@ -158,11 +158,14 @@ export function makeInteractionButtons(user_info, rebuild) {
     return {main_btn, main_menu, menu_btn, menu}
 }
 
-export function insertInteractionButtons(user_info, container, add_menu = true) {
+export function insertInteractionButtons(user_info, options) {
+    let {
+        container,
+        add_menu = true,
+        rebuild = (user_info) => insertInteractionButtons(user_info, {container, add_menu}),
+    } = options;
     // noinspection JSUnresolvedReference
-    let buttons = makeInteractionButtons(user_info,
-        (user_info) => insertInteractionButtons(user_info, container, add_menu)
-    );
+    let buttons = makeInteractionButtons(user_info, rebuild);
     container.innerHTML = "";
     if (buttons.main_btn) buttons.main_btn.appendTo(container);
     if (buttons.main_menu) container.appendChild(buttons.main_menu.wrapper);
@@ -176,12 +179,16 @@ export function insertInteractionButtons(user_info, container, add_menu = true) 
 export function insertUser(user_info, container) {
     let box = document.createElement("div");
     box.classList.add("user");
-    let name = document.createElement("span");
+    let name = document.createElement("a");
+    name.href = `/profile/${user_info.username}/`;
     // noinspection JSUnresolvedReference
     name.innerText = user_info.display_name;
     box.appendChild(name);
     let button_container = document.createElement("div");
-    insertInteractionButtons(user_info, button_container, false);
+    insertInteractionButtons(user_info, {
+        container: button_container,
+        add_menu: false,
+    });
     box.appendChild(button_container);
     container.appendChild(box);
 }

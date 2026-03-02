@@ -94,6 +94,10 @@ class User(models.Model):
     def __str__(self):
         return f"{self.account_settings.get_display_name()} @{self.account_settings.username}"
 
+    def info(self, requesting_user):
+        from interactions.models import UserInfo
+        return UserInfo(self, requesting_user)
+
     def get_friends(self):
         from interactions.models import FriendRequestStatus
         return User.objects.activated().filter(
@@ -129,13 +133,37 @@ class User(models.Model):
         from interactions.models import FriendRequest
         return FriendRequest.objects.is_sendable_between(self, recipient)
 
-    def send_friend_request_to(self, recipient):
+    def send_friend_request_to(self, recipient: Self, *, is_api=False):
         from interactions.models import FriendRequest
-        return FriendRequest.objects.send_request(self, recipient)
+        return FriendRequest.objects.send_request(self, recipient, is_api=is_api)
 
-    def info(self, requesting_user):
-        from interactions.models import UserInfo
-        return UserInfo(self, requesting_user)
+    def accept_friend_request_from(self, sender: Self):
+        from interactions.models import FriendRequest
+        return FriendRequest.objects.accept_request(sender, self)
+
+    def deny_friend_request_from(self, sender: Self):
+        from interactions.models import FriendRequest
+        return FriendRequest.objects.deny_request(sender, self)
+
+    def withdraw_friend_request_to(self, recipient: Self):
+        from interactions.models import FriendRequest
+        return FriendRequest.objects.withdraw_request(self, recipient)
+
+    def remove_friend(self, friend: Self):
+        from interactions.models import FriendRequest
+        return FriendRequest.objects.remove_friend(self, friend)
+
+    def is_blocking(self, recipient: Self):
+        from interactions.models import Block
+        return Block.objects.is_blocking(self, recipient)
+
+    def block(self, recipient: Self):
+        from interactions.models import Block
+        return Block.objects.block(self, recipient)
+
+    def unblock(self, recipient: Self):
+        from interactions.models import Block
+        return Block.objects.unblock(self, recipient)
 
 
 class PasswordField(models.CharField):

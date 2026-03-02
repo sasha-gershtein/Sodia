@@ -98,7 +98,6 @@ class FriendRequest(models.Model):
 
     class Meta:
         constraints = [
-            # models.UniqueConstraint(fields=['sender', 'recipient'], name='unique_friend_request'),
             models.UniqueConstraint(
                 Least("sender", "recipient"),
                 Greatest("sender", "recipient"),
@@ -115,6 +114,8 @@ class FriendRequest(models.Model):
             return True
         if self.status in (FriendRequestStatus.PENDING, FriendRequestStatus.ACCEPTED):
             return False
+        if any(Block.objects.get_between(self.sender, self.recipient)):
+            return False
         back = sender == self.recipient
         if (  # can send if denied/removed by sender or withdrawn by receiver
                 (self.status == FriendRequestStatus.DENIED and back)
@@ -129,14 +130,48 @@ class FriendRequest(models.Model):
         return self.updated_at < timezone.now() - self.REQUEST_COOLDOWN
 
 
+class BlockManager(models.Manager):
+    def is_blocking(self, sender, recipient):
+        return self.filter(sender=sender, recipient=recipient).exists()
+
+    def get_between(self, user_1: User, user_2: User, /):
+        return self.is_blocking(user_1, user_2), self.is_blocking(user_2, user_1)
+
+    def block(self, sender: User, recipient):
+        if sender.is_friends_with(recipient):
+            sender.remove_friend(recipient)
+        self.create(sender=sender, recipient=recipient)
+
+    def unblock(self, sender, recipient):
+        self.get(sender=sender, recipient=recipient).delete()
+
+
+class Block(models.Model):
+    sender = models.ForeignKey(User, related_name="blocks_sent", on_delete=models.CASCADE)
+    recipient = models.ForeignKey(User, related_name="blocks_received", on_delete=models.CASCADE)
+
+    objects = BlockManager()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['sender', 'recipient'], name='unique_block'),
+            models.CheckConstraint(
+                condition=~Q(sender=F('recipient')),
+                name='prevent_self_block',
+            ),
+        ]
+
+
 class Relation(Enum):
     SAME_USER = auto()
     FRIENDS = auto()
     PENDING_SENT = auto()  # user sent a friend request to related user
     PENDING_RECEIVED = auto()  # related user sent a friend request to user
     NONE = auto()
-    FAILED_REQUEST = auto()  # there has been a failed (denied / withdrawn) friend request in the cooldown period,
-    #                          due to which a new request cannot be sent at the moment
+    FRIEND_REQUEST_FORBIDDEN = auto()
+    # there has been a failed (denied / withdrawn) friend request in the cooldown period,
+    # due to which a new request cannot be sent at the moment
+    # or user is blocked by related user
     BLOCKED = auto()  # related user is blocked by user
 
     def get_json_value(self):
@@ -146,15 +181,15 @@ class Relation(Enum):
     def between(cls, user: User, related_user: User):
         if user == related_user:
             return cls.SAME_USER
-        if False:
-            return cls.BLOCKED  # noqa TODO
+        if user.is_blocking(related_user):
+            return cls.BLOCKED
         request = FriendRequest.objects.get_between(user, related_user)
         if request.status == FriendRequestStatus.ACCEPTED:
             return cls.FRIENDS
         if request.status == FriendRequestStatus.PENDING:
             return cls.PENDING_SENT if user == request.sender else cls.PENDING_RECEIVED
         if not request.is_resendable(user):
-            return cls.FAILED_REQUEST
+            return cls.FRIEND_REQUEST_FORBIDDEN
         return cls.NONE
 
     @property
@@ -168,7 +203,7 @@ class Relation(Enum):
                 return 1
             case Relation.NONE:
                 return 0
-            case Relation.FAILED_REQUEST:
+            case Relation.FRIEND_REQUEST_FORBIDDEN:
                 return -1
             case Relation.BLOCKED:
                 return -2
@@ -249,8 +284,12 @@ class UserInfo:
 
         self.friends_count = self.user.get_friends().count()
         self.friends_visible = relation >= privacy.friends
-        # TODO: can message if relation is enough, *not blocked back*, or in special conditions
-        self.can_message = relation not in {Relation.SAME_USER, Relation.BLOCKED} and relation >= privacy.message
+        # TODO: can message back if not reset
+        self.can_message = (
+                relation not in {Relation.SAME_USER, Relation.BLOCKED}
+                and not user.is_blocking(requesting_user)
+                and relation >= privacy.message
+        )
 
     @property
     def friends(self):
