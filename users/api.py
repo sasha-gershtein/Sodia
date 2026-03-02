@@ -1,3 +1,4 @@
+from django.db.models import QuerySet
 from django.urls import reverse
 
 from .forms import LoginForm, RegistrationForm, ChangePasswordForm
@@ -6,7 +7,6 @@ from .models import User
 
 from api.decorators import api_view, api_login_required
 from api.errors import parse_form_errors
-from interactions.models import UserInfo
 
 
 @api_view
@@ -74,3 +74,15 @@ def partial_user_info(_request, user, data):
 @api_login_required
 def full_user_info(_request, user, data):
     return User.objects.get_user_by_data(data).info(user).full  # validates and raises appropriate exceptions
+
+
+@api_login_required
+def search(_request, user, data):
+    query = data.get("query").strip()
+    results = User.objects.none()
+    if query == "*":
+        results = User.objects.activated()
+    return [
+        result.info(user).partial
+        for result in results
+    ]

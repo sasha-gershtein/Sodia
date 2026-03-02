@@ -32,8 +32,14 @@ class Home(View):
         }
         return render(request, 'users/home.html', context)
 
+
 @login_required
-def profile(request, _user, username: str, *args, **kwargs):
+def profile(request, _user: User, username: str):
     if User.objects.get_user_by_username(username) is None:
         raise Http404
     return render(request, 'users/profile.html')
+
+
+@login_required
+def search(request, _user: User):
+    return render(request, 'users/search.html')

@@ -4,7 +4,6 @@ from django.core.validators import validate_email
 
 from api.errors import FormResponseUserError
 from .models import User, UserLoginDetails
-from settings.models import UserAccountSettings
 
 
 class LoginForm(forms.Form):

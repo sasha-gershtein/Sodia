@@ -99,16 +99,12 @@ class User(models.Model):
         return UserInfo(self, requesting_user)
 
     def get_friends(self):
-        from interactions.models import FriendRequestStatus
+        from interactions.models import FriendRequest, FriendRequestStatus
+        accepted = FriendRequest.objects.filter(status=FriendRequestStatus.ACCEPTED)
+        recipient_pks = accepted.filter(sender=self).values("recipient_id")
+        sender_pks = accepted.filter(recipient=self).values("sender_id")
         return User.objects.activated().filter(
-            Q(  # those who received accepted requests from self
-                requests_received__sender=self,
-                requests_received__status=FriendRequestStatus.ACCEPTED
-            )
-            | Q(  # OR those who sent accepted requests to self
-                requests_sent__recipient=self,
-                requests_sent__status=FriendRequestStatus.ACCEPTED
-            )
+            Q(pk__in=recipient_pks) | Q(pk__in=sender_pks)
         )
 
     def get_pending_sent(self):

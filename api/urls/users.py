@@ -12,4 +12,5 @@ urlpatterns = [
     path('me/', api.get_own_info, name='get_own_info'),
     path('partial-info/', api.partial_user_info, name='partial_info'),
     path('full-info/', api.full_user_info, name='full_info'),
+    path('search/', api.search, name='search'),
 ]

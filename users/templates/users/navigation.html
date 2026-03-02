@@ -4,6 +4,11 @@
             <a href="{% url 'users:home' %}">home</a><br>
             <a href="{% url 'settings:index' %}">settings</a><br>
             <a class="hide-empty" id="profile-link">@<span class="template" id="navigation-username"></span></a>
+            <form id="navigation-search-form" action="{% url 'users:search' %}" method="get">
+                <!--suppress HtmlFormInputWithoutLabel -->
+                <input type="text" name="q" id="navigation-search-query" placeholder="Search users..." required>
+                <input type="submit" value="Search">
+            </form>
             <form id="logout" action="{% url 'api:users:logout' %}" method="post">
                 <input type="submit" value="Sign out">
             </form>

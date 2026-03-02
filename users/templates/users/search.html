@@ -1,0 +1,21 @@
+{% extends 'users/auth_base.html' %}
+
+{% load static %}
+
+{% block head %}
+    {{ block.super }}
+    <script type="module" src="{% static 'js/users/search.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/users/search.css' %}">
+{% endblock %}
+
+{% block title %}Search — Sodia{% endblock %}
+
+{% block content %}
+    <h1>Search</h1>
+    <form id="search-form" action="{% url 'users:search' %}" method="get">
+        <!--suppress HtmlFormInputWithoutLabel -->
+        <input type="text" name="q" id="search-query" placeholder="Search..." required>
+        <input type="submit" value="Search">
+    </form>
+    <div id="search-results"><p>Your search returned no results. Please check your query and try again.</p></div>
+{% endblock %}

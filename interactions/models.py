@@ -137,12 +137,18 @@ class BlockManager(models.Manager):
     def get_between(self, user_1: User, user_2: User, /):
         return self.is_blocking(user_1, user_2), self.is_blocking(user_2, user_1)
 
-    def block(self, sender: User, recipient):
-        if sender.is_friends_with(recipient):
+    def block(self, sender: User, recipient: User):
+        request = FriendRequest.objects.get_between(sender, recipient)
+        if request.status == FriendRequestStatus.ACCEPTED:
             sender.remove_friend(recipient)
+        elif request.status == FriendRequestStatus.PENDING:
+            if sender == request.sender:
+                sender.withdraw_friend_request_to(recipient)
+            else:
+                sender.deny_friend_request_from(recipient)
         self.create(sender=sender, recipient=recipient)
 
-    def unblock(self, sender, recipient):
+    def unblock(self, sender: User, recipient: User):
         self.get(sender=sender, recipient=recipient).delete()
 
 
