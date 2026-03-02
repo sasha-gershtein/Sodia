@@ -73,6 +73,8 @@ Other:
 * [Stack Overflow](https://stackoverflow.com/)
 * [Medium](https://medium.com/)
 * [Can I Use](https://caniuse.com/)
+* [Wikipedia](https://en.wikipedia.org/wiki/Main_Page)
+* [Хабр (Habr)](https://habr.com/ru/feed/)
 
 ## AI use
 
