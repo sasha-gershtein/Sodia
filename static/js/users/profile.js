@@ -51,7 +51,7 @@ loadTemplate(
     },
     {
         prefix: "profile",
-        title: _ => `${username} — Sodia`,
+        title: () => `${username} — Sodia`,
         translators: {
             house: house => house?.name,
             friends_count: friends_count => `${friends_count} friend${friends_count === 1 ? "" : "s"}`,

@@ -12,6 +12,12 @@ const search_results = document.querySelector("#search-results");
 class SearchFrom extends Form {
     success_message = null;
 
+    constructor(id) {
+        super(id);
+        this.fields.query.ERROR_MESSAGES.valueMissing = () => "please enter a search query";
+    }
+
+
     async onSubmit(e) {
         const focused = document.activeElement === this.fields.query.input;
         const url = new URL(location);

@@ -161,6 +161,10 @@ class User(models.Model):
         from interactions.models import Block
         return Block.objects.unblock(self, recipient)
 
+    def search(self, query):
+        from .search import search
+        return search(query, self)
+
 
 class PasswordField(models.CharField):
     def __init__(self, *args, **kwargs):

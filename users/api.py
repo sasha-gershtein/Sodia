@@ -61,30 +61,27 @@ def change_password(request, user: User, data):
 
 
 @api_login_required
-def get_own_info(_request, user, _data):
+def get_own_info(_request, user: User, _data):
     return user.info(user).partial
 
 
 @api_login_required
-def partial_user_info(_request, user, data):
+def partial_user_info(_request, user: User, data):
     return User.objects.get_user_by_data(data).info(user).partial  # validates and raises appropriate exceptions
 
 
 @api_login_required
-def full_user_info(_request, user, data):
+def full_user_info(_request, user: User, data):
     return User.objects.get_user_by_data(data).info(user).full  # validates and raises appropriate exceptions
 
 
 @api_login_required
-def search(_request, user, data):
+def search(_request, user: User, data):
     form = SearchForm(data)
     if not form.is_valid():
         raise parse_form_errors(form)
-    query = form.cleaned_data.get("query", "").strip()
-    results = User.objects.none()
-    if query == "*":
-        results = User.objects.activated()
+    query = form.cleaned_data.get("query", "")
     return [
         result.info(user).partial
-        for result in results
+        for result in user.search(query)
     ]

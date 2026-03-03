@@ -49,7 +49,7 @@ export class Button {
         let {
             id = null,
             label = null,
-            callback = _ => null,
+            callback = () => null,
             classes = [],
             create = true,
         } = options;
@@ -111,7 +111,7 @@ export class APIButton extends Button {
         let {
             url,
             payload = {},
-            callback = _ => null,
+            callback = () => null,
             success_message = "Success!",
         } = options;
 
@@ -173,7 +173,7 @@ export class ContextMenuButton extends Button {
         let {
             menu,
             hide_on_buttons = true,
-            callback = _ => null,
+            callback = () => null,
         } = options;
 
         options.callback = (e) => this.onClick(e);

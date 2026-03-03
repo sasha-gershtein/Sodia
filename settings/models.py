@@ -77,7 +77,7 @@ class AccountManager(SettingsManager):
         max_length = self.model._meta.get_field("username").max_length
         # remove possible illegal characters: :/?#[]@!$&'()*+,;=
         base = re.sub(
-            r"[^\w.\-]", "", email.split('@')[0]
+            r"[^\w.\-_]", "", email.split('@')[0]
         )[:max_length]
         username = base
         if not base:
@@ -109,7 +109,7 @@ class UserAccountSettings(models.Model):
     username = CharField(
         min_length=4, max_length=30,
         pattern=(
-            r"^[\w.\-]*$",
+            r"^[\w.\-_]*$",
             "Username can only contain English letters, digits, periods, dashes and underscores"
         ),
         unique=True
