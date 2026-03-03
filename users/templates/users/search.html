@@ -12,10 +12,13 @@
 
 {% block content %}
     <h1>Search</h1>
-    <form id="search-form" action="{% url 'users:search' %}" method="get">
-        <!--suppress HtmlFormInputWithoutLabel -->
-        <input type="text" name="q" id="search-query" placeholder="Search..." required>
-        <input type="submit" value="Search">
+    <form id="search-form" action="{% url 'api:users:search' %}" method="post">
+        {{ search_form }}
+        <input type="submit" value="Search" id="search-btn">
     </form>
-    <div id="search-results"><p>Your search returned no results. Please check your query and try again.</p></div>
+    <div id="search-results-container">
+        <div id="no-results" hidden><p>Your search returned no results. Please check your query and try again.</p></div>
+        <div id="loading-search-results" hidden><p>Loading...</p></div>
+        <div id="search-results"></div>
+    </div>
 {% endblock %}

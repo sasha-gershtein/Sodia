@@ -6,7 +6,7 @@ from django.http import Http404
 from .middleware import SessionData
 from .decorators import login_required
 from .models import User
-from .forms import LoginForm, RegistrationForm
+from .forms import LoginForm, RegistrationForm, SearchForm
 
 
 class Home(View):
@@ -27,10 +27,7 @@ class Home(View):
     @method_decorator(login_required)
     # noinspection PyMethodMayBeStatic
     def home(self, request, user: User):
-        context = {
-            "user": user,
-        }
-        return render(request, 'users/home.html', context)
+        return render(request, 'users/home.html')
 
 
 @login_required
@@ -42,4 +39,7 @@ def profile(request, _user: User, username: str):
 
 @login_required
 def search(request, _user: User):
-    return render(request, 'users/search.html')
+    context = {
+        "search_form": SearchForm()
+    }
+    return render(request, 'users/search.html', context)

@@ -6,7 +6,7 @@
             <a class="hide-empty" id="profile-link">@<span class="template" id="navigation-username"></span></a>
             <form id="navigation-search-form" action="{% url 'users:search' %}" method="get">
                 <!--suppress HtmlFormInputWithoutLabel -->
-                <input type="text" name="q" id="navigation-search-query" placeholder="Search users..." required>
+                <input type="text" name="q" id="navigation-search-query" placeholder="Search users...">
                 <input type="submit" value="Search">
             </form>
             <form id="logout" action="{% url 'api:users:logout' %}" method="post">

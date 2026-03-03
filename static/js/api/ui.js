@@ -57,6 +57,7 @@ export class Button {
         if (!create && id) this.button = document.getElementById(id);
         if (!this.button) {
             this.button = document.createElement("button");
+            this.button.type = "button";
             if (id) this.button.id = id;
         }
         if (label) this.button.innerText = label;
@@ -227,18 +228,28 @@ export class ContextMenuButton extends Button {
     }
 }
 
-let loading = document.querySelector("#loading");
-let loading_state = 1;
 
-export function showPageLoading() {
-    if (loading_state++) return;
-    loading.hidden = false;
+export class HideableElement {
+    element;
+    #state;
+
+    constructor(id, initial_state = 0) {
+        this.element = document.getElementById(id);
+        this.#state = initial_state;
+    }
+
+    show() {
+        if (this.#state++) return;
+        this.element.hidden = false;
+    }
+
+    hide(force = false) {
+        if (force) this.#state = 0;
+        else if (--this.#state) return;
+        this.element.hidden = true;
+    }
 }
 
-export function hidePageLoading(force = false) {
-    if (force) loading_state = 0;
-    else if (--loading_state) return;
-    loading.hidden = true;
-}
+export const page_loading = new HideableElement("loading", 1);
 
-document.addEventListener("DOMContentLoaded", _ => hidePageLoading());
+document.addEventListener("DOMContentLoaded", _ => page_loading.hide());

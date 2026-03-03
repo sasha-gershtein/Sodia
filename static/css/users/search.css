@@ -1,3 +1,7 @@
-#search-results {
-    max-width: 50%;
+#search-results-container {
+    max-width: 500px;
+}
+
+#search-results-container:has(#loading-search-results:not([hidden])) > :not(#loading-search-results) {
+    display: none;
 }

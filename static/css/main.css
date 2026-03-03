@@ -22,7 +22,7 @@ body {
 }
 
 #loading:not([hidden]) ~ :not(#info-box) {
-    display: none;
+    visibility: hidden;
 }
 
 .context-menu-wrapper {

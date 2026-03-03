@@ -567,6 +567,10 @@ export class Form {
         processError(err);
         return false;
     }
+
+    submit() {
+        this.form.requestSubmit(this.submit_button);
+    }
 }
 
 export class UpdateForm extends Form {

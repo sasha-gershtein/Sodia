@@ -1,6 +1,6 @@
 // noinspection ExceptionCaughtLocallyJS
 
-import {displayError, displayInfo, hidePageLoading, showPageLoading} from "./ui.js";
+import {displayError, displayInfo, page_loading} from "./ui.js";
 
 function getCookie(name) {
     return document.cookie.split('; ')
@@ -141,7 +141,7 @@ export async function loadTemplate(url, payload = {}, options = {}) {
         title = null,
         translators = {},
     } = options;
-    showPageLoading();
+    page_loading.show();
     let response;
     try {
         response = await api(url, payload, {attempts: 100});
@@ -160,6 +160,6 @@ export async function loadTemplate(url, payload = {}, options = {}) {
     if (title != null) { // noinspection JSValidateTypes
         document.title = title(response);
     }
-    hidePageLoading();
+    page_loading.hide();
     return response;
 }

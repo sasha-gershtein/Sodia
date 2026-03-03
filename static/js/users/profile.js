@@ -43,6 +43,7 @@ function load(user_info) {
 
 const list = window.location.pathname.split("/");
 const username = list[list.findIndex(e => e === "profile") + 1];
+// noinspection JSUnusedGlobalSymbols
 loadTemplate(
     "/api/users/full-info/",
     {
@@ -54,6 +55,7 @@ loadTemplate(
         translators: {
             house: house => house?.name,
             friends_count: friends_count => `${friends_count} friend${friends_count === 1 ? "" : "s"}`,
+            country: country => country?.name,
         }
     }
 ).then(load);

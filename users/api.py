@@ -1,7 +1,6 @@
-from django.db.models import QuerySet
 from django.urls import reverse
 
-from .forms import LoginForm, RegistrationForm, ChangePasswordForm
+from .forms import LoginForm, RegistrationForm, ChangePasswordForm, SearchForm
 from .middleware import SessionData
 from .models import User
 
@@ -78,7 +77,10 @@ def full_user_info(_request, user, data):
 
 @api_login_required
 def search(_request, user, data):
-    query = data.get("query").strip()
+    form = SearchForm(data)
+    if not form.is_valid():
+        raise parse_form_errors(form)
+    query = form.cleaned_data.get("query", "").strip()
     results = User.objects.none()
     if query == "*":
         results = User.objects.activated()

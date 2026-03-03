@@ -119,3 +119,7 @@ class ChangePasswordForm(forms.Form):
                 None,
                 FormResponseUserError("New password must be different from the old password", code="password_unchanged")
             )
+
+
+class SearchForm(forms.Form):
+    query = forms.CharField(max_length=250, label="", widget=forms.TextInput(attrs={"placeholder": "Search users..."}))
