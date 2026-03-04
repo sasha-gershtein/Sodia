@@ -22,6 +22,10 @@ async function show_friends() {
 }
 
 function load(user_info) {
+    // noinspection JSUnresolvedReference
+    if (user_info.first_name && user_info.last_name) {
+        document.getElementById("profile-full-name").innerText = user_info.first_name + " " + user_info.last_name;
+    }
     load.friends_button ??= null;
     show_friends.user_id = user_info.id;
     insertInteractionButtons(user_info, {

@@ -1,4 +1,5 @@
 import {Form, UpdateForm} from '../api/forms.js';
+import {loadMe} from "../users/auth_base.js";
 
 class ChangePasswordForm extends Form {
     success_message = "Password changed successfully";
@@ -27,6 +28,11 @@ class AccountForm extends UpdateForm {
         super(...args);
         this.fields.username.ERROR_MESSAGES.patternMismatch =
             () => `${this.label} can only contain English letters, digits, periods, dashes and underscores`;
+    }
+
+    onSuccess(show_message = true, clear = false) {
+        void loadMe();
+        return super.onSuccess(show_message, clear);
     }
 }
 

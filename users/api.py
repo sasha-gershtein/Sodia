@@ -82,6 +82,6 @@ def search(_request, user: User, data):
         raise parse_form_errors(form)
     query = form.cleaned_data.get("query", "")
     return [
-        result.info(user).partial
+        result.partial
         for result in user.search(query)
     ]

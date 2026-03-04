@@ -3,12 +3,16 @@ import {loadTemplate} from "../api/api.js";
 
 const logout_form = new Form("logout");
 
-loadTemplate(
-    "/api/users/me/",
-    {},
-    {
-        prefix: "navigation"
-    }
-).then(response => {
-    document.querySelector("#profile-link").href = `/profile/${response.username}`
-})
+export async function loadMe(show_loading = false) {
+    const response = await loadTemplate(
+        "/api/users/me/",
+        {},
+        {
+            prefix: "navigation",
+            show_loading,
+        }
+    );
+    document.querySelector("#profile-link").href = `/profile/${response.username}/`;
+}
+
+void loadMe(true);

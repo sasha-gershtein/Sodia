@@ -140,8 +140,9 @@ export async function loadTemplate(url, payload = {}, options = {}) {
         prefix = null,
         title = null,
         translators = {},
+        show_loading = true,
     } = options;
-    page_loading.show();
+    if (show_loading) page_loading.show();
     let response;
     try {
         response = await api(url, payload, {attempts: 100});
@@ -160,6 +161,6 @@ export async function loadTemplate(url, payload = {}, options = {}) {
     if (title != null) { // noinspection JSValidateTypes
         document.title = title(response);
     }
-    page_loading.hide();
+    if (show_loading) page_loading.hide();
     return response;
 }
