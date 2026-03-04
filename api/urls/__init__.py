@@ -9,4 +9,5 @@ urlpatterns = [
     path('users/', include('api.urls.users', namespace='users')),
     path('settings/', include('api.urls.settings', namespace='settings')),
     path('interactions/', include('api.urls.interactions', namespace='interactions')),
+    path('messaging/', include('api.urls.messaging', namespace='messaging')),
 ]

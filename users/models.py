@@ -64,10 +64,10 @@ class UserManager(models.Manager):
         return UserLoginDetails.objects.get_user_by_email(email, default, only_activated=only_activated)
 
     def get_user_by_data(self, data):
-        if data.get("id") is not None:
-            user = self.get_user_by_id(data["id"])
-        elif data.get("username") is not None:
-            user = self.get_user_by_username(data["username"])
+        if isinstance(pk := data.get("id"), str):
+            user = self.get_user_by_id(pk)
+        elif isinstance(username := data.get("username"), str):
+            user = self.get_user_by_username(username)
         else:
             raise BadRequestError("User must be identified via id or username")
         if user is None:
@@ -165,9 +165,30 @@ class User(models.Model):
         from .search import search
         return search(query, self)
 
+    def get_dialogues(self):
+        return self.dialogues.order_by("-last_message_sent_at")
+
     def get_unread_messages_count(self, interlocutor: Self):
         from messaging.models import Dialogue
         return Dialogue.objects.get_unread_messages_count(self, interlocutor)
+
+    def get_dialogue_messages(self, interlocutor: Self, start=0, n=10):
+        from messaging.models import Dialogue, Message
+        return [
+            message
+            for message in Message.objects.get_dialogue_messages(
+                Dialogue.objects.get_readonly_dialogue(self, interlocutor),
+                start, n
+            )
+        ]
+
+    def mark_dialogue_read(self, interlocutor: Self):
+        from messaging.models import Dialogue
+        Dialogue.objects.get_dialogue(self, interlocutor).mark_read()
+
+    def send_message(self, recipient: Self, content: str):
+        from messaging.models import Dialogue
+        return Dialogue.objects.send_message(self, recipient, content)
 
 
 class PasswordField(models.CharField):

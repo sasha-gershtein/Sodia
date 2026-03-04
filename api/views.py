@@ -13,3 +13,5 @@ def handle404(request, exception):
     if request.path.startswith(reverse('api:root')):
         return ErrorResponse(NotFoundError(exception.message))
     return page_not_found(request, exception)
+
+# TODO: make custom 404 (general + user not found), 500, and CSRF error pages

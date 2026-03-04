@@ -3,7 +3,7 @@ from api.errors import BadRequestError, NotFoundError, ForbiddenError, ConflictE
 
 from users.models import User
 
-from interactions.models import FriendRequest, Block
+from .models import FriendRequest, Block
 
 
 @api_login_required
@@ -21,10 +21,10 @@ def send_friend_request(_request, user: User, data):
 @api_login_required
 def respond_to_friend_request(_request, user: User, data):
     sender = User.objects.get_user_by_data(data)
-    if not "accept" in data:
+    if not isinstance(accept := data.get("accept"), bool):
         raise BadRequestError("Must provide 'accept' parameter")
     try:
-        if data["accept"]:
+        if accept:
             user.accept_friend_request_from(sender)
         else:
             user.deny_friend_request_from(sender)

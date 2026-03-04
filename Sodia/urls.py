@@ -21,6 +21,7 @@ urlpatterns = [
     #    path('admin/', admin.site.urls),
     path('', include('users.urls')),
     path('settings/', include('settings.urls')),
+    path('message/', include('messaging.urls')),
     path('api/', include('api.urls')),
 ]
 

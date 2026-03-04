@@ -1,7 +1,9 @@
 from dataclasses import dataclass
+from datetime import datetime
 
 from django.db import models, transaction
 from django.db.models import Q, F
+from django.utils import timezone
 
 from users.models import User
 
@@ -23,6 +25,11 @@ class DialogueManager(models.Manager):
                 user=user,
                 interlocutor=interlocutor,
             )
+
+    def get_dialogue(self, user: User, interlocutor: User):
+        if user == interlocutor:
+            raise ValueError("Cannot have a dialogue with yourself")
+        dialogue = self.get(user=user, interlocutor=interlocutor)
 
     def get_locked_dialogue(self, user: User, interlocutor: User):
         if user == interlocutor:
@@ -50,8 +57,8 @@ class DialogueManager(models.Manager):
         if not recipient.info(sender).can_message:
             raise ValueError(f"Cannot send message from {sender} to {recipient}")
         dialogue, inverse = self.get_locked_inverse_pair(sender, recipient)
-        Message.objects.create_message(sender, dialogue, content)
         Message.objects.create_message(sender, inverse, content)
+        return Message.objects.create_message(sender, dialogue, content)
 
     @transaction.atomic
     def reset_can_message_back(self, user_1, user_2, /):
@@ -76,6 +83,7 @@ class ReadOnlyDialogue:
     pk: int | None = None
     unread_messages_count: int = 0
     last_message_id: int = 0
+    last_message_sent_at: datetime | None = None
     can_message_back: bool = False
 
 
@@ -84,6 +92,7 @@ class Dialogue(models.Model):
     interlocutor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="+")
     unread_messages_count = models.IntegerField(default=0)
     last_message_id = models.IntegerField(default=0)
+    last_message_sent_at = models.DateTimeField(default=timezone.now)
     can_message_back = models.BooleanField(default=False)
 
     objects = DialogueManager()
@@ -103,11 +112,18 @@ class Dialogue(models.Model):
     def get_messages(self, start=0, n=10):
         return Message.objects.get_dialogue_messages(self, start, n)
 
+    def mark_read(self):
+        self.unread_messages_count = 0
+        self.save()
+
 
 class MessageManager(models.Manager):
     @transaction.atomic
     def create_message(self, sender: User, dialogue: Dialogue, content: str):
-        update = {"last_message_id": F("last_message_id") + 1}
+        update = {
+            "last_message_sent_at": timezone.now(),
+            "last_message_id": F("last_message_id") + 1,
+        }
         is_own = sender == dialogue.user
         if not is_own:
             update["unread_messages_count"] = F("unread_messages_count") + 1
@@ -149,3 +165,12 @@ class Message(models.Model):
                 name="unique_dialogue_message",
             ),
         ]
+
+    @property
+    def info(self):
+        return {
+            "id": self.id_in_dialogue,
+            "content": self.content,
+            "is_own": self.is_own,
+            "sent_at": self.sent_at,
+        }
