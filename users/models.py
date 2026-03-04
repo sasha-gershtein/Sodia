@@ -129,9 +129,9 @@ class User(models.Model):
         from interactions.models import FriendRequest
         return FriendRequest.objects.is_sendable_between(self, recipient)
 
-    def send_friend_request_to(self, recipient: Self, *, is_api=False):
+    def send_friend_request_to(self, recipient: Self):
         from interactions.models import FriendRequest
-        return FriendRequest.objects.send_request(self, recipient, is_api=is_api)
+        return FriendRequest.objects.send_request(self, recipient)
 
     def accept_friend_request_from(self, sender: Self):
         from interactions.models import FriendRequest
@@ -161,9 +161,13 @@ class User(models.Model):
         from interactions.models import Block
         return Block.objects.unblock(self, recipient)
 
-    def search(self, query):
+    def search(self, query: str):
         from .search import search
         return search(query, self)
+
+    def get_unread_messages_count(self, interlocutor: Self):
+        from messaging.models import Dialogue
+        return Dialogue.objects.get_unread_messages_count(self, interlocutor)
 
 
 class PasswordField(models.CharField):

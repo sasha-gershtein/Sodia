@@ -27,6 +27,8 @@ Things I'm using or implementing for the first time in a big project for Sodia:
 * Git and GitHub
 * Full client and server side user input validation
 * Secrets and cryptographically secure hashes
+* Thread-safe programming and race conditions
+* Asynchronous programming in JavaScript
 * JavaScript classes and modules
 
 Things I decided against:
@@ -34,7 +36,6 @@ Things I decided against:
 * Any frontend frameworks
 * Django REST Framework
 * Websockets for live updates (I use polling instead)
-* Asynchronous or multithread request handling
 * Supporting HTTPS
 * Production hosting
 * Responsive UI

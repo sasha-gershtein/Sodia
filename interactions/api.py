@@ -3,7 +3,7 @@ from api.errors import BadRequestError, NotFoundError, ForbiddenError, ConflictE
 
 from users.models import User
 
-from interactions.models import FriendRequest, UserInfo, Block
+from interactions.models import FriendRequest, Block
 
 
 @api_login_required
@@ -11,7 +11,10 @@ def send_friend_request(_request, user: User, data):
     recipient = User.objects.get_user_by_data(data)
     if user == recipient:
         raise BadRequestError("Cannot send a friend request to yourself", reason="SELF_FRIEND_REQUEST")
-    user.send_friend_request_to(recipient, is_api=True)
+    if not user.is_friend_request_sendable_to(recipient):
+        raise ConflictError(f"Could not send a friend request. Please try refreshing the page",
+                            reason="FRIEND_REQUEST_NOT_SENDABLE")
+    user.send_friend_request_to(recipient)
     return recipient.info(user).partial
 
 

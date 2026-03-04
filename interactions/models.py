@@ -9,10 +9,9 @@ from django.db.models.functions import Least, Greatest
 from django.utils import timezone
 
 from Sodia.models import JsonEnumMixin, SingleChoiceField
+from messaging.models import Dialogue
 from settings.models import PrivacySetting
 from users.models import User
-
-from api.errors import ConflictError
 
 
 class FriendRequestStatus(JsonEnumMixin, IntEnum):
@@ -28,7 +27,7 @@ class FriendsManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().select_related("sender", "recipient")
 
-    def get_between(self, user_1: User, user_2: User):
+    def get_between(self, user_1: User, user_2: User, /):  # TODO: make thread-safe
         if user_1 == user_2:
             raise ValueError("Users must be different")
         try:
@@ -38,8 +37,6 @@ class FriendsManager(models.Manager):
             )
         except self.model.DoesNotExist:
             return self.model(sender=user_1, recipient=user_2, status=None)
-        except self.model.MultipleObjectsReturned as e:
-            raise AssertionError("Database in illegal state. There must be a unique request between users") from e
 
     def check_friendship_between(self, user_1: User, user_2: User, /) -> bool:
         request = self.get_between(user_1, user_2)
@@ -50,12 +47,9 @@ class FriendsManager(models.Manager):
         return self.get_between(sender, recipient).is_resendable(sender)
 
     @transaction.atomic
-    def send_request(self, sender: User, recipient: User, *, is_api=False):
+    def send_request(self, sender: User, recipient: User):
         request = self.get_between(sender, recipient)
         if not request.is_resendable(sender):
-            if is_api:
-                raise ConflictError(f"Could not send a friend request. Please try refreshing the page",
-                                    reason="FRIEND_REQUEST_NOT_SENDABLE")
             raise ValueError(f"Cannot send friend request from {sender} to {recipient}")
         if request.pk is not None:
             request.delete()
@@ -75,10 +69,14 @@ class FriendsManager(models.Manager):
     def withdraw_request(self, sender: User, recipient: User):
         self.update_pending_request(sender, recipient, FriendRequestStatus.WITHDRAWN)
 
+    @transaction.atomic
     def remove_friend(self, user: User, friend: User):
         request = self.get_between(user, friend)
         if request.status != FriendRequestStatus.ACCEPTED:
             raise self.model.DoesNotExist
+
+        Dialogue.objects.reset_can_message_back(user, friend)
+
         if user == request.sender:
             request.status = FriendRequestStatus.REMOVED_BY_SENDER
         else:
@@ -104,8 +102,8 @@ class FriendRequest(models.Model):
                 name="unique_friend_request",
             ),
             models.CheckConstraint(
-                condition=~Q(sender=F('recipient')),
-                name='prevent_self_friend_request',
+                condition=~Q(sender=F("recipient")),
+                name="prevent_self_friend_request",
             ),
         ]
 
@@ -146,6 +144,9 @@ class BlockManager(models.Manager):
                 sender.withdraw_friend_request_to(recipient)
             else:
                 sender.deny_friend_request_from(recipient)
+
+        Dialogue.objects.reset_can_message_back(sender, recipient)
+
         self.create(sender=sender, recipient=recipient)
 
     def unblock(self, sender: User, recipient: User):
@@ -239,6 +240,7 @@ class UserInfo:
         "display_name",
         "relation",
         "can_message",
+        "unread_messages",
     }
     FULL = {
         "id",
@@ -258,6 +260,7 @@ class UserInfo:
         "friends_count",
         "friends_visible",
         "can_message",
+        "unread_messages",
     }
 
     _friends: list[User] | None = None
@@ -290,12 +293,17 @@ class UserInfo:
 
         self.friends_count = self.user.get_friends().count()
         self.friends_visible = relation >= privacy.friends
-        # TODO: can message back if not reset
+
+        dialogue = Dialogue.objects.get_readonly_dialogue(requesting_user, user)
         self.can_message = (
                 relation not in {Relation.SAME_USER, Relation.BLOCKED}
                 and not user.is_blocking(requesting_user)
-                and relation >= privacy.message
+                and (
+                        relation >= privacy.message
+                        or dialogue.can_message_back
+                )
         )
+        self.unread_messages = dialogue.unread_messages_count
 
     @property
     def friends(self):
