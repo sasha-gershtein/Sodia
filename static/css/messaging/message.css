@@ -1,0 +1,171 @@
+body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    margin: 0;
+}
+
+header {
+    margin: 0 5px;
+}
+
+main {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+}
+
+#dialogue-list {
+    border-right: 2px solid black;
+    width: 35%;
+    overflow-y: scroll;
+    padding-bottom: 20px;
+}
+
+.dialogue {
+    user-select: none;
+    height: 60px;
+    border-bottom: 1px solid #2e2e2e;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 4px 10px;
+    cursor: pointer;
+    position: relative;
+}
+
+.dialogue:hover {
+    background: #bbd1ec;
+}
+
+.dialogue:has(> input:checked) {
+    background: #75a6df;
+}
+
+.dialogue > input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    margin: 0;
+    cursor: pointer;
+}
+
+.dialogue .name {
+    font-size: 150%;
+    display: flex;
+    flex: 1;
+    font-weight: 600;
+}
+
+.dialogue .unread-messages-counter {
+    border-radius: 100vmax; /* large enough, so browsers will cut down to make a "pill"   */
+    background: #cc4755;
+    text-align: center;
+    padding: 3px 8px;
+    color: white;
+}
+
+.dialogue .unread-messages-counter:empty {
+    display: none;
+}
+
+#active-dialogue {
+    width: 65%;
+    display: flex;
+    flex-direction: column;
+}
+
+#dialogue-title-container {
+    padding: 10px 20px;
+    border-bottom: 1px solid #2e2e2e;
+}
+
+#dialogue-title {
+    font-size: 180%;
+    font-weight: 600;
+    text-decoration: underline;
+    color: unset;
+}
+
+#message-input-area {
+    display: flex;
+    flex-direction: row;
+    padding: 10px 20px;
+    background: #d2d2d5;
+}
+
+#message-input-form {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+}
+
+#message-input-container {
+    flex: 1;
+    position: relative;
+}
+
+#message-input-field {
+    position: absolute;
+    box-sizing: border-box;
+    width: 100%;
+    resize: none;
+    bottom: 0;
+    padding: 5px 10px;
+    border: unset;
+    background: #d2d2d5;
+    outline: unset;
+    max-height: 150px;
+    border-radius: 10px 10px 0 0;
+    scrollbar-width: none;
+}
+
+#send-message-btn {
+    margin-left: 10px;
+    padding: 4px 6px;
+    border-radius: 100vmax; /* large enough, so browsers will cut down to make a "pill"   */
+}
+
+#messages-area {
+    flex: 1;
+    min-width: 0;
+    overflow-y: scroll;
+    display: flex;
+    flex-direction: column-reverse;
+    padding: 0 14px;
+}
+
+.message {
+    border: 1px solid #2e2e2e;
+    margin: 2px;
+    max-width: 70%;
+    border-radius: 8px;
+}
+
+.message:first-of-type {
+    margin-bottom: 16px;
+}
+
+.message:last-of-type {
+    margin-top: 16px;
+}
+
+.message.own {
+    background: #83df75;
+    align-self: flex-end;
+}
+
+.message:not(.own) {
+    background: #759adf;
+    align-self: flex-start;
+}
+
+.sent-at {
+    font-style: italic;
+    font-size: 70%;
+    margin: 0 8px;
+}
+
+.message-content {
+    padding: 2px 6px;
+}

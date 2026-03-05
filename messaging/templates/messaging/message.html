@@ -1,5 +1,148 @@
-{% extends 'users/auth_base.html' %}
+{% extends 'base.html' %}
 
-{% block content %}
-    <h1>Messaging</h1>
+{% load static %}
+
+{% block head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/users/navigation.css' %}">
+    <link rel="stylesheet" href="{% static 'css/messaging/message.css' %}">
+    <script type="module" src="{% static 'js/users/auth_base.js' %}"></script>
+    <script type="module" src="{% static 'js/messaging/message.js' %}"></script>
+{% endblock %}
+
+{% block body %}
+    {{ block.super }}
+    {% include 'users/navigation.html' %}
+    <main>
+        <section id="dialogue-list">
+            <label class="dialogue">
+                <input type="radio" name="dialogue">
+                <span class="name">John Doe</span>
+                <span class="unread-messages-counter">13</span>
+            </label>
+            <label class="dialogue">
+                <input type="radio" name="dialogue">
+                <span class="name">Sasha G.</span>
+                <span class="unread-messages-counter">130</span>
+            </label>
+            <label class="dialogue">
+                <input type="radio" name="dialogue" checked>
+                <span class="name">Test User</span>
+                <span class="unread-messages-counter"></span>
+            </label>
+            <label class="dialogue">
+                <input type="radio" name="dialogue">
+                <span class="name">John Doe</span>
+                <span class="unread-messages-counter">1</span>
+            </label>
+            <label class="dialogue">
+                <input type="radio" name="dialogue">
+                <span class="name">Sasha</span>
+                <span class="unread-messages-counter">4000</span>
+            </label>
+            <label class="dialogue">
+                <input type="radio" name="dialogue">
+                <span class="name">John Doe 2</span>
+                <span class="unread-messages-counter"></span>
+            </label>
+            <label class="dialogue">
+                <input type="radio" name="dialogue">
+                <span class="name">Person</span>
+                <span class="unread-messages-counter">67</span>
+            </label>
+            <label class="dialogue">
+                <input type="radio" name="dialogue">
+                <span class="name">Sasha</span>
+                <span class="unread-messages-counter">11</span>
+            </label>
+            <label class="dialogue">
+                <input type="radio" name="dialogue">
+                <span class="name">Admin Password</span>
+                <span class="unread-messages-counter">5</span>
+            </label>
+            <label class="dialogue">
+                <input type="radio" name="dialogue">
+                <span class="name">Sasha</span>
+                <span class="unread-messages-counter">11</span>
+            </label>
+            <label class="dialogue">
+                <input type="radio" name="dialogue">
+                <span class="name">Admin Password</span>
+                <span class="unread-messages-counter">5</span>
+            </label>
+            <label class="dialogue">
+                <input type="radio" name="dialogue">
+                <span class="name">Sasha</span>
+                <span class="unread-messages-counter">11</span>
+            </label>
+            <label class="dialogue">
+                <input type="radio" name="dialogue">
+                <span class="name">Admin Password</span>
+                <span class="unread-messages-counter">5</span>
+            </label>
+        </section>
+        <section id="active-dialogue">
+            <div id="dialogue-title-container"><a href="/profile/test_user" id="dialogue-title">Test User</a></div>
+            <section id="messages-area">
+                <div class="message own">
+                    <div class="sent-at">today, 23:59</div>
+                    <div class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam egestas mauris non felis varius, non congue felis elementum. Fusce eget sagittis nisi. Nunc ligula arcu, sodales in ultricies varius, malesuada non ligula. In id mi convallis, iaculis tortor eget, varius erat. Duis id ante turpis. Praesent volutpat purus sed nisi ullamcorper sollicitudin. Nulla facilisi. </div>
+                </div>
+                <div class="message">
+                    <div class="sent-at">today, 23:59</div>
+                    <div class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam egestas mauris non felis varius, non congue felis elementum. Fusce eget sagittis nisi. Nunc ligula arcu, sodales in ultricies varius, malesuada non ligula. In id mi convallis, iaculis tortor eget, varius erat. Duis id ante turpis. Praesent volutpat purus sed nisi ullamcorper sollicitudin. Nulla facilisi. </div>
+                </div>
+                <div class="message">
+                    <div class="sent-at">today, 23:59</div>
+                    <div class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam egestas mauris non felis varius, non congue felis elementum. Fusce eget sagittis nisi. Nunc ligula arcu, sodales in ultricies varius, malesuada non ligula. In id mi convallis, iaculis tortor eget, varius erat. Duis id ante turpis. Praesent volutpat purus sed nisi ullamcorper sollicitudin. Nulla facilisi. </div>
+                </div>
+                <div class="message own">
+                    <div class="sent-at">today, 23:59</div>
+                    <div class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam egestas mauris non felis varius, non congue felis elementum. Fusce eget sagittis nisi. Nunc ligula arcu, sodales in ultricies varius, malesuada non ligula. In id mi convallis, iaculis tortor eget, varius erat. Duis id ante turpis. Praesent volutpat purus sed nisi ullamcorper sollicitudin. Nulla facilisi. </div>
+                </div>
+                <div class="message">
+                    <div class="sent-at">today, 23:59</div>
+                    <div class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam egestas mauris non felis varius, non congue felis elementum. Fusce eget sagittis nisi. Nunc ligula arcu, sodales in ultricies varius, malesuada non ligula. In id mi convallis, iaculis tortor eget, varius erat. Duis id ante turpis. Praesent volutpat purus sed nisi ullamcorper sollicitudin. Nulla facilisi. </div>
+                </div>
+                <div class="message own">
+                    <div class="sent-at">today, 23:59</div>
+                    <div class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam egestas mauris non felis varius, non congue felis elementum. Fusce eget sagittis nisi. Nunc ligula arcu, sodales in ultricies varius, malesuada non ligula. In id mi convallis, iaculis tortor eget, varius erat. Duis id ante turpis. Praesent volutpat purus sed nisi ullamcorper sollicitudin. Nulla facilisi. </div>
+                </div>
+                <div class="message">
+                    <div class="sent-at">today, 19:19</div>
+                    <div class="message-content">Testing testing...</div>
+                </div>
+                <div class="message own">
+                    <div class="sent-at">today, 10:20</div>
+                    <div class="message-content">I'm all left</div>
+                </div>
+                <div class="message">
+                    <div class="sent-at">today, 10:16</div>
+                    <div class="message-content">How are you?</div>
+                </div>
+                <div class="message">
+                    <div class="sent-at">today, 10:14</div>
+                    <div class="message-content">Hello Sasha</div>
+                </div>
+                <div class="message own">
+                    <div class="sent-at">yesterday, 13:53</div>
+                    <div class="message-content">I'm Sasha</div>
+                </div>
+                <div class="message own">
+                    <div class="sent-at">yesterday, 13:52</div>
+                    <div class="message-content">Hi!</div>
+                </div>
+            </section>
+            <div id="message-input-area">
+                <form id="message-input-form">
+                    <div id="message-input-container">
+                        <!--suppress HtmlFormInputWithoutLabel -->
+                        <textarea rows="1" name="content" id="message-input-field" maxlength="4096"
+                                  placeholder="Type your message here..."></textarea>
+                    </div>
+                    <input type="submit" value="Send" id="send-message-btn">
+                </form>
+            </div>
+        </section>
+    </main>
 {% endblock %}

@@ -14,4 +14,4 @@ def handle404(request, exception):
         return ErrorResponse(NotFoundError(exception.message))
     return page_not_found(request, exception)
 
-# TODO: make custom 404 (general + user not found), 500, and CSRF error pages
+# TODO: make custom 404 (general + user not found + messaging not found), 500, and CSRF error pages
