@@ -15,7 +15,7 @@ export class InfoMessage {
         this.element.classList.add("info-message");
         this.element.classList.add(this.level);
         this.element.innerHTML = this.message;
-        info_box.appendChild(this.element);
+        info_box.append(this.element);
         this.displayed = true;
         this.element.addEventListener("click", this.remove.bind(this));
         if (timeout >= 0) setTimeout(this.remove.bind(this), timeout);
@@ -23,7 +23,7 @@ export class InfoMessage {
 
     remove() {
         if (!this.displayed) return;
-        info_box.removeChild(this.element);
+        this.element.remove();
         this.displayed = false;
     }
 }
@@ -77,7 +77,7 @@ export class Button {
     }
 
     appendTo(element) {
-        element.appendChild(this.button);
+        element.append(this.button);
     }
 
     onClick(e) {
@@ -158,7 +158,7 @@ export function makeContextMenu(buttons, id = null, classes = [], tag = "div", c
         wrapper = document.createElement("div");
         if (id) wrapper.id = id + "-wrapper";
         wrapper.classList.add("context-menu-wrapper");
-        wrapper.appendChild(menu);
+        wrapper.append(menu);
     }
     menu.classList.add("context-menu");
     classes.forEach(cls => menu.classList.add(cls));
@@ -226,6 +226,35 @@ export class ContextMenuButton extends Button {
             this.button.focus();
         }
     }
+}
+
+const time_formatter = new Intl.DateTimeFormat(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+});
+
+const date_formatter = new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+});
+
+export function formatTimestamp(timestamp) {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+
+    const datetime = new Date(timestamp * 1000);
+    const date = new Date(datetime.getFullYear(), datetime.getMonth(), datetime.getDate());
+
+    const time_str = time_formatter.format(datetime);
+    if (date.getTime() === today.getTime()) {
+        return `today, ${time_str}`;
+    }
+    if (date.getTime() === yesterday.getTime()) {
+        return `yesterday, ${time_str}`;
+    }
+    return `${date_formatter.format(date)}, ${time_str}`;
 }
 
 

@@ -15,11 +15,23 @@ main {
     min-height: 0;
 }
 
-#dialogue-list {
+#dialogue-list-container {
     border-right: 2px solid black;
     width: 35%;
     overflow-y: scroll;
     padding-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+#dialogue-list-container:not(:has(#dialogue-list:empty)) #empty-dialogue-list {
+    display: none;
+}
+
+#empty-dialogue-list {
+    padding: 0 20px;
+    font-style: italic;
+    margin: auto;
 }
 
 .dialogue {
@@ -75,6 +87,16 @@ main {
     flex-direction: column;
 }
 
+#active-dialogue:has(#no-selected-dialogue:not([hidden])) > :not(#no-selected-dialogue) {
+    display: none;
+}
+
+#no-selected-dialogue {
+    margin: auto;
+    font-size: 150%;
+    font-style: italic;
+}
+
 #dialogue-title-container {
     padding: 10px 20px;
     border-bottom: 1px solid #2e2e2e;
@@ -120,10 +142,26 @@ main {
     scrollbar-width: none;
 }
 
+#message-input-form.cannot-message #message-input-field {
+    font-style: italic;
+    text-align: center;
+}
+
 #send-message-btn {
     margin-left: 10px;
     padding: 4px 6px;
     border-radius: 100vmax; /* large enough, so browsers will cut down to make a "pill"   */
+}
+
+#message-input-form.cannot-message #send-message-btn {
+    visibility: hidden;
+    width: 0;
+    margin-left: 0;
+    margin-right: 0;
+    border-left-width: 0;
+    border-right-width: 0;
+    padding-left: 0;
+    padding-right: 0;
 }
 
 #messages-area {
@@ -132,7 +170,14 @@ main {
     overflow-y: scroll;
     display: flex;
     flex-direction: column-reverse;
-    padding: 0 14px;
+    padding: 16px;
+}
+
+#message-sentinel {
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    margin: 0;
 }
 
 .message {
@@ -140,14 +185,6 @@ main {
     margin: 2px;
     max-width: 70%;
     border-radius: 8px;
-}
-
-.message:first-of-type {
-    margin-bottom: 16px;
-}
-
-.message:last-of-type {
-    margin-top: 16px;
 }
 
 .message.own {

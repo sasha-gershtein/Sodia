@@ -38,8 +38,13 @@ def mark_read(_request, user: User, data):
 @api_login_required
 def send_message(_request, user: User, data):
     if not isinstance(content := data.get("content"), str):
-        raise BadRequestError("Content is required")
+        raise BadRequestError("Content is required", reason="CONTENT_MISSING")
     recipient = User.objects.get_user_by_data(data)
     if user == recipient:
         raise BadRequestError("Cannot send a message to yourself", reason="SELF_MESSAGE")
-    return user.send_message(recipient, content)
+    content = content.strip()
+    if not content:
+        raise BadRequestError("Message is empty", reason="EMPTY_MESSAGE")
+    if len(content) > 4096:
+        raise BadRequestError("Message is too long", reason="MESSAGE_TOO_LONG")
+    return user.send_message(recipient, content).info

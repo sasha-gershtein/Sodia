@@ -235,6 +235,7 @@ class UserInfo:
     PARTIAL = {
         "id",
         "username",
+        "is_activated",
         "first_name",
         "last_name",
         "display_name",
@@ -245,6 +246,7 @@ class UserInfo:
     FULL = {
         "id",
         "username",
+        "is_activated",
         "first_name",
         "last_name",
         "display_name",
@@ -277,6 +279,7 @@ class UserInfo:
 
         self.id = user.id
         self.username = account.username
+        self.is_activated = user.is_activated
 
         self.first_name = account.first_name if relation >= privacy.full_name else None
         self.last_name = account.last_name if relation >= privacy.full_name else None
@@ -296,7 +299,8 @@ class UserInfo:
 
         dialogue = Dialogue.objects.get_readonly_dialogue(requesting_user, user)
         self.can_message = (
-                relation not in {Relation.SAME_USER, Relation.BLOCKED}
+                user.is_activated and requesting_user.is_activated
+                and relation not in {Relation.SAME_USER, Relation.BLOCKED}
                 and not user.is_blocking(requesting_user)
                 and (
                         relation >= privacy.message

@@ -166,7 +166,7 @@ class User(models.Model):
         return search(query, self)
 
     def get_dialogues(self):
-        return self.dialogues.order_by("-last_message_sent_at")
+        return self.dialogues.order_by("last_message_sent_at")
 
     def get_unread_messages_count(self, interlocutor: Self):
         from messaging.models import Dialogue

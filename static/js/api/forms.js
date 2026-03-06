@@ -81,7 +81,7 @@ export class Field {
     displayError(message) {
         let error = document.createElement("li");
         error.innerText = message;
-        this.error_list_element?.appendChild(error);
+        this.error_list_element?.append(error);
     }
 
     showErrors(exclude_required = false) {
@@ -317,7 +317,7 @@ class FormValidationField extends Field {
             input = document.createElement("input");
             input.type = "hidden";
             input.name = `${form.form.id}_form_validation_field`;
-            form.form.appendChild(input);
+            form.form.append(input);
         }
         super(input, form, signal);
         this.error_list_element = form.error_list_element;
@@ -587,7 +587,7 @@ export class UpdateForm extends Form {
         this.#autosave_button = document.createElement("input");
         this.#autosave_button.type = "submit";
         this.#autosave_button.hidden = true;
-        this.form.appendChild(this.#autosave_button);
+        this.form.append(this.#autosave_button);
         this.#init_promise = this.sync(true).then(this.afterInit.bind(this));
     }
 

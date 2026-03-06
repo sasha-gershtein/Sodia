@@ -3,6 +3,7 @@
         <div class="template-container" id="navigation">
             <a href="{% url 'users:home' %}">home</a><br>
             <a href="{% url 'settings:index' %}">settings</a><br>
+            <a href="{% url 'messaging:message-home' %}">messaging</a><br>
             <a class="hide-empty" id="profile-link">@<span class="template" id="navigation-username"></span></a>
             <form id="navigation-search-form" action="{% url 'users:search' %}" method="get">
                 <!--suppress HtmlFormInputWithoutLabel -->

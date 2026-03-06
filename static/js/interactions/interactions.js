@@ -168,11 +168,11 @@ export function insertInteractionButtons(user_info, options) {
     let buttons = makeInteractionButtons(user_info, rebuild);
     container.innerHTML = "";
     if (buttons.main_btn) buttons.main_btn.appendTo(container);
-    if (buttons.main_menu) container.appendChild(buttons.main_menu.wrapper);
+    if (buttons.main_menu) container.append(buttons.main_menu.wrapper);
     if (!add_menu) return;
     if (buttons.menu_btn) {
         buttons.menu_btn.appendTo(container);
-        container.appendChild(buttons.menu.wrapper);
+        container.append(buttons.menu.wrapper);
     }
 }
 
@@ -183,12 +183,12 @@ export function insertUser(user_info, container) {
     name.href = `/profile/${user_info.username}/`;
     // noinspection JSUnresolvedReference
     name.innerText = user_info.display_name;
-    box.appendChild(name);
+    box.append(name);
     let button_container = document.createElement("div");
     insertInteractionButtons(user_info, {
         container: button_container,
         add_menu: false,
     });
-    box.appendChild(button_container);
-    container.appendChild(box);
+    box.append(button_container);
+    container.append(box);
 }

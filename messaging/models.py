@@ -29,7 +29,7 @@ class DialogueManager(models.Manager):
     def get_dialogue(self, user: User, interlocutor: User):
         if user == interlocutor:
             raise ValueError("Cannot have a dialogue with yourself")
-        dialogue = self.get(user=user, interlocutor=interlocutor)
+        return self.get(user=user, interlocutor=interlocutor)
 
     def get_locked_dialogue(self, user: User, interlocutor: User):
         if user == interlocutor:
@@ -142,10 +142,10 @@ class MessageManager(models.Manager):
         if dialogue.pk is None:
             return self.none()
         if start <= 0:
-            start = dialogue.last_message_id + start
+            start = dialogue.last_message_id + start + 1
         return self.filter(
             dialogue_id=dialogue.pk,
-            id_in_dialogue__lte=start
+            id_in_dialogue__lt=start
         ).order_by("-id_in_dialogue")[:n]
 
 
@@ -172,5 +172,5 @@ class Message(models.Model):
             "id": self.id_in_dialogue,
             "content": self.content,
             "is_own": self.is_own,
-            "sent_at": self.sent_at,
+            "sent_at": self.sent_at.timestamp(),
         }
