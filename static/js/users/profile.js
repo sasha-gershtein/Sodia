@@ -2,7 +2,7 @@ import {api, loadTemplate, processError} from "../api/api.js";
 import {insertInteractionButtons, insertUser} from "../interactions/interactions.js";
 import {ContextMenuButton} from "../api/ui.js";
 
-const friends_list = document.getElementById("friends-list")
+const friends_list = document.getElementById("friends-list"); // TODO: show message when empty
 
 async function show_friends() {
     show_friends.friends_loaded ??= false;

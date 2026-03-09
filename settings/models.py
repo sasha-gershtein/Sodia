@@ -113,7 +113,7 @@ class UserAccountSettings(models.Model):
             "Username can only contain English letters, digits, periods, dashes and underscores"
         ),
         unique=True
-    )
+    )  # TODO: set lowercase
     first_name = CharField(min_length=2, max_length=50)
     last_name = CharField(min_length=2, max_length=50)
     display_name = CharField(null=True, blank=True, min_length=5, max_length=100)
