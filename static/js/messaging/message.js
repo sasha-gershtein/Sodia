@@ -42,11 +42,16 @@ class Message {
 
 class Dialogue {
     static check_sentinel_interval_id = null;
+    static loading_controller = null;
+
+    static get loading() {
+        console.log(!!Dialogue.loading_controller && !Dialogue.loading_controller.signal.aborted);
+        return !!Dialogue.loading_controller && !Dialogue.loading_controller.signal.aborted;
+    }
 
     messages = new PushOnlyDeque();
     draft = "";
     all_messages_loaded = false;
-    loading = false;
 
     constructor(user_info) {
         this.info = user_info;
@@ -67,9 +72,9 @@ class Dialogue {
         this.element.append(this.input, this.name, this.counter);
         this.element.append(this.counter);
 
-        this.controller = new AbortController();
+        this.input_controller = new AbortController();
         const params = {
-            signal: this.controller.signal
+            signal: this.input_controller.signal
         };
 
         this.input.addEventListener("input", this.onSelect.bind(this), params);
@@ -77,8 +82,8 @@ class Dialogue {
         DialogueList.element.prepend(this.element);
     }
 
-    abort() {
-        this.controller.abort();
+    abort_input() {
+        this.input_controller.abort();
     }
 
     saveDraft() {
@@ -86,13 +91,17 @@ class Dialogue {
         setInputValue();
     }
 
-    deselect() {
-        history.pushState({}, "", "/message/");
-        document.title = "Messaging — Sodia";
-        DialogueList.selected = null;
-        this.input.checked = false;
-        no_selected_dialogue.hidden = false;
+    deselect(all = true) {
+        if (all) {
+            history.pushState({}, "", "/message/");
+            document.title = "Messaging — Sodia";
+            DialogueList.selected = null;
+            this.input.checked = false;
+            no_selected_dialogue.hidden = false;
+        }
         this.saveDraft();
+        Dialogue.loading_controller?.abort();
+        console.log("aborted", !!Dialogue.loading_controller, Dialogue.loading_controller?.signal.aborted);
     }
 
     select() {
@@ -100,13 +109,12 @@ class Dialogue {
         void this.onSelect();
     }
 
-    async onSelect() {
-        this.loading = true;
-        DialogueList.selected?.saveDraft();
+    onSelect() {
+        DialogueList.selected?.deselect(false);
+        DialogueList.selected = this;
         history.pushState({}, "", `/message/${this.info.username}/`); // TODO: go back on navigation
         // noinspection JSUnresolvedReference
         document.title = `${this.info.display_name} — Sodia Messaging`;
-        DialogueList.selected = this;
 
         no_selected_dialogue.hidden = true;
         // noinspection JSUnresolvedReference
@@ -133,12 +141,12 @@ class Dialogue {
             fragment.append(message.element);
         }
         messages_area.insertBefore(fragment, message_sentinel);
-        this.loading = false;
         this.loadMessagesIfNeeded();
     }
 
     addMessage(message_info, fragment = null, top = false) {
         let message = new Message(message_info);
+        if (DialogueList.selected !== this) return;
         if (top) {
             if (fragment) fragment.append(message.element);
             else messages_area.insertBefore(message.element, message_sentinel);
@@ -152,8 +160,8 @@ class Dialogue {
     }
 
     async loadMessages() {
-        if (this.loading || this.all_messages_loaded) return;
-        this.loading = true;
+        if (Dialogue.loading || this.all_messages_loaded || DialogueList.selected !== this) return;
+        Dialogue.loading_controller = new AbortController();
         const n = 10;
         try {
             const response = await api("/api/messaging/load-dialogue/",
@@ -162,21 +170,25 @@ class Dialogue {
                     start: this.messages.back?.info.id ?? 0,
                     n,
                 },
-                {attempts: 20});
+                {
+                    attempts: 20,
+                    signal: Dialogue.loading_controller.signal,
+                });
             const fragment = document.createDocumentFragment();
             response.forEach((message_info) => this.addMessage(message_info, fragment, true));
-            messages_area.insertBefore(fragment, message_sentinel);
+            if (DialogueList.selected === this) messages_area.insertBefore(fragment, message_sentinel);
             if (response.length < n) this.all_messages_loaded = true;
         } catch (err) {
             processError(err);
         } finally {
-            this.loading = false;
+            if (DialogueList.selected === this) Dialogue.loading_controller = null;
+            console.log("cleared");
         }
         this.loadMessagesIfNeeded();
     }
 
     loadMessagesIfNeeded() {
-        if (this.loading || this.all_messages_loaded) return;
+        if (Dialogue.loading || this.all_messages_loaded || DialogueList.selected !== this) return;
         if (message_sentinel.getBoundingClientRect().bottom > messages_area.getBoundingClientRect().top - 550)
             void this.loadMessages();
     }

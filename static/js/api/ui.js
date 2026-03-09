@@ -254,7 +254,7 @@ export function formatTimestamp(timestamp) {
     if (date.getTime() === yesterday.getTime()) {
         return `yesterday, ${time_str}`;
     }
-    return `${date_formatter.format(date)}, ${time_str}`;
+    return `${date_formatter.format(date).replaceAll("/", ".")}, ${time_str}`;
 }
 
 

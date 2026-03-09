@@ -43,9 +43,26 @@ export class MaxRetriesError extends Error {
     }
 }
 
-async function makeRequest(url, body, timeout = 5000) {
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), timeout)
+export class TimeoutError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = "TimeoutError";
+    }
+}
+
+async function makeRequest(url, body, timeout = 5000, signal = null) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(new TimeoutError()), timeout);
+
+    let abort_handler = null;
+    if (signal !== null) {
+        if (signal.aborted) {
+            controller.abort(signal.reason);
+        } else {
+            abort_handler = () => controller.abort(signal.reason);
+            signal.addEventListener("abort", abort_handler, {once: true});
+        }
+    }
 
     try {
         return await fetch(url, {
@@ -61,6 +78,9 @@ async function makeRequest(url, body, timeout = 5000) {
         });
     } finally {
         clearTimeout(timer);
+        if (signal && abort_handler) {
+            signal.removeEventListener("abort", abort_handler);
+        }
     }
 }
 
@@ -69,6 +89,7 @@ export async function api(url, payload = {}, options = {}) {
         attempts = -1,
         timeout = 5000,
         delay = 200,
+        signal = null,
     } = options;
     let loading_message = null;
     const show_loading_timeout_id = setTimeout(() => {
@@ -79,7 +100,7 @@ export async function api(url, payload = {}, options = {}) {
         while (attempts !== 0) {
             attempts--;
             try {
-                const response = await makeRequest(url, body, timeout);
+                const response = await makeRequest(url, body, timeout, signal);
                 let parsed = {}
                 try {
                     parsed = await response.json();
@@ -99,7 +120,7 @@ export async function api(url, payload = {}, options = {}) {
                 }
                 throw new APIError(message, reason, code, meta);
             } catch (err) {
-                if (!((err.name === "AbortError") || (err instanceof TypeError)))
+                if (signal?.aborted || !(err.name === "AbortError" || err instanceof TypeError))
                     throw err;
             }
             await sleep(delay);
