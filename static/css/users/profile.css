@@ -1,3 +1,14 @@
 #profile-buttons button {
     margin: 6px;
 }
+
+#friends-list:empty::after {
+    content: "Friends will be displayed here...";
+    font-style: italic;
+    font-size: 90%;
+}
+
+#profile-description {
+    max-width: 800px;
+    overflow-wrap: anywhere;
+}

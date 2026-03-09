@@ -80,7 +80,7 @@ class AccountManager(SettingsManager):
             r"[^\w.\-_]", "", email.split('@')[0]
         )[:max_length]
         username = base
-        if not base:
+        if len(base) < 2:
             base = "user"
             username = "user-1"
         i = 2
@@ -107,7 +107,7 @@ class UserAccountSettings(models.Model):
     user = models.OneToOneField("users.User", on_delete=models.CASCADE, related_name='account_settings',
                                 primary_key=True)
     username = CharField(
-        min_length=4, max_length=30,
+        min_length=2, max_length=30,
         pattern=(
             r"^[\w.\-_]*$",
             "Username can only contain English letters, digits, periods, dashes and underscores"

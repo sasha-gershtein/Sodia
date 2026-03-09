@@ -7,7 +7,9 @@ from .models import User
 
 from interactions.models import UserInfo
 
-WORDS_SIMILARITY_POWER = 5
+MAX_TOKENS = 10
+
+WORDS_SIMILARITY_EXPONENT = 5
 WORD_LENGTH_BONUS = 1.09
 
 SENTENCE_LENGTH_BONUS = 1.5
@@ -22,18 +24,21 @@ COUNTRY_NAME_WEIGHT = 2
 COUNTRY_CODE_WEIGHT = 1
 GENDER_WEIGHT = 1
 
+USER_SCORE_EXPONENT = 1 / 2.5
+USER_SCORE_THRESHOLD = 1 / 3
+
 MAX_RESULTS = 50
 
-PROBABILITY_THRESHOLD = 0.05
+PROBABILITY_THRESHOLD = 1 / 20
 
 
 def parse(s: str) -> list[str]:
-    return re.findall(r"[\w.\-_]{1,30}", s.lower())
+    return re.findall(r"[\w.\-_]{1,30}", s.lower())[:MAX_TOKENS]
 
 
 def score_words(word_1: str, word_2: str, /) -> float:
     ratio = SequenceMatcher(None, word_1, word_2, autojunk=False).ratio()
-    return ratio ** WORDS_SIMILARITY_POWER * WORD_LENGTH_BONUS ** (min(len(word_1), len(word_2)) - 1)
+    return ratio ** WORDS_SIMILARITY_EXPONENT * WORD_LENGTH_BONUS ** (min(len(word_1), len(word_2)) - 1)
 
 
 @dataclass
@@ -88,6 +93,11 @@ class UserScore:
     probability: float = None
 
 
+def debug_output(score, query, mean):
+    print(f"{query}: {score.info.user}: {score.score:.2f} ({(100 * (score.probability - mean)):.2f}%)")
+    return score.info
+
+
 def search(query: str, requesting_user: User) -> list[UserInfo]:
     if query == "*":
         return [user.info(requesting_user) for user in User.objects.activated().order_by("id")[:MAX_RESULTS]]
@@ -97,7 +107,9 @@ def search(query: str, requesting_user: User) -> list[UserInfo]:
     max_score = 0
     for user in User.objects.activated():
         score = UserScore(user.info(requesting_user))
-        score.score = score_user(score.info, parsed)
+        score.score = score_user(score.info, parsed) ** USER_SCORE_EXPONENT
+        if score.score < USER_SCORE_THRESHOLD:
+            continue
         max_score = max(max_score, score.score)
         results.append(score)
 

@@ -2,7 +2,7 @@ import {api, loadTemplate, processError} from "../api/api.js";
 import {insertInteractionButtons, insertUser} from "../interactions/interactions.js";
 import {ContextMenuButton} from "../api/ui.js";
 
-const friends_list = document.getElementById("friends-list"); // TODO: show message when empty
+const friends_list = document.getElementById("friends-list");
 
 async function show_friends() {
     show_friends.friends_loaded ??= false;
@@ -24,7 +24,9 @@ async function show_friends() {
 function load(user_info) {
     // noinspection JSUnresolvedReference
     if (user_info.first_name && user_info.last_name) {
-        document.getElementById("profile-full-name").innerText = user_info.first_name + " " + user_info.last_name;
+        const full_name = user_info.first_name + " " + user_info.last_name;
+        // noinspection JSUnresolvedReference
+        if (full_name !== user_info.display_name) document.getElementById("profile-full-name").innerText = full_name;
     }
     load.friends_button ??= null;
     show_friends.user_id = user_info.id;

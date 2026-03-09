@@ -17,7 +17,7 @@ def login(request, data):
     session_data.session.authenticate(form.cleaned_data["user"])
     return {
         "redirect": {
-            "location": reverse("users:home")
+            "location": reverse("users:home")  # TODO: random dialogue
         }
     }
 
