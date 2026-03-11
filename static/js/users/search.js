@@ -2,7 +2,9 @@ import {HideableElement} from "../api/ui.js";
 import {insertUser} from "../interactions/interactions.js";
 import {Form} from "../api/forms.js";
 
-const query = new URLSearchParams(location.search).get("q");
+function get_url_query() {
+    return new URLSearchParams(location.search).get("q");
+}
 
 const loading = new HideableElement("loading-search-results");
 const no_results = new HideableElement("no-results");
@@ -15,14 +17,20 @@ class SearchFrom extends Form {
     constructor(id) {
         super(id);
         this.fields.query.ERROR_MESSAGES.valueMissing = () => "please enter a search query";
+        this.popstate_button = document.createElement("input");
+        this.popstate_button.type = "submit";
+        this.popstate_button.hidden = true;
+        this.form.append(this.popstate_button);
     }
 
 
     async onSubmit(e) {
         const focused = document.activeElement === this.fields.query.input;
-        const url = new URL(location);
-        url.searchParams.set("q", this.fields.query.value);
-        history.pushState({}, "", url);
+        if (e.submitter !== this.popstate_button) {
+            const url = new URL(location);
+            url.searchParams.set("q", this.fields.query.value);
+            history.pushState({}, "", url);
+        }
         loading.show();
         try {
             await super.onSubmit(e);
@@ -48,5 +56,10 @@ class SearchFrom extends Form {
 }
 
 const search_form = new SearchFrom("search-form");
-search_form.fields.query.value = query.substring(0, search_form.fields.query.input.maxLength);
+search_form.fields.query.value = get_url_query().substring(0, search_form.fields.query.input.maxLength);
 if (search_form.validate()) search_form.submit();
+
+addEventListener("popstate", (e) => {
+    search_form.fields.query.value = get_url_query();
+    search_form.form.requestSubmit(search_form.popstate_button);
+});

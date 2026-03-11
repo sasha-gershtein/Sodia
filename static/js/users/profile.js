@@ -47,7 +47,7 @@ function load(user_info) {
     load.friends_button.disabled = !user_info.friends_visible;
 }
 
-const list = window.location.pathname.split("/");
+const list = location.pathname.split("/");
 const username = list[list.findIndex(e => e === "profile") + 1];
 // noinspection JSUnusedGlobalSymbols
 loadTemplate(

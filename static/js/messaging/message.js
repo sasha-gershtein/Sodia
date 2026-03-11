@@ -100,9 +100,13 @@ class Dialogue {
         setInputValue();
     }
 
-    deselect(all = true) {
+    deselect(options) {
+        const {
+            all = true,
+            push_state = true
+        } = options;
         if (all) {
-            history.pushState({}, "", "/message/");
+            if (push_state) history.pushState({}, "", "/message/");
             document.title = "Messaging — Sodia";
             DialogueList.selected = null;
             this.input.checked = false;
@@ -112,15 +116,15 @@ class Dialogue {
         Dialogue.loading_controller?.abort();
     }
 
-    select() {
+    select(push_state = true) {
         this.input.checked = true;
-        void this.onSelect();
+        void this.onSelect(push_state);
     }
 
-    onSelect() {
-        DialogueList.selected?.deselect(false);
+    onSelect(push_state = true) {
+        DialogueList.selected?.deselect({all: false});
         DialogueList.selected = this;
-        history.pushState({}, "", `/message/${this.info.username}/`); // TODO: go back on navigation
+        if (push_state) history.pushState({}, "", `/message/${this.info.username}/`);
         // noinspection JSUnresolvedReference
         document.title = `${this.info.display_name} — Sodia Messaging`;
 
@@ -278,8 +282,8 @@ class DialogueList {
         return this.dialogues[user_info.id] = new Dialogue(user_info);
     }
 
-    static deselect() {
-        this.selected?.deselect();
+    static deselect(push_state = true) {
+        this.selected?.deselect({push_state});
     }
 }
 
@@ -318,8 +322,10 @@ message_input_form.addEventListener("submit", (e) => {
     void DialogueList.selected?.sendMessage();
 });
 
-const list = window.location.pathname.split("/");
-const username = list[list.findIndex(e => e === "message") + 1] || null;
+function get_url_username() {
+    const list = location.pathname.split("/");
+    return list[list.findIndex(e => e === "message") + 1] || null;
+}
 
 async function load() {
     let dialogues;
@@ -329,6 +335,7 @@ async function load() {
         processError(err);
         return;
     }
+    const username = get_url_username();
     let username_found = false;
     dialogues.forEach(user_info => {
         const dialogue = DialogueList.addDialogue(user_info);
@@ -357,4 +364,19 @@ Updates.register("messaging.new", msg => {
     const interlocutor = msg.interlocutor;
     if (!DialogueList.dialogues[interlocutor.id]) DialogueList.addDialogue(interlocutor);
     else DialogueList.dialogues[interlocutor.id].addMessage(msg);
+});
+
+addEventListener("popstate", (e) => {
+    const username = get_url_username();
+    if (!username) {
+        DialogueList.deselect(false);
+        return;
+    }
+    for (const dialogue of Object.values(DialogueList.dialogues)) {
+        if (dialogue.info.username === username) {
+            dialogue.select(false);
+            return;
+        }
+    }
+    location.reload();
 });
