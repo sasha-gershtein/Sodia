@@ -184,7 +184,10 @@ class User(models.Model):
 
     def mark_dialogue_read(self, interlocutor: Self):
         from messaging.models import Dialogue
-        Dialogue.objects.get_dialogue(self, interlocutor).mark_read()
+        try:
+            Dialogue.objects.get_dialogue(self, interlocutor).mark_read()
+        except Dialogue.DoesNotExist:
+            pass
 
     def send_message(self, recipient: Self, content: str, *, exclude_session: "Session | None" = None):
         from messaging.models import Dialogue

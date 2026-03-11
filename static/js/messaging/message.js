@@ -341,7 +341,7 @@ async function load() {
         const dialogue = DialogueList.addDialogue(user_info);
         if (user_info.username === username) {
             username_found = true;
-            dialogue.select();
+            dialogue.select(false);
         }
     });
     if (username && !username_found) {
