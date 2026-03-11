@@ -8,7 +8,7 @@ from Sodia.models import FloatField, DateField, CharField, SingleChoiceField, Mu
 
 
 # Create your models here.
-class Country(models.Model):
+class Country(models.Model):  # TODO: populate
     name = CharField(max_length=100)
     code = CharField(max_length=2, unique=True)
 
@@ -29,7 +29,7 @@ class HouseBoardingType(JsonEnumMixin, IntFlag):
     MIXED = auto()
 
 
-class House(models.Model):
+class House(models.Model):  # TODO: populate
     name = models.CharField(max_length=20)
     boarding_type = SingleChoiceField(HouseBoardingType)
 
