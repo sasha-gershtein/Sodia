@@ -1,6 +1,7 @@
 import {api, processError} from "../api/api.js";
 import {formatTimestamp, page_loading} from "../api/ui.js";
 import {PushOnlyDeque} from "../deque.js";
+import {Updates} from "../updates/updates.js";
 
 const no_selected_dialogue = document.getElementById("no-selected-dialogue");
 const dialogue_title = document.getElementById("dialogue-title");
@@ -45,7 +46,6 @@ class Dialogue {
     static loading_controller = null;
 
     static get loading() {
-        console.log(!!Dialogue.loading_controller && !Dialogue.loading_controller.signal.aborted);
         return !!Dialogue.loading_controller && !Dialogue.loading_controller.signal.aborted;
     }
 
@@ -63,11 +63,11 @@ class Dialogue {
         this.input.name = "dialogue";
         this.name = document.createElement("span");
         // noinspection JSUnresolvedReference
-        this.name.textContent = user_info.display_name;
+        this.name.innerText = user_info.display_name;
         this.name.classList.add("name");
         this.counter = document.createElement("span");
         // noinspection JSUnresolvedReference
-        this.counter.textContent = user_info.unread_messages_counter || "";
+        this.counter.innerText = user_info.unread_messages_count || "";
         this.counter.classList.add("unread-messages-counter");
         this.element.append(this.input, this.name, this.counter);
         this.element.append(this.counter);
@@ -80,6 +80,15 @@ class Dialogue {
         this.input.addEventListener("input", this.onSelect.bind(this), params);
 
         DialogueList.element.prepend(this.element);
+    }
+
+    get unread_messages_count() {
+        return this.info.unread_messages_count;
+    }
+
+    set unread_messages_count(value) {
+        this.info.unread_messages_count = value;
+        this.counter.innerText = value || "";
     }
 
     abort_input() {
@@ -101,7 +110,6 @@ class Dialogue {
         }
         this.saveDraft();
         Dialogue.loading_controller?.abort();
-        console.log("aborted", !!Dialogue.loading_controller, Dialogue.loading_controller?.signal.aborted);
     }
 
     select() {
@@ -118,11 +126,12 @@ class Dialogue {
 
         no_selected_dialogue.hidden = true;
         // noinspection JSUnresolvedReference
-        dialogue_title.textContent = this.info.display_name;
+        dialogue_title.innerText = this.info.display_name;
         // noinspection JSUnresolvedReference
         if (this.info.is_activated) dialogue_title.href = `/profile/${this.info.username}/`;
-        // noinspection JSUnresolvedReference
+        void this.markRead();
 
+        // noinspection JSUnresolvedReference
         if (!this.info.can_message) {
             message_input_field.disabled = true;
             message_input_form.classList.add("cannot-message");
@@ -144,10 +153,23 @@ class Dialogue {
         this.loadMessagesIfNeeded();
     }
 
-    addMessage(message_info, fragment = null, top = false) {
+    async markRead() {
+        try {
+            await api("/api/messaging/mark-read/", {id: this.info.id}, {attempts: 5});
+            this.unread_messages_count = 0;
+        } catch (err) {
+            processError(err);
+        }
+    }
+
+    addMessage(message_info, fragment = null, old = false) {
         let message = new Message(message_info);
-        if (DialogueList.selected !== this) return;
-        if (top) {
+        if (!old) this.float();
+        if (DialogueList.selected !== this) {
+            if (!old) this.unread_messages_count++;
+            return;
+        }
+        if (old) {
             if (fragment) fragment.append(message.element);
             else messages_area.insertBefore(message.element, message_sentinel);
             this.messages.pushBack(message);
@@ -155,6 +177,7 @@ class Dialogue {
             if (fragment) fragment.prepend(message);
             else messages_area.prepend(message.element);
             this.messages.pushFront(message);
+            void this.markRead();
         }
         return message;
     }
@@ -182,7 +205,6 @@ class Dialogue {
             processError(err);
         } finally {
             if (DialogueList.selected === this) Dialogue.loading_controller = null;
-            console.log("cleared");
         }
         this.loadMessagesIfNeeded();
     }
@@ -329,3 +351,10 @@ async function load() {
 
 page_loading.show();
 load().then(() => page_loading.hide());
+
+Updates.register("messaging.new", msg => {
+    // noinspection JSUnresolvedReference
+    const interlocutor = msg.interlocutor;
+    if (!DialogueList.dialogues[interlocutor.id]) DialogueList.addDialogue(interlocutor);
+    else DialogueList.dialogues[interlocutor.id].addMessage(msg);
+});

@@ -2,9 +2,11 @@ import datetime
 from enum import Enum, IntEnum, auto
 
 from typing import Self
+from uuid import UUID
 
 from django.db import models, transaction
 from django.db.models import Q, F
+from django.db.models.fields import UUIDField
 from django.db.models.functions import Least, Greatest
 from django.utils import timezone
 
@@ -241,7 +243,7 @@ class UserInfo:
         "display_name",
         "relation",
         "can_message",
-        "unread_messages",
+        "unread_messages_count",
     }
     FULL = {
         "id",
@@ -262,7 +264,7 @@ class UserInfo:
         "friends_count",
         "friends_visible",
         "can_message",
-        "unread_messages",
+        "unread_messages_count",
     }
 
     _friends: list[User] | None = None
@@ -307,7 +309,7 @@ class UserInfo:
                         or dialogue.can_message_back
                 )
         )
-        self.unread_messages = dialogue.unread_messages_count
+        self.unread_messages_count = dialogue.unread_messages_count
 
     @property
     def friends(self):
@@ -315,11 +317,17 @@ class UserInfo:
             self._friends = self.user.get_friends()
         return self._friends
 
+    @staticmethod
+    def normalise(value):
+        if isinstance(value, UUID):
+            return str(value)
+        return value
+
     def get_json_value(self, keys=None):
         if keys is None:
             keys = self.PARTIAL
         return {
-            key: value.get_json_value() if hasattr(value, "get_json_value") else value
+            key: value.get_json_value() if hasattr(value, "get_json_value") else self.normalise(value)
             for key in keys
             if (value := getattr(self, key)) is not None
         }

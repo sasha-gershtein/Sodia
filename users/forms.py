@@ -7,7 +7,7 @@ from .models import User, UserLoginDetails
 
 
 class LoginForm(forms.Form):
-    identifier = forms.CharField(label="Username or email", min_length=4, max_length=254,
+    identifier = forms.CharField(label="Username or email", min_length=2, max_length=254,
                                  widget=forms.TextInput(attrs={"placeholder": "john.doe"}))
     password = forms.CharField(min_length=4, max_length=100, widget=forms.PasswordInput)
 

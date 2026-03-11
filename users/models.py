@@ -186,9 +186,9 @@ class User(models.Model):
         from messaging.models import Dialogue
         Dialogue.objects.get_dialogue(self, interlocutor).mark_read()
 
-    def send_message(self, recipient: Self, content: str):
+    def send_message(self, recipient: Self, content: str, *, exclude_session: "Session | None" = None):
         from messaging.models import Dialogue
-        return Dialogue.objects.send_message(self, recipient, content)
+        return Dialogue.objects.send_message(self, recipient, content, exclude_session=exclude_session)
 
 
 class PasswordField(models.CharField):
@@ -277,7 +277,7 @@ class Session(models.Model):
     last_request_ip = models.GenericIPAddressField()
     last_request_at = models.DateTimeField(auto_now=True)
     expires_at = models.DateTimeField(default=objects.new_expires_at)
-    next_update_number = models.IntegerField(default=0)
+    next_update_id = models.IntegerField(default=0)
 
     class Meta:
         indexes = [
@@ -324,17 +324,3 @@ class Session(models.Model):
         if self.user is None:
             return f"<{self.__class__.__name__} ({self.token[:20]}...)>"
         return f"<{self.__class__.__name__} ({self.token[:20]}...), auth: {self.user}>"
-
-
-class SessionUpdate(models.Model):
-    session = models.ForeignKey(Session, on_delete=models.CASCADE)
-    update_number = models.IntegerField(default=0)
-    update_message = models.TextField()
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['session', 'update_number'], name='unique_session_update_number'),
-        ]
-
-    def __repr__(self):
-        return f"<{self.__class__.__name__} {self.update_number} of {self.session}>"

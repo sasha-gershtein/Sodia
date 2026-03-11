@@ -10,4 +10,5 @@ urlpatterns = [
     path('settings/', include('api.urls.settings', namespace='settings')),
     path('interactions/', include('api.urls.interactions', namespace='interactions')),
     path('messaging/', include('api.urls.messaging', namespace='messaging')),
+    path('updates/', include('api.urls.updates', namespace='updates')),
 ]

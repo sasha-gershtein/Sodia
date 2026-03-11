@@ -5,7 +5,8 @@ from django.db import models, transaction
 from django.db.models import Q, F
 from django.utils import timezone
 
-from users.models import User
+from updates.models import Update
+from users.models import User, Session
 
 
 class DialogueManager(models.Manager):
@@ -53,12 +54,12 @@ class DialogueManager(models.Manager):
         return self.get_readonly_dialogue(user, interlocutor).unread_messages_count
 
     @transaction.atomic
-    def send_message(self, sender: User, recipient: User, content: str):
+    def send_message(self, sender: User, recipient: User, content: str, *, exclude_session: Session | None = None):
         if not recipient.info(sender).can_message:
             raise ValueError(f"Cannot send message from {sender} to {recipient}")
         dialogue, inverse = self.get_locked_inverse_pair(sender, recipient)
         Message.objects.create_message(sender, inverse, content)
-        return Message.objects.create_message(sender, dialogue, content)
+        return Message.objects.create_message(sender, dialogue, content, exclude_session=exclude_session)
 
     @transaction.atomic
     def reset_can_message_back(self, user_1, user_2, /):
@@ -119,7 +120,7 @@ class Dialogue(models.Model):
 
 class MessageManager(models.Manager):
     @transaction.atomic
-    def create_message(self, sender: User, dialogue: Dialogue, content: str):
+    def create_message(self, sender: User, dialogue: Dialogue, content: str, *, exclude_session: Session | None = None):
         update = {
             "last_message_sent_at": timezone.now(),
             "last_message_id": F("last_message_id") + 1,
@@ -131,12 +132,19 @@ class MessageManager(models.Manager):
         Dialogue.objects.filter(pk=dialogue.pk).update(**update)
         dialogue.refresh_from_db()
 
-        return self.create(
+        obj = self.create(
             dialogue=dialogue,
             id_in_dialogue=dialogue.last_message_id,
             content=content,
             is_own=is_own,
         )
+
+        msg = obj.info
+        msg["interlocutor"] = dialogue.interlocutor.info(dialogue.user).partial
+        print(msg)
+        Update.objects.create_updates_for_user("messaging.new", msg, dialogue.user, exclude_session)
+
+        return obj
 
     def get_dialogue_messages(self, dialogue: Dialogue | ReadOnlyDialogue, start: int = 0, n: int = 10):
         if dialogue.pk is None:

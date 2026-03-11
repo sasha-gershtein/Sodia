@@ -1,5 +1,6 @@
 from api.decorators import api_login_required
 from api.errors import BadRequestError
+from users.middleware import SessionData
 
 from users.models import User
 
@@ -36,7 +37,7 @@ def mark_read(_request, user: User, data):
 
 
 @api_login_required
-def send_message(_request, user: User, data):
+def send_message(request, user: User, data):
     if not isinstance(content := data.get("content"), str):
         raise BadRequestError("Content is required", reason="CONTENT_MISSING")
     recipient = User.objects.get_user_by_data(data)
@@ -47,4 +48,5 @@ def send_message(_request, user: User, data):
         raise BadRequestError("Message is empty", reason="EMPTY_MESSAGE")
     if len(content) > 4096:
         raise BadRequestError("Message is too long", reason="MESSAGE_TOO_LONG")
-    return user.send_message(recipient, content).info
+    session_data: SessionData = request.session_data
+    return user.send_message(recipient, content, exclude_session=session_data.session).info
