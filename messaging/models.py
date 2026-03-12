@@ -113,7 +113,11 @@ class Dialogue(models.Model):
     def get_messages(self, start=0, n=10):
         return Message.objects.get_dialogue_messages(self, start, n)
 
+    @transaction.atomic
     def mark_read(self):
+        user = User.objects.select_for_update(of=["self"]).get(pk=self.user.pk)
+        user.unread_messages_count -= self.unread_messages_count
+        user.save()
         self.unread_messages_count = 0
         self.save()
 
@@ -127,6 +131,7 @@ class MessageManager(models.Manager):
         }
         is_own = sender == dialogue.user
         if not is_own:
+            User.objects.filter(pk=dialogue.user.pk).update(unread_messages_count=F("unread_messages_count") + 1)
             update["unread_messages_count"] = F("unread_messages_count") + 1
             update["can_message_back"] = True
         Dialogue.objects.filter(pk=dialogue.pk).update(**update)

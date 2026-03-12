@@ -13,4 +13,7 @@ urlpatterns = [
     path('partial-info/', api.partial_user_info, name='partial_info'),
     path('full-info/', api.full_user_info, name='full_info'),
     path('search/', api.search, name='search'),
+    path('load-home/', api.load_home, name='load_home'),
+    path('sodia-btn/press/', api.press_sodia_button, name='press_sodia_button'),
+    path('sodia-btn/unpress/', api.unpress_sodia_button, name='unpress_sodia_button'),
 ]

@@ -1,0 +1,75 @@
+#sodia-button-wrapper {
+    background: #d8d6e3;
+    padding: 30px;
+    box-sizing: border-box;
+    width: fit-content;
+    border-radius: 15%;
+    margin: 30px;
+    border: 1px solid #275027;
+    transition: border-radius 0.5s cubic-bezier(0.32, -0.53, 0.14, 2.17);
+}
+
+#sodia-button-wrapper:has(#sodia-btn:hover, #sodia-btn:focus-visible) {
+    border-radius: 20%;
+}
+
+#sodia-btn {
+    background: #4e3ec5;
+    max-width: 50vmin;
+    width: 300px;
+    aspect-ratio: 1 / 1;
+    border: 18px solid white;
+    border-radius: 50%;
+    box-shadow: 2px 3px 6px 3px #131315, inset 1px 1px 4px 1px #131315;
+    cursor: pointer;
+    outline: 1px solid rgba(0, 0, 0, 0.6);
+    transition: box-shadow 0.5s cubic-bezier(0.32, -0.53, 0.14, 2.17);
+}
+
+#sodia-btn::after {
+    content: "OFF";
+    color: white;
+    font-weight: bold;
+    font-size: 400%;
+    text-shadow: 1px 1px 4px #131315;
+    transition: text-shadow 0.5s cubic-bezier(0.32, -0.53, 0.14, 2.17);
+}
+
+#sodia-btn.pressed::after {
+    content: "ON";
+    color: #54e367;
+    text-shadow: none;
+    transition: text-shadow 0.5s cubic-bezier(0.32, -0.53, 0.14, 2.17),
+    color 0.5s cubic-bezier(0.32, -0.53, 0.14, 2.17);
+}
+
+#sodia-btn:hover, #sodia-btn:focus-visible {
+    box-shadow: 2px 3px 3px 1px #131315, inset 1px 1px 10px 2px #131315;
+}
+
+#sodia-btn.pressed {
+    box-shadow: 0 0 4px -1px #131315, inset 2px 3px 8px 4px #131315;
+    outline: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+#sodia-btn.pressed:hover, #sodia-btn.pressed:focus-visible {
+    box-shadow: 0 0 0 0 #131315, inset 2px 3px 12px 4px #131315;
+}
+
+#pressing-button-list {
+    max-width: 500px;
+    margin-bottom: 100px;
+}
+
+#sodia-btn-description {
+    max-width: 500px;
+    margin: 10px;
+    text-align: center;
+}
+
+:has(#sodia-btn.pressed, #sodia-btn-presses-count:not(:empty)) #no-presses-text,
+:has(#sodia-btn.pressed) #sodia-btn-presses-count-text,
+#sodia-btn-presses-count-text:has(#sodia-btn-presses-count:empty),
+:has(#sodia-btn:not(.pressed)) #pressing-text {
+    display: none;
+}

@@ -33,6 +33,7 @@ function load(user_info) {
     insertInteractionButtons(user_info, {
         container: document.querySelector("#profile-buttons"),
         rebuild: load,
+        set_ids: true,
     });
     if (load.friends_button === null) {
         load.friends_button = new ContextMenuButton({

@@ -35,10 +35,7 @@ export class Updates {
         try {
             const response = await api("/api/updates/");
             for (const [name, updates] of Object.entries(response)) {
-                if (!this.handlers[name]) {
-                    console.error(`unregistered update ${name}:`, updates);
-                    continue;
-                }
+                if (!this.handlers[name]) continue;
                 for (const msg of updates) {
                     for (const handler of this.handlers[name]) {
                         try {

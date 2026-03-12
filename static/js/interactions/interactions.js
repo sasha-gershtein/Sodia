@@ -10,7 +10,7 @@ export class Relation {
     static BLOCKED = "BLOCKED";
 }
 
-export function makeInteractionButtons(user_info, rebuild) {
+export function makeInteractionButtons(user_info, rebuild, set_ids = false) {
     let main_btn = null;
     let main_menu = null;
     let menu_btn = null;
@@ -23,13 +23,14 @@ export function makeInteractionButtons(user_info, rebuild) {
     const can_message = user_info.can_message;
     const username = user_info.username;
     const user_id = user_info.id;
-    const main_id = "main-action-btn";
+    const main_id = set_ids ? "main-action-btn" : null;
 
     switch (relation) {
         case Relation.SAME_USER:
             main_btn = new LinkButton({
                 url: "/settings/account/",
                 id: main_id,
+                classes: ["edit-btn"],
                 label: "Edit profile",
             });
             break;
@@ -40,6 +41,7 @@ export function makeInteractionButtons(user_info, rebuild) {
                     id: user_id,
                 },
                 id: main_id,
+                classes: ["add-friend-btn"],
                 label: "Add friend",
                 callback: rebuild,
                 success_message: "Friend request sent",
@@ -52,7 +54,8 @@ export function makeInteractionButtons(user_info, rebuild) {
                     id: user_id,
                     accept: true,
                 },
-                id: "accept-friend-btn",
+                id: set_ids ? "accept-friend-btn" : null,
+                classes: ["accept-friend-btn"],
                 label: "Accept",
                 callback: rebuild,
                 success_message: "Friend request accepted",
@@ -63,7 +66,8 @@ export function makeInteractionButtons(user_info, rebuild) {
                     id: user_id,
                     accept: false,
                 },
-                id: "deny-friend-btn",
+                id: set_ids ? "deny-friend-btn" : null,
+                classes: ["deny-friend-btn"],
                 label: "Ignore",
                 callback: rebuild,
                 success_message: "Friend request ignored",
@@ -82,6 +86,7 @@ export function makeInteractionButtons(user_info, rebuild) {
                     id: user_id,
                 },
                 id: main_id,
+                classes: ["withdraw-friend-btn"],
                 label: "Withdraw friend request",
                 callback: rebuild,
                 success_message: "Friend request withdrawn",
@@ -99,11 +104,13 @@ export function makeInteractionButtons(user_info, rebuild) {
     }
     let message_button = null;
     if (can_message) {
+        const count = user_info.unread_messages_count;
         message_button = new LinkButton({
             url: `/message/${username}/`,
-            id: main_btn === null ? main_id : "message-btn",
-            label: "Message",
-        })
+            id: set_ids ? (main_btn === null ? main_id : "message-btn") : null,
+            classes: ["message-btn"],
+            label: "Message" + (count ? ` (${count})` : ""),
+        });
     }
     if (main_btn === null) main_btn = message_button;
     else if (message_button !== null) menu_buttons.push(message_button);
@@ -114,7 +121,8 @@ export function makeInteractionButtons(user_info, rebuild) {
             payload: {
                 id: user_id,
             },
-            id: "remove-friend-btn",
+            id: set_ids ? "remove-friend-btn" : null,
+            classes: ["remove-friend-btn"],
             label: "Remove friend",
             callback: rebuild,
             success_message: "Friend removed",
@@ -127,7 +135,8 @@ export function makeInteractionButtons(user_info, rebuild) {
                 payload: {
                     id: user_id,
                 },
-                id: "unblock-btn",
+                id: set_ids ? "unblock-btn" : null,
+                classes: ["unblock-btn"],
                 label: "Unblock",
                 callback: rebuild,
                 success_message: "User unblocked",
@@ -138,7 +147,8 @@ export function makeInteractionButtons(user_info, rebuild) {
                 payload: {
                     id: user_id,
                 },
-                id: "block-btn",
+                id: set_ids ? "block-btn" : null,
+                classes: ["block-btn"],
                 label: "Block",
                 callback: rebuild,
                 success_message: "User blocked",
@@ -150,7 +160,8 @@ export function makeInteractionButtons(user_info, rebuild) {
         menu = makeContextMenu(menu_buttons, "hidden-actions-menu");
         menu_btn = new ContextMenuButton({
             menu: menu.menu,
-            id: "hidden-actions-btn",
+            id: set_ids ? "hidden-actions-btn" : null,
+            classes: ["hidden-actions-btn"],
             label: "...",
         })
     }
@@ -163,9 +174,10 @@ export function insertInteractionButtons(user_info, options) {
         container,
         add_menu = true,
         rebuild = (user_info) => insertInteractionButtons(user_info, {container, add_menu}),
+        set_ids = false,
     } = options;
     // noinspection JSUnresolvedReference
-    let buttons = makeInteractionButtons(user_info, rebuild);
+    let buttons = makeInteractionButtons(user_info, rebuild, set_ids);
     container.innerHTML = "";
     if (buttons.main_btn) buttons.main_btn.appendTo(container);
     if (buttons.main_menu) container.append(buttons.main_menu.wrapper);
@@ -176,19 +188,28 @@ export function insertInteractionButtons(user_info, options) {
     }
 }
 
-export function insertUser(user_info, container) {
+export function insertUser(user_info, container, only_message = false) {
     let box = document.createElement("div");
     box.classList.add("user");
     let name = document.createElement("a");
     name.href = `/profile/${user_info.username}/`;
     // noinspection JSUnresolvedReference
     name.innerText = user_info.display_name;
-    box.append(name);
     let button_container = document.createElement("div");
-    insertInteractionButtons(user_info, {
+    if (only_message) {
+        // noinspection JSUnresolvedReference
+        if (user_info.can_message) {
+            const count = user_info.unread_messages_count;
+            new LinkButton({
+                url: `/message/${user_info.username}/`,
+                label: "Message" + (count ? ` (${count})` : ""),
+                classes: ["message-btn"],
+            }).appendTo(button_container);
+        }
+    } else insertInteractionButtons(user_info, {
         container: button_container,
         add_menu: false,
     });
-    box.append(button_container);
+    box.append(name, button_container);
     container.append(box);
 }

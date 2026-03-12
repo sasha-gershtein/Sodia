@@ -74,6 +74,9 @@ class UserManager(models.Manager):
             raise NotFoundError("User does not exist", reason="USER_NOT_FOUND")
         return user
 
+    def pressing_sodia_button(self):
+        return self.activated().filter(is_pressing_sodia_button=True)
+
 
 class User(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -84,6 +87,7 @@ class User(models.Model):
     challenge_partner = models.OneToOneField("self", on_delete=models.SET_NULL, null=True, related_name="+")
     challenge_streak = models.IntegerField(default=0)
     is_pressing_sodia_button = models.BooleanField(default=False)
+    unread_messages_count = models.IntegerField(default=0)
 
     objects = UserManager()
 
@@ -182,16 +186,25 @@ class User(models.Model):
             )
         ]
 
+    @transaction.atomic
     def mark_dialogue_read(self, interlocutor: Self):
         from messaging.models import Dialogue
         try:
-            Dialogue.objects.get_dialogue(self, interlocutor).mark_read()
+            Dialogue.objects.get_locked_dialogue(self, interlocutor).mark_read()
         except Dialogue.DoesNotExist:
             pass
 
     def send_message(self, recipient: Self, content: str, *, exclude_session: "Session | None" = None):
         from messaging.models import Dialogue
         return Dialogue.objects.send_message(self, recipient, content, exclude_session=exclude_session)
+
+    def press_sodia_button(self):
+        self.is_pressing_sodia_button = True
+        self.save()
+
+    def unpress_sodia_button(self):
+        self.is_pressing_sodia_button = False
+        self.save()
 
 
 class PasswordField(models.CharField):

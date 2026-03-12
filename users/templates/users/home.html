@@ -1,6 +1,26 @@
 {% extends 'users/auth_base.html' %}
 
+{% load static %}
+
+{% block head %}
+    {{ block.super }}
+    <script type="module" src="{% static 'js/users/home.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/users/home.css' %}">
+{% endblock %}
+
 {% block content %}
-    <h1>Hi!</h1>
-    <p>This is the home page</p>
+    <h1>Home</h1>
+    <h2>Sodia Button</h2>
+    <p id="sodia-btn-description"><span>If you are feeling bored, you can press the button.
+        Anyone else currently pressing the button will see you in the list below, and you will see them.</span><br>
+        <span id="no-presses-text">No one is pressing the button right at the moment, but you can be first!</span>
+        <span id="sodia-btn-presses-count-text"><span id="sodia-btn-presses-count"></span>
+            pressing the Sodia Button now. Press it too to see who they are!</span>
+        <span id="pressing-text">You are pressing the button! Press it again to stop.</span>
+    </p>
+
+    <div id="sodia-button-wrapper">
+        <button id="sodia-btn" role="button"></button>
+    </div>
+    <div id="pressing-button-list"></div>
 {% endblock %}

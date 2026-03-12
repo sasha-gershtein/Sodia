@@ -10,6 +10,9 @@ export async function loadMe(show_loading = false) {
         {
             prefix: "navigation",
             show_loading,
+            translators: {
+                unread_messages_count: count => count || "",
+            }
         }
     );
     document.querySelector("#profile-link").href = `/profile/${response.username}/`;

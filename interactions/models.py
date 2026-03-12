@@ -299,17 +299,22 @@ class UserInfo:
         self.friends_count = self.user.get_friends().count()
         self.friends_visible = relation >= privacy.friends
 
-        dialogue = Dialogue.objects.get_readonly_dialogue(requesting_user, user)
-        self.can_message = (
-                user.is_activated and requesting_user.is_activated
-                and relation not in {Relation.SAME_USER, Relation.BLOCKED}
-                and not user.is_blocking(requesting_user)
-                and (
-                        relation >= privacy.message
-                        or dialogue.can_message_back
-                )
-        )
-        self.unread_messages_count = dialogue.unread_messages_count
+        if relation == Relation.SAME_USER:
+            self.can_message = False
+            self.unread_messages_count = self.user.unread_messages_count
+        else:
+            dialogue = Dialogue.objects.get_readonly_dialogue(requesting_user, user)
+            self.can_message = (
+                    user.is_activated and requesting_user.is_activated
+                    and relation != Relation.BLOCKED
+                    and not user.is_blocking(requesting_user)
+                    and (
+                            relation >= privacy.message
+                            or dialogue.can_message_back
+                            or (user.is_pressing_sodia_button and requesting_user.is_pressing_sodia_button)
+                    )
+            )
+            self.unread_messages_count = dialogue.unread_messages_count
 
     @property
     def friends(self):

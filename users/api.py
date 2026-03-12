@@ -85,3 +85,34 @@ def search(_request, user: User, data):
         result.partial
         for result in user.search(query)
     ]
+
+
+def get_sodia_button_info(user: User):
+    query_set = User.objects.pressing_sodia_button().exclude(pk=user.pk)
+    if user.is_pressing_sodia_button:
+        sodia_button_info = [
+            user_pressing_button.info(user).partial
+            for user_pressing_button in query_set
+        ]
+    else:
+        sodia_button_info = query_set.count()
+    return {
+        "is_pressing_sodia_button": user.is_pressing_sodia_button,
+        "sodia_button_info": sodia_button_info,
+    }
+
+
+@api_login_required
+def load_home(_request, user: User, _data):
+    return get_sodia_button_info(user)
+
+
+@api_login_required
+def press_sodia_button(_request, user: User, _data):
+    user.press_sodia_button()
+    return get_sodia_button_info(user)
+
+@api_login_required
+def unpress_sodia_button(_request, user: User, _data):
+    user.unpress_sodia_button()
+    return get_sodia_button_info(user)
