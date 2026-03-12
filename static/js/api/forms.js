@@ -638,7 +638,13 @@ export class UpdateForm extends Form {
     updateFields() {
         for (const [field, value] of Object.entries(this.result)) {
             if (field in this.fields &&
-                !this.fields[field].is_changed && this.fields[field].input !== document.activeElement) {
+                !this.fields[field].is_changed && (
+                    this.fields[field].input !== document.activeElement
+                    || this.fields[field] instanceof SelectField
+                    || this.fields[field] instanceof MultiselectField
+                    || this.fields[field] instanceof CheckboxField
+                    || this.fields[field] instanceof RadioField
+                )) {
                 this.fields[field].value = value;
             }
         }

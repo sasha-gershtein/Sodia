@@ -83,8 +83,6 @@ class User(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     is_activated = models.BooleanField(default=True)  # TODO: default should be False
     flag = SingleChoiceField(enum_class=AccountFlag, default=AccountFlag.UNSAFE)
-    # TODO: make separate table Challenge
-    challenge_partner = models.OneToOneField("self", on_delete=models.SET_NULL, null=True, related_name="+")
     challenge_streak = models.IntegerField(default=0)
     is_pressing_sodia_button = models.BooleanField(default=False)
     unread_messages_count = models.IntegerField(default=0)
@@ -281,6 +279,12 @@ class SessionManager(models.Manager):
                               digestmod=hashlib.sha256)
         kwargs["token"] = token_hash.digest()
         return token_plaintext, self.create(**kwargs)
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("user")
+
+    def get_by_token(self, token):
+        return self.get(token=token)
 
 
 class Session(models.Model):

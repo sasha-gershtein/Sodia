@@ -26,6 +26,19 @@ class AccountForm(UpdateForm):
         kwargs.setdefault("prefix", "account")
         super().__init__(*args, **kwargs)
 
+    def clean(self):
+        cleaned_data = super().clean()
+        username = cleaned_data.get("username")
+        gender = cleaned_data.get("gender")
+        house = cleaned_data.get("house")
+        if username:
+            cleaned_data["username"] = username.lower()
+        if gender:
+            cleaned_data["gender"] = gender.lower()
+        if not house:
+            cleaned_data["boarding_type"] = None
+        return cleaned_data
+
 
 class PrivacyForm(UpdateForm):
     class Meta:

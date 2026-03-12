@@ -29,7 +29,7 @@ class FriendsManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().select_related("sender", "recipient")
 
-    def get_between(self, user_1: User, user_2: User, /):  # TODO: make thread-safe
+    def get_between(self, user_1: User, user_2: User, /):
         if user_1 == user_2:
             raise ValueError("Users must be different")
         try:

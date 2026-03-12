@@ -78,7 +78,7 @@ class AccountManager(SettingsManager):
         # remove possible illegal characters: :/?#[]@!$&'()*+,;=
         base = re.sub(
             r"[^\w.\-_]", "", email.split('@')[0]
-        )[:max_length]
+        )[:max_length].lower()
         username = base
         if len(base) < 2:
             base = "user"
@@ -113,19 +113,17 @@ class UserAccountSettings(models.Model):
             "Username can only contain English letters, digits, periods, dashes and underscores"
         ),
         unique=True
-    )  # TODO: set lowercase
+    )
     first_name = CharField(min_length=2, max_length=50)
     last_name = CharField(min_length=2, max_length=50)
     display_name = CharField(null=True, blank=True, min_length=5, max_length=100)
-    # profile_picture = models.??? TODO
-    gender = CharField(null=True, blank=True, max_length=30)  # TODO: set lowercase
+    gender = CharField(null=True, blank=True, max_length=30)
     birth_date = DateField(null=True, blank=True, min_value=datetime.date(1900, 1, 1), max_value=datetime.date.today)
     country = models.ForeignKey(Country, null=True, blank=True, on_delete=models.SET_NULL)
     description = models.TextField(null=True, blank=True, max_length=2000)
     house = models.ForeignKey(House, null=True, blank=True, on_delete=models.SET_NULL)
-    boarding_type = SingleChoiceField(PupilBoardingType, null=True, blank=True)  # TODO: must be NULL if house is NULL
+    boarding_type = SingleChoiceField(PupilBoardingType, null=True, blank=True)
     year_group = models.ForeignKey(YearGroup, null=True, blank=True, on_delete=models.SET_NULL)
-    # free_periods = ??? TODO: JSONField
 
     objects = AccountManager()
 
@@ -196,7 +194,6 @@ class UserChallengesSettings(models.Model):
     user = models.OneToOneField("users.User", on_delete=models.CASCADE, related_name="challenges_settings",
                                 primary_key=True)
     frequency = SingleChoiceField(enum_class=FrequencySetting, default=FrequencySetting.THREE_DAYS)
-    # year_groups = TODO: JSONField
     gender_filter = MultipleChoiceField(enum_class=GenderFilter, default=GenderFilter.ALL)
     subjects_match = FloatField(default=0.0, min_value=-1.0, max_value=1.0)
     interests_match = FloatField(default=0.0, min_value=-1.0, max_value=1.0)
