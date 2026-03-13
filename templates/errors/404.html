@@ -1,0 +1,8 @@
+{% load static %}
+
+<h1>404: Page not found</h1>
+<p>This page you are looking for does not exist or is located somewhere else.<br>
+    You can either
+    <a href="#" onclick="if (history.length > 1) history.back(); else window.location = '/'; return false;">go back</a>
+    or <a href="{% url 'users:home' %}">return to home</a>
+</p>

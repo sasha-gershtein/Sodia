@@ -1,0 +1,25 @@
+{% extends 'users/auth_base.html' %}
+{% load static %}
+
+{% block head %}
+    {{ block.super }}
+    <script type="module" src="{% static 'js/errors/404-profile.js' %}"></script>
+{% endblock %}
+
+{% block title %}Dialogue not found — Sodia{% endblock %}
+
+{% block content %}
+    <h1>404: Dialogue not found</h1>
+    <p>The dialogue you are looking for does not exist.
+        Perhaps, the user you are looking for has changed their username.</p>
+    <p>
+        <a id="search-link" href="{% url 'users:search' %}">Search for user @<span id="404-username-search"></span></a>
+    </p>
+    <p>
+        You can also
+        <a href="#" onclick="if (history.length > 1) history.back(); else window.location = '/'; return false;">
+            go back</a>,
+        <a href="{% url 'messaging:message-home' %}">see all dialogues</a>,
+        or <a href="{% url 'users:home' %}">return to home</a>
+    </p>
+{% endblock %}

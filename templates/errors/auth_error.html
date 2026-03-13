@@ -1,0 +1,7 @@
+{% extends 'users/auth_base.html' %}
+
+{% block title %}{{ title|default_if_none:"Something went wrong" }} — Sodia{% endblock %}
+
+{% block content %}
+    {% include error %}
+{% endblock %}

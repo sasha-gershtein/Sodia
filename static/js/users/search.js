@@ -57,7 +57,7 @@ class SearchFrom extends Form {
 
 const search_form = new SearchFrom("search-form");
 search_form.fields.query.value = get_url_query().substring(0, search_form.fields.query.input.maxLength);
-if (search_form.validate()) search_form.submit();
+if (search_form.validate()) search_form.form.requestSubmit(search_form.popstate_button);
 
 addEventListener("popstate", (e) => {
     search_form.fields.query.value = get_url_query();

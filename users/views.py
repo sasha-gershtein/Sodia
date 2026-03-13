@@ -30,10 +30,14 @@ class Home(View):
         return render(request, 'users/home.html')
 
 
+class Profile404(Http404):
+    pass
+
+
 @login_required
 def profile(request, _user: User, username: str):
     if User.objects.get_user_by_username(username) is None:
-        raise Http404
+        raise Profile404()
     return render(request, 'users/profile.html')
 
 

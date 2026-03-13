@@ -1,0 +1,9 @@
+{% load static %}
+
+<h1>403: Forbidden (CSRF Verification Failed)</h1>
+<p>Oops, something went wrong. You were not supposed to see this page!<br>
+    Please check that scripts are enabled in your browser. If you see this page again, please contact us.<br>
+    You can either
+    <a href="#" onclick="if (history.length > 1) history.back(); else window.location = '/'; return false;">go back</a>
+    or <a href="{% url 'users:home' %}">return to home</a>
+</p>

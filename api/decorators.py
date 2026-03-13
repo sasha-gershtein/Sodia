@@ -5,6 +5,7 @@ from django.views.decorators.http import require_http_methods
 from django.http import HttpRequest, JsonResponse
 
 from Sodia.settings import DEBUG
+from Sodia.views import handle405
 
 from users.middleware import SessionData
 
@@ -30,10 +31,11 @@ def process_api_errors(func):
 
 
 def api_view(func):
-    @require_http_methods(METHODS)
     @process_api_errors
     @wraps(func)
     def wrapper(request: HttpRequest, *args, **kwargs):
+        if request.method not in METHODS:
+            return handle405(request, METHODS)
         body = request.body.decode("utf-8")
         try:
             data = json.loads(body) if body else {}

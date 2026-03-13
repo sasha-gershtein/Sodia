@@ -1,0 +1,8 @@
+{% load static %}
+
+<h1>500: Internal Server Error</h1>
+<p>Something went wrong, and your request could not be processed. Try again later<br>
+    You can either <a href="#" onclick="location.reload(); return false;">refresh this page</a>,
+    <a href="#" onclick="if (history.length > 1) history.back(); else window.location = '/'; return false;">go back</a>
+    or <a href="{% url 'users:home' %}">return to home</a>
+</p>

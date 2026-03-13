@@ -1,0 +1,22 @@
+{% extends 'users/auth_base.html' %}
+{% load static %}
+
+{% block head %}
+    {{ block.super }}
+    <script type="module" src="{% static 'js/errors/404-profile.js' %}"></script>
+{% endblock %}
+
+{% block title %}User not found — Sodia{% endblock %}
+
+{% block content %}
+    <h1>404: User not found</h1>
+    <p>The user with username @<span id="404-username"></span> does not exist.
+        Perhaps, they've changed their username or deleted their account.</p>
+    <p><a id="search-link" href="{% url 'users:search' %}">Search for user @<span id="404-username-search"></span></a></p>
+    <p>
+        You can also
+        <a href="#" onclick="if (history.length > 1) history.back(); else window.location = '/'; return false;">
+            go back</a>
+        or <a href="{% url 'users:home' %}">return to home</a>
+    </p>
+{% endblock %}

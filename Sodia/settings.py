@@ -153,3 +153,5 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
+
+CSRF_FAILURE_VIEW = 'Sodia.views.csrf_failure'

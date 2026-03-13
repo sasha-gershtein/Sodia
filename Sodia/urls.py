@@ -17,6 +17,10 @@ Including another URLconf
 # from django.contrib import admin
 from django.urls import path, include
 
+handler404 = 'Sodia.views.handle404'
+handler500 = 'Sodia.views.handle500'
+handler_csrf = 'Sodia.views.csrf_failure'
+
 urlpatterns = [
     #    path('admin/', admin.site.urls),
     path('', include('users.urls')),
@@ -25,4 +29,3 @@ urlpatterns = [
     path('api/', include('api.urls')),
 ]
 
-handler404 = 'api.views.handle404'
