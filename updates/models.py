@@ -8,7 +8,7 @@ class UpdateManager(models.Manager):
 
     @transaction.atomic
     def create_update_for_session(self, message, session: Session):
-        session = Session.objects.select_for_update().get(pk=session.pk)
+        session = Session.objects.select_for_update(of=["self"]).get(pk=session.pk)
         next_id = session.next_update_id
         if next_id < 0:
             return
@@ -34,7 +34,7 @@ class UpdateManager(models.Manager):
 
     @transaction.atomic
     def get_updates(self, session: Session):
-        session = Session.objects.select_for_update().get(pk=session.pk)
+        session = Session.objects.select_for_update(of=["self"]).get(pk=session.pk)
         next_id = session.next_update_id
         session.next_update_id = 0
         session.save()
