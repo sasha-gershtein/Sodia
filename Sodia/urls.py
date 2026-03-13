@@ -19,7 +19,6 @@ from django.urls import path, include
 
 handler404 = 'Sodia.views.handle404'
 handler500 = 'Sodia.views.handle500'
-handler_csrf = 'Sodia.views.csrf_failure'
 
 urlpatterns = [
     #    path('admin/', admin.site.urls),

@@ -8,8 +8,9 @@ from Sodia.models import FloatField, DateField, CharField, SingleChoiceField, Mu
 
 
 # Create your models here.
-class Country(models.Model):  # TODO: populate
-    name = CharField(max_length=100)
+class Country(models.Model):
+    id = models.IntegerField(primary_key=True)
+    name = CharField(max_length=100, unique=True)
     code = CharField(max_length=2, unique=True)
 
     def __str__(self):
@@ -29,8 +30,9 @@ class HouseBoardingType(JsonEnumMixin, IntFlag):
     MIXED = auto()
 
 
-class House(models.Model):  # TODO: populate
-    name = models.CharField(max_length=20)
+class House(models.Model):
+    id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=20, unique=True)
     boarding_type = SingleChoiceField(HouseBoardingType)
 
     def __str__(self):
@@ -52,7 +54,7 @@ class PupilBoardingType(JsonEnumMixin, IntFlag):
 
 class YearGroup(models.Model):
     year_group_number = models.IntegerField(primary_key=True)
-    name = CharField(max_length=20)
+    name = CharField(max_length=20, unique=True)
 
     def __str__(self):
         return self.name
