@@ -22,10 +22,10 @@ def handle404(request, exception):
         "error": "errors/404.html",
         "title": "Not found",
     }
-    session_data: SessionData = request.session_data
-    if not session_data.user:
-        return render(request, "errors/unauth_error.html", context=context, status=404)
-    return render(request, "errors/auth_error.html", context=context, status=404)
+    session_data: SessionData = getattr(request, "session_data", None)
+    if session_data and session_data.user:
+        return render(request, "errors/auth_error.html", context=context, status=404)
+    return render(request, "errors/unauth_error.html", context=context, status=404)
 
 
 # noinspection PyUnusedLocal
@@ -34,10 +34,10 @@ def csrf_failure(request, reason):
         "error": "errors/403-csrf.html",
         "title": "Something went wrong",
     }
-    session_data: SessionData = request.session_data
-    if not session_data.user:
-        return render(request, "errors/unauth_error.html", context=context, status=403)
-    return render(request, "errors/auth_error.html", context=context, status=403)
+    session_data: SessionData = getattr(request, "session_data", None)
+    if session_data and session_data.user:
+        return render(request, "errors/auth_error.html", context=context, status=403)
+    return render(request, "errors/unauth_error.html", context=context, status=403)
 
 
 def handle405(request, allow=("POST",)):
@@ -45,11 +45,11 @@ def handle405(request, allow=("POST",)):
         "error": "errors/405-api.html",
         "title": "Method not allowed",
     }
-    session_data: SessionData = request.session_data
-    if not session_data.user:
-        response = render(request, "errors/unauth_error.html", context=context, status=405)
-    else:
+    session_data: SessionData = getattr(request, "session_data", None)
+    if session_data and session_data.user:
         response = render(request, "errors/auth_error.html", context=context, status=405)
+    else:
+        response = render(request, "errors/unauth_error.html", context=context, status=405)
     response["Allow"] = ", ".join(allow)
     return response
 
@@ -59,7 +59,7 @@ def handle500(request):
         "error": "errors/500.html",
         "title": "Something went wrong",
     }
-    session_data: SessionData = request.session_data
-    if not session_data.user:
-        return render(request, "errors/unauth_error.html", context=context, status=500)
-    return render(request, "errors/auth_error.html", context=context, status=500)
+    session_data: SessionData = getattr(request, "session_data", None)
+    if session_data and session_data.user:
+        return render(request, "errors/auth_error.html", context=context, status=500)
+    return render(request, "errors/unauth_error.html", context=context, status=500)
