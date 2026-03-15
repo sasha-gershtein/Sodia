@@ -1,7 +1,5 @@
 # Sodia
 
-_(Currently in development)_
-
 **Sodia** (from **so**cial me**dia** — I know, I'm _very_ creative) is a web application, a social media for school
 students. It is designed to help new students to meet people and make friends when they change schools.
 

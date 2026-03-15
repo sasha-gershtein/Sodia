@@ -354,17 +354,16 @@ async function load() {
         }
         DialogueList.addDialogue(user_info).select();
     }
+    Updates.register("messaging.new", msg => {
+        // noinspection JSUnresolvedReference
+        const interlocutor = msg.interlocutor;
+        if (!DialogueList.dialogues[interlocutor.id]) DialogueList.addDialogue(interlocutor);
+        else DialogueList.dialogues[interlocutor.id].addMessage(msg);
+    });
 }
 
 page_loading.show();
 load().then(() => page_loading.hide());
-
-Updates.register("messaging.new", msg => {
-    // noinspection JSUnresolvedReference
-    const interlocutor = msg.interlocutor;
-    if (!DialogueList.dialogues[interlocutor.id]) DialogueList.addDialogue(interlocutor);
-    else DialogueList.dialogues[interlocutor.id].addMessage(msg);
-});
 
 addEventListener("popstate", (e) => {
     const username = get_url_username();
