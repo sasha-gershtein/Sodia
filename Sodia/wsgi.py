@@ -1,4 +1,7 @@
 """
+Automatically generated at project creation config file needed to set up a run a web server.
+--------------------------------------------------------------------------------------------
+
 WSGI config for Sodia project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
@@ -11,6 +14,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Sodia.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "Sodia.settings")
 
 application = get_wsgi_application()

@@ -1,7 +1,8 @@
-import {UpdateForm} from '../api/forms.js';
+import {UpdateForm} from "../api/forms.js";
 
 class PrivacyForm extends UpdateForm {
+    // override success message for privacy settings form
     success_message = "Privacy settings are saved successfully";
 }
 
-const privacy_settings_form = new PrivacyForm("privacy");
+new PrivacyForm("privacy"); // initialise privacy settings form

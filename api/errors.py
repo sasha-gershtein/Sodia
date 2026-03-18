@@ -1,3 +1,5 @@
+"""This file defines API error classes and functions to handle them"""
+
 import math
 
 from django.core.exceptions import ValidationError
@@ -7,10 +9,11 @@ from django.urls import reverse_lazy
 
 
 class ApiError(Exception):
-    code: int = 500
-    reason: str = "GENERIC"
-    message: str = "Internal Server Error"
-    meta = None
+    """Base class for all API errors"""
+    code: int = 500  # HTTP response code
+    reason: str = "GENERIC"  # REASON header and value that can be used by the client to identify error's source
+    message: str = "Internal Server Error"  # human-readable message
+    meta = None  # additional data that can be passed alongside with the error
 
     def __init__(self, message=None, *args, code=None, reason=None, meta=None):
         super().__init__(*args)
@@ -21,7 +24,9 @@ class ApiError(Exception):
 
 
 class InternalServerError(ApiError):
+    code = 500
     reason = "INTERNAL_SERVER_ERROR"
+    message = "Something went wrong and your request could not be processed"
 
 
 class ClientError(ApiError, ValueError):
@@ -46,8 +51,8 @@ class UnauthorizedError(ClientError):
     reason = "UNAUTHORIZED"
     message = "Unauthorized"
     meta = {
-        "redirect": {
-            "location": reverse_lazy("users:home")
+        "redirect": {  # redirect to login page
+            "location": reverse_lazy("users:home"),
         }
     }
 
@@ -98,20 +103,24 @@ class FormResponseUserError(ValidationError):
 
 
 def parse_form_errors(form: forms.BaseForm):
+    """return an API exception that best describes errors in a form submission"""
     assert form.errors, "parse_form_errors should only be called on invalid forms"
     user_error = FormResponseUserError(message="", priority=-math.inf)
     for field_errors in form.errors.as_data().values():
         for error in field_errors:
             if not isinstance(error, FormResponseUserError):
+                # if there is a non-custom error, return APIValidationError
                 return APIValidationError(meta=form.errors)
 
             if error.priority > user_error.priority:
                 user_error = error
 
+    # return a custom error with reason of the highest priority error
     return BadUserInputError(meta=form.errors, reason=user_error.code.upper() if user_error.code else None)
 
 
 def ErrorResponse(e: ApiError):
+    """return a JsonResponse with error details in the standard API format"""
     return JsonResponse(
         data={
             "success": False,

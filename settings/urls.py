@@ -1,12 +1,14 @@
+"""This file defines paths of app "settings" that are accessible on the website, except for static files."""
+
 from django.urls import path
 from . import views
 
-app_name = 'settings'
+app_name = "settings"
 
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('account/', views.account, name='account'),
-    path('privacy/', views.privacy, name='privacy'),
-    path('notifications/', views.notifications, name='notifications'),
-    path('challenges/', views.challenges, name='challenges'),
+    path("", views.index, name="index"),
+    path("account/", views.account, name="account"),
+    path("privacy/", views.privacy, name="privacy"),
+    path("notifications/", views.notifications, name="notifications"),
+    path("challenges/", views.challenges, name="challenges"),
 ]

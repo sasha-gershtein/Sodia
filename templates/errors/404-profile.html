@@ -12,7 +12,9 @@
     <h1>404: User not found</h1>
     <p>The user with username @<span id="404-username"></span> does not exist.
         Perhaps, they've changed their username or deleted their account.</p>
-    <p><a id="search-link" href="{% url 'users:search' %}">Search for user @<span id="404-username-search"></span></a></p>
+    <p>
+        <a id="search-link" href="{% url 'users:search' %}">Search for user @<span id="404-username-search"></span></a>
+    </p>
     <p>
         You can also
         <a href="#" onclick="if (history.length > 1) history.back(); else window.location = '/'; return false;">

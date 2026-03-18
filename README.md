@@ -14,9 +14,8 @@ I also use pure JavaScript on the front end to make API requests for fetching da
 with Django templates and automatic POST requests on form submission. This makes my app closer to a single-page
 application. I think it'd be cooler to make an SPA from scratch, but this might be a stretch goal.
 
-Despite (or, rather, due to) this being a learning project, I'm really trying to write good easy-to-maintain code. It
-may be lacking comments at the time of writing, but I don't think there is any spaghetti code impossible to understand
-by reading in this project.
+Despite (or, rather, due to) this being a learning project, I'm really trying to write good easy-to-maintain code.
+I have also gone through the whole codebase to add elaborate comments and doc strings.
 
 Things I'm using or implementing for the first time in a big project for Sodia:
 

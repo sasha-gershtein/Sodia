@@ -1,13 +1,20 @@
+"""This file defines the Password class to handle passwords hashes and verify them"""
+
 import hashlib
 import secrets
 import base64
 import os
+from typing import overload
 
 
 class Password:
+    """Class for values of PasswordField that store a cryptographically secure hash of a password
+    and implement verification methods"""
+    # default settings
     ALGORITHM = "sha256"
+    # passwords are hashed 200000 times in a row to make exhaustive search attack less time-efficient
     ITERATIONS = 200000
-    __slots__ = (
+    __slots__ = (  # memory optimisation
         "algorithm",
         "iterations",
         "salt",
@@ -18,20 +25,34 @@ class Password:
 
     @staticmethod
     def get_hash(password, algorithm, salt, iterations):
+        """return the hash of a password"""
         return hashlib.pbkdf2_hmac(algorithm, password.encode("utf-8"), salt, iterations)
 
     @classmethod
     def from_password(cls, password: str):
+        """return a Password instance from a plaintext password"""
         return cls(password=password)
 
     @classmethod
     def from_db_value(cls, value: str):
+        """return a Password instance from a db value"""
         return cls(db_string=value)
+
+    @overload
+    def __init__(self, db_string: str):
+        ...
+
+    @overload
+    def __init__(self, password: str, *,
+                 salt: bytes | None = None,
+                 algorithm: str = ALGORITHM,
+                 iterations: int = ITERATIONS):
+        ...
 
     def __init__(
             self,
-            password: str | None = None, *,
-            db_string: str | None = None,
+            password: str | None = None, *,  # plaintext password
+            db_string: str | None = None,  # db value
             salt: bytes | None = None,
             algorithm: str = ALGORITHM,
             iterations: int = ITERATIONS
@@ -53,6 +74,7 @@ class Password:
 
         self.algorithm = algorithm
         self.iterations = iterations
+        # generate cryptographically secure random salt if not passed
         self.salt: bytes = os.urandom(32) if salt is None else salt
         if password is None:
             raise ValueError("Must provide either a password or a db_string")
@@ -61,10 +83,14 @@ class Password:
         self.salt_string = base64.b64encode(self.salt).decode("ascii")
 
     def verify(self, password: str) -> bool:
+        """compare plaintext password to password hash (timing attack resistant)"""
+        # hash string password using same salt
+        # compare hashes using constant-time comparison to prevent timing attacks
         return secrets.compare_digest(self.password_hash,
                                       self.get_hash(password, self.algorithm, self.salt, self.iterations))
 
     def __eq__(self, other):
+        """shorthand for self.verify(other: str) or compare hashes with another Password instance"""
         if isinstance(other, Password):
             return secrets.compare_digest(self.password_hash, other.password_hash)
         if isinstance(other, str):
@@ -72,4 +98,5 @@ class Password:
         return NotImplemented
 
     def __str__(self):
+        """get db value"""
         return f"pbkdf2-{self.algorithm}:{self.iterations}:{self.salt_string}:{self.password_hash_string}"

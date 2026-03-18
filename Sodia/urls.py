@@ -1,30 +1,20 @@
 """
 URL configuration for Sodia project.
 
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+This file defines paths that are accessible on the website, except for static files.
+This file is at the project root, so it doesn't define individual views,
+but includes paths from other apps in the project.
 """
-# from django.contrib import admin
+
 from django.urls import path, include
 
-handler404 = 'Sodia.views.handle404'
-handler500 = 'Sodia.views.handle500'
+handler404 = "Sodia.views.handle404"  # handle 404 errors
+handler500 = "Sodia.views.handle500"  # handle 500 errors
+# CSRF failure error view is configured in Sodia/settings.py
 
 urlpatterns = [
-    #    path('admin/', admin.site.urls),
-    path('', include('users.urls')),
-    path('settings/', include('settings.urls')),
-    path('message/', include('messaging.urls')),
-    path('api/', include('api.urls')),
+    path("", include("users.urls")),  # paths from app users
+    path("settings/", include("settings.urls")),  # paths from app settings
+    path("message/", include("messaging.urls")),  # paths from app messaging
+    path("api/", include("api.urls")),  # paths from app api for API endpoints
 ]
-

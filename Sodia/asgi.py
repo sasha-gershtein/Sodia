@@ -1,4 +1,7 @@
 """
+Automatically generated at project creation config file that can alternatively be used to set up a run a web server.
+--------------------------------------------------------------------------------------------------------------------
+
 ASGI config for Sodia project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
@@ -11,6 +14,6 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Sodia.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "Sodia.settings")
 
 application = get_asgi_application()

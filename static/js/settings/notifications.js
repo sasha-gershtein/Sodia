@@ -1,7 +1,8 @@
-import {UpdateForm} from '../api/forms.js';
+import {UpdateForm} from "../api/forms.js";
 
 class NotificationsForm extends UpdateForm {
+    // override success message for notifications settings form
     success_message = "Notifications settings are saved successfully";
 }
 
-const notifications_settings_form = new NotificationsForm("notifications");
+new NotificationsForm("notifications"); // initialise notifications settings form
