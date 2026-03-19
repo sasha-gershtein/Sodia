@@ -1,3 +1,5 @@
+<!-- CODE IN THIS FILE WAS GENERATED USING AI (GPT-5) -->
+
 {% extends 'base.html' %}
 
 {% load static %}
@@ -15,14 +17,14 @@
 
 {% block body %}
     {% include 'users/navigation.html' %}
-    <main>
-        <section id="dialogue-list-container">
+    <main class="messaging-layout app-main">
+        <section id="dialogue-list-container" class="messaging-panel">
             <div id="empty-dialogue-list">Dialogues will be displayed here.<br>
                 To create a dialogue, open a user's profile and press "Message"
             </div>
             <div id="dialogue-list"></div>
         </section>
-        <section id="active-dialogue">
+        <section id="active-dialogue" class="messaging-panel">
             <div id="no-selected-dialogue">Please select a dialogue to chat...</div>
             <div id="dialogue-title-container"><a id="dialogue-title"></a></div>
             <section id="messages-area">
@@ -42,3 +44,4 @@
     </main>
     {{ block.super }}
 {% endblock %}
+

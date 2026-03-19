@@ -1,6 +1,10 @@
+<!-- CODE IN THIS FILE WAS GENERATED USING AI (GPT-5) -->
+
 {% extends 'users/auth_base.html' %}
 
 {% load static %}
+
+{% block title %}Home — Sodia{% endblock %}
 
 {% block head %}
     {{ block.super }}
@@ -9,18 +13,32 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Home</h1>
-    <h2>(Sodia™ Button™)™</h2>
-    <p id="sodia-btn-description"><span>If you are feeling bored, you can press the button.
-        Anyone else currently pressing the button will see you in the list below, and you will see them.</span><br>
-        <span id="no-presses-text">No one is pressing the button right at the moment, but you can be first!</span>
-        <span id="sodia-btn-presses-count-text"><span id="sodia-btn-presses-count"></span>
-            pressing the Sodia Button now. Press it too to see who they are!</span>
-        <span id="pressing-text">You are pressing the button! Press it again to stop.</span>
-    </p>
+    <section class="home-layout">
+        <div class="home-main">
+            <h1>Home</h1>
+            <h2>The (Sodia™ Button™)™</h2>
+            <p id="sodia-btn-description">
+                <span>
+                    If you are feeling bored, you can press the Sodia Button.
+                    Anyone else currently pressing the button will see you in the list below, and you will see them.
+                    You will be able to message them and agree to meet up and hang out.
+                </span><br>
+                <span id="no-presses-text">
+                    No one is pressing the button right at the moment, but you can be first!</span>
+                <span id="sodia-btn-presses-count-text"><span id="sodia-btn-presses-count"></span>
+                    pressing the Sodia Button now. Press it too to see who they are!</span>
+                <span id="pressing-text">You are pressing the button. Press again to stop.</span>
+            </p>
 
-    <div id="sodia-button-wrapper">
-        <button id="sodia-btn" role="button"></button>
-    </div>
-    <div id="pressing-button-list"></div>
+            <div id="sodia-button-wrapper">
+                <button id="sodia-btn" role="button" aria-label="Toggle Sodia button"></button>
+            </div>
+
+            <div id="pressing-users-wrap">
+            <h3>Other people pressing the button:</h3>
+            <div id="pressing-button-list"></div>
+            </div>
+        </div>
+    </section>
 {% endblock %}
+

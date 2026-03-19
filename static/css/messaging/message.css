@@ -1,27 +1,53 @@
+/* CODE IN THIS FILE WAS GENERATED USING AI (GPT-5) */
+
 body {
+    min-height: 100vh;
+}
+
+body:has(.messaging-layout) {
+    height: 100dvh;
+    overflow: hidden;
+}
+
+body:has(.messaging-layout) .app-footer {
+    display: none;
+}
+
+.messaging-layout {
     display: flex;
-    flex-direction: column;
-    height: 100vh;
+    gap: 12px;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 12px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.messaging-layout.app-main {
+    padding: 12px;
     margin: 0;
 }
 
-header {
-    margin: 0 5px;
-}
-
-main {
-    display: flex;
-    flex: 1;
-    min-height: 0;
+.messaging-panel {
+    border: 1px solid var(--text-200);
+    border-radius: 14px;
+    background: var(--background-50);
+    box-shadow: 0 14px 24px -24px var(--text-950);
 }
 
 #dialogue-list-container {
-    border-right: 2px solid black;
-    width: 35%;
-    overflow-y: scroll;
-    padding-bottom: 20px;
+    width: min(360px, 34vw);
+    min-width: 260px;
+    min-height: 0;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
+}
+
+#dialogue-list {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 
 #dialogue-list-container:not(:has(#dialogue-list:empty)) #empty-dialogue-list {
@@ -29,29 +55,38 @@ main {
 }
 
 #empty-dialogue-list {
-    padding: 0 20px;
-    font-style: italic;
     margin: auto;
+    padding: 0 18px;
+    text-align: center;
+    color: var(--text-700);
+    font-style: italic;
+    line-height: 1.45;
 }
 
 .dialogue {
     user-select: none;
-    height: 60px;
-    border-bottom: 1px solid #2e2e2e;
+    min-height: 66px;
+    border-bottom: 1px solid var(--text-100);
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 4px 10px;
+    gap: 8px;
+    padding: 10px 12px;
     cursor: pointer;
     position: relative;
+    transition: background-color 120ms ease;
+}
+
+.dialogue:last-child {
+    border-bottom: 0;
 }
 
 .dialogue:hover {
-    background: #bbd1ec;
+    background: var(--primary-50);
 }
 
 .dialogue:has(> input:checked) {
-    background: #75a6df;
+    background: var(--secondary-100);
 }
 
 .dialogue > input {
@@ -63,18 +98,34 @@ main {
 }
 
 .dialogue .name {
-    font-size: 150%;
+    font-size: 1.12rem;
     display: flex;
     flex: 1;
-    font-weight: 600;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    color: var(--text-900);
+}
+
+.dialogue .name::before {
+    content: "";
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+    border: 1px solid var(--text-200);
+    background: center / cover no-repeat url("../../img/default_pfp.jpg");
 }
 
 .dialogue .unread-messages-counter {
-    border-radius: 100vmax; /* large enough, so browsers will cut down to make a "pill"   */
-    background: #cc4755;
+    border-radius: 999px;
+    background: hsl(356 71% 56%);
     text-align: center;
-    padding: 3px 8px;
+    padding: 2px 8px;
     color: white;
+    font-weight: 700;
+    font-size: 0.84rem;
+    min-width: 26px;
 }
 
 .dialogue .unread-messages-counter:empty {
@@ -82,9 +133,12 @@ main {
 }
 
 #active-dialogue {
-    width: 65%;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 #active-dialogue:has(#no-selected-dialogue:not([hidden])) > :not(#no-selected-dialogue) {
@@ -93,33 +147,52 @@ main {
 
 #no-selected-dialogue {
     margin: auto;
-    font-size: 150%;
+    font-size: 1.2rem;
+    color: var(--text-700);
     font-style: italic;
+    text-align: center;
+    padding: 16px;
 }
 
 #dialogue-title-container {
-    padding: 10px 20px;
-    border-bottom: 1px solid #2e2e2e;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--text-100);
 }
 
 #dialogue-title {
-    font-size: 180%;
-    font-weight: 600;
-    text-decoration: underline;
-    color: unset;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-900);
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+}
+
+#dialogue-title::before {
+    content: "";
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+    border: 1px solid var(--text-200);
+    background: center / cover no-repeat url("../../img/default_pfp.jpg");
 }
 
 #message-input-area {
     display: flex;
     flex-direction: row;
-    padding: 10px 20px;
-    background: #d2d2d5;
+    padding: 10px 12px;
+    border-top: 1px solid var(--text-100);
+    background: var(--background-100);
+    border-radius: 0 0 14px 14px;
 }
 
 #message-input-form {
     flex: 1;
     display: flex;
     flex-direction: row;
+    gap: 8px;
+    align-items: flex-end;
 }
 
 #message-input-container {
@@ -133,24 +206,35 @@ main {
     width: 100%;
     resize: none;
     bottom: 0;
-    padding: 5px 10px;
-    border: unset;
-    background: #d2d2d5;
-    outline: unset;
+    padding: 9px 12px;
+    border: 0;
+    outline: 1px solid var(--text-200);
+    background: var(--background);
+    line-height: 1.35;
     max-height: 150px;
-    border-radius: 10px 10px 0 0;
-    scrollbar-width: none;
+    border-radius: 10px;
+    overflow-y: auto;
+}
+
+#message-input-field:placeholder-shown {
+    overflow-y: hidden;
+}
+
+#message-input-field:focus-visible {
+    outline-color: var(--primary-500);
+    box-shadow: 0 0 0 3px hsl(228 83% 50% / 0.22);
 }
 
 #message-input-form.cannot-message #message-input-field {
     font-style: italic;
     text-align: center;
+    color: var(--text-700);
 }
 
 #send-message-btn {
-    margin-left: 10px;
-    padding: 4px 6px;
-    border-radius: 100vmax; /* large enough, so browsers will cut down to make a "pill"   */
+    margin: 0;
+    padding: 8px 12px;
+    border-radius: 999px;
 }
 
 #message-input-form.cannot-message #send-message-btn {
@@ -167,10 +251,12 @@ main {
 #messages-area {
     flex: 1;
     min-width: 0;
-    overflow-y: scroll;
+    min-height: 180px;
+    overflow-y: auto;
     display: flex;
     flex-direction: column-reverse;
-    padding: 16px;
+    padding: 12px;
+    gap: 4px;
 }
 
 #message-sentinel {
@@ -181,28 +267,54 @@ main {
 }
 
 .message {
-    border: 1px solid #2e2e2e;
+    border: 1px solid var(--text-200);
     margin: 2px;
-    max-width: 70%;
-    border-radius: 8px;
+    max-width: min(72%, 620px);
+    border-radius: 12px;
+    background: var(--background);
 }
 
 .message.own {
-    background: #83df75;
+    background: hsl(121 51% 89%);
     align-self: flex-end;
+    border-color: hsl(121 41% 70%);
 }
 
 .message:not(.own) {
-    background: #759adf;
+    background: hsl(211 80% 92%);
     align-self: flex-start;
+    border-color: hsl(211 67% 76%);
 }
 
 .sent-at {
     font-style: italic;
-    font-size: 70%;
-    margin: 0 8px;
+    font-size: 0.73rem;
+    margin: 6px 9px 0;
+    color: var(--text-700);
 }
 
 .message-content {
-    padding: 2px 6px;
+    padding: 4px 9px 8px;
+    overflow-wrap: anywhere;
 }
+
+@media (max-width: 940px) {
+    .messaging-layout {
+        flex-direction: column;
+        min-height: auto;
+    }
+
+    #dialogue-list-container {
+        width: 100%;
+        max-height: 34vh;
+    }
+
+    #active-dialogue {
+        min-height: 56vh;
+    }
+
+    .message {
+        max-width: 86%;
+    }
+}
+

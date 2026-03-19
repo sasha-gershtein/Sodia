@@ -1,3 +1,5 @@
+<!-- CODE IN THIS FILE WAS GENERATED USING AI (GPT-5) -->
+
 {% extends "settings/settings_base.html" %}
 
 {% load static %}
@@ -12,8 +14,13 @@
 {% endblock %}
 
 {% block settings %}
-    <form id="privacy" action="{% url 'api:settings:privacy' %}" method="post">
+    <form id="privacy" class="settings-form-card" action="{% url 'api:settings:privacy' %}" method="post">
+        <h2>
+            <span class="material-symbols-outlined" aria-hidden="true">shield_lock</span>
+            <span>Privacy controls</span>
+        </h2>
         {{ privacy_form }}
         <input type="submit" value="Save">
     </form>
 {% endblock %}
+

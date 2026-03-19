@@ -1,11 +1,29 @@
-{% extends "users/auth_base.html" %}
+<!-- CODE IN THIS FILE WAS GENERATED USING AI (GPT-5) -->
+
+{% extends "settings/settings_base.html" %}
 
 {% block title %}Settings — Sodia{% endblock %}
 
-{% block content %}
-    <h1>Settings</h1>
-    <a href="{% url "settings:account" %}">Account settings</a><br>
-    <a href="{% url "settings:privacy" %}">Privacy settings</a><br>
-    <a href="{% url "settings:notifications" %}">Notifications settings</a><br>
-    <a href="{% url "settings:challenges" %}">Challenges settings</a><br>
+{% block settings_nav %}{% endblock %}
+
+{% block settings %}
+    <div class="settings-grid">
+        <a class="settings-tile" href="{% url "settings:account" %}">
+            <span class="material-symbols-outlined" aria-hidden="true">manage_accounts</span>
+            <span>Account settings</span>
+        </a>
+        <a class="settings-tile" href="{% url "settings:privacy" %}">
+            <span class="material-symbols-outlined" aria-hidden="true">shield_lock</span>
+            <span>Privacy settings</span>
+        </a>
+        <a class="settings-tile" href="{% url "settings:notifications" %}">
+            <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
+            <span>Notifications settings</span>
+        </a>
+        <a class="settings-tile" href="{% url "settings:challenges" %}">
+            <span class="material-symbols-outlined" aria-hidden="true">trophy</span>
+            <span>Challenges settings</span>
+        </a>
+    </div>
 {% endblock %}
+

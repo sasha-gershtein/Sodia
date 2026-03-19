@@ -280,6 +280,12 @@ const date_formatter = new Intl.DateTimeFormat("en-GB", { // formats date as 19/
     year: "2-digit",
 });
 
+const birth_date_formatter = new Intl.DateTimeFormat("en-GB");
+
+export function format_birth_date(birth_date) {
+    return birth_date_formatter.format(new Date(birth_date))
+}
+
 export function formatTimestamp(timestamp) {
     // format timestamp (i.e. for messages)
     // examples:

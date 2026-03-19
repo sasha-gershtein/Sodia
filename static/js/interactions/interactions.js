@@ -182,7 +182,6 @@ export function makeInteractionButtons(user_info, rebuild, set_ids = false) {
             menu: menu.menu,
             id: set_ids ? "hidden-actions-btn" : null, // do not set ids if set_ids is false
             classes: ["hidden-actions-btn"],
-            label: "...",
         })
     }
 

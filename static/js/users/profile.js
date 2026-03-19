@@ -1,6 +1,6 @@
 import {api, loadTemplate, processError} from "../api/api.js";
 import {insertInteractionButtons, insertUser} from "../interactions/interactions.js";
-import {ContextMenuButton} from "../api/ui.js";
+import {ContextMenuButton, format_birth_date} from "../api/ui.js";
 
 // select HTML elements
 const friends_list = document.getElementById("friends-list");
@@ -78,6 +78,7 @@ loadTemplate(
             // show "1 friend" or "n friends" if n != 1
             friends_count: friends_count => `${friends_count} friend${friends_count === 1 ? "" : "s"}`,
             country: country => country?.name, // show country name if defined, hide otherwise
+            birth_date: birth_date => birth_date ? format_birth_date(birth_date) : "",
         }
     }
 ).then(load); // then call load()

@@ -1,24 +1,44 @@
+<!-- CODE IN THIS FILE WAS GENERATED USING AI (GPT-5) -->
+
 {% extends 'users/auth_base.html' %}
 {% load static %}
 
 {% block head %}
     {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/errors/errors.css' %}">
     <script type="module" src="{% static 'js/errors/404-profile.js' %}"></script>
 {% endblock %}
 
 {% block title %}User not found — Sodia{% endblock %}
 
 {% block content %}
-    <h1>404: User not found</h1>
-    <p>The user with username @<span id="404-username"></span> does not exist.
-        Perhaps, they've changed their username or deleted their account.</p>
-    <p>
-        <a id="search-link" href="{% url 'users:search' %}">Search for user @<span id="404-username-search"></span></a>
-    </p>
-    <p>
-        You can also
-        <a href="#" onclick="if (history.length > 1) history.back(); else window.location = '/'; return false;">
-            go back</a>
-        or <a href="{% url 'users:home' %}">return to home</a>
-    </p>
+    <section class="error-screen">
+        <article class="error-card">
+            <div class="error-brand">
+                <img src="{% static 'img/logo-horizontal.png' %}" alt="Sodia">
+            </div>
+            <p class="error-kicker">Error 404</p>
+            <h1 class="error-title">User not found</h1>
+            <p class="error-description">
+                The user <strong>@<span id="404-username"></span></strong> does not exist.
+                They may have changed their username or deleted their account.
+            </p>
+            <p class="error-description">
+                <a id="search-link" class="error-inline-link" href="{% url 'users:search' %}">
+                    Search for @<span id="404-username-search"></span>
+                </a>
+            </p>
+            <div class="error-actions">
+                <a href="#" onclick="if (history.length > 1) history.back(); else window.location = '/'; return false;">
+                    <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                    <span>Go back</span>
+                </a>
+                <a class="error-action-secondary" href="{% url 'users:home' %}">
+                    <span class="material-symbols-outlined" aria-hidden="true">home</span>
+                    <span>Home</span>
+                </a>
+            </div>
+        </article>
+    </section>
 {% endblock %}
+

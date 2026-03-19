@@ -1,8 +1,32 @@
+<!-- CODE IN THIS FILE WAS GENERATED USING AI (GPT-5) -->
+
 {% load static %}
 
-<h1>500: Internal Server Error</h1>
-<p>Something went wrong, and your request could not be processed. Try again later<br>
-    You can either <a href="#" onclick="location.reload(); return false;">refresh this page</a>,
-    <a href="#" onclick="if (history.length > 1) history.back(); else window.location = '/'; return false;">go back</a>
-    or <a href="{% url 'users:home' %}">return to home</a>
-</p>
+<section class="error-screen">
+    <article class="error-card">
+        <div class="error-brand">
+            <img src="{% static 'img/logo-horizontal.png' %}" alt="Sodia">
+        </div>
+        <p class="error-kicker">Error 500</p>
+        <h1 class="error-title">Internal server error</h1>
+        <p class="error-description">
+            Something went wrong and your request could not be processed.
+            Please try again in a moment.
+        </p>
+        <div class="error-actions">
+            <a href="#" onclick="location.reload(); return false;">
+                <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+                <span>Refresh</span>
+            </a>
+            <a class="error-action-secondary" href="#" onclick="if (history.length > 1) history.back(); else window.location = '/'; return false;">
+                <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                <span>Go back</span>
+            </a>
+            <a class="error-action-secondary" href="{% url 'users:home' %}">
+                <span class="material-symbols-outlined" aria-hidden="true">home</span>
+                <span>Home</span>
+            </a>
+        </div>
+    </article>
+</section>
+

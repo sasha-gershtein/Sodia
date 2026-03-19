@@ -1,3 +1,5 @@
+<!-- CODE IN THIS FILE WAS GENERATED USING AI (GPT-5) -->
+
 {% extends 'base.html' %}
 
 {% load static %}
@@ -11,8 +13,11 @@
 
 {% block body %}
     {% include 'users/navigation.html' %}
-    <main>
-        {% block content %}{% endblock %}
+    <main class="app-main">
+        <div class="app-content-wrap">
+            {% block content %}{% endblock %}
+        </div>
     </main>
     {{ block.super }}
 {% endblock %}
+

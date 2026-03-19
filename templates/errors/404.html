@@ -1,8 +1,27 @@
+<!-- CODE IN THIS FILE WAS GENERATED USING AI (GPT-5) -->
+
 {% load static %}
 
-<h1>404: Page not found</h1>
-<p>This page you are looking for does not exist or is located somewhere else.<br>
-    You can either
-    <a href="#" onclick="if (history.length > 1) history.back(); else window.location = '/'; return false;">go back</a>
-    or <a href="{% url 'users:home' %}">return to home</a>
-</p>
+<section class="error-screen">
+    <article class="error-card">
+        <div class="error-brand">
+            <img src="{% static 'img/logo-horizontal.png' %}" alt="Sodia">
+        </div>
+        <p class="error-kicker">Error 404</p>
+        <h1 class="error-title">Page not found</h1>
+        <p class="error-description">
+            The page you are looking for does not exist or has been moved.
+        </p>
+        <div class="error-actions">
+            <a href="#" onclick="if (history.length > 1) history.back(); else window.location = '/'; return false;">
+                <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                <span>Go back</span>
+            </a>
+            <a class="error-action-secondary" href="{% url 'users:home' %}">
+                <span class="material-symbols-outlined" aria-hidden="true">home</span>
+                <span>Home</span>
+            </a>
+        </div>
+    </article>
+</section>
+

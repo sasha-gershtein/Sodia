@@ -1,3 +1,5 @@
+<!-- CODE IN THIS FILE WAS GENERATED USING AI (GPT-5) -->
+
 {% extends "settings/settings_base.html" %}
 
 {% load static %}
@@ -12,14 +14,24 @@
 {% endblock %}
 
 {% block settings %}
-    <form id="change-password" action="{% url 'api:users:change_password' %}" method="post">
-        <h2>Change password:</h2>
-        {{ change_password_form }}
-        <input type="submit" value="Change password">
-    </form>
-    <form id="account" action="{% url 'api:settings:account' %}" method="post">
-        <h2>Account settings:</h2>
-        {{ account_form }}
-        <input type="submit" value="Save">
-    </form>
+    <div class="settings-stack">
+        <form id="change-password" class="settings-form-card" action="{% url 'api:users:change_password' %}" method="post">
+            <h2>
+                <span class="material-symbols-outlined" aria-hidden="true">password</span>
+                <span>Change password</span>
+            </h2>
+            {{ change_password_form }}
+            <input type="submit" value="Change password">
+        </form>
+
+        <form id="account" class="settings-form-card" action="{% url 'api:settings:account' %}" method="post">
+            <h2>
+                <span class="material-symbols-outlined" aria-hidden="true">manage_accounts</span>
+                <span>Account details</span>
+            </h2>
+            {{ account_form }}
+            <input type="submit" value="Save">
+        </form>
+    </div>
 {% endblock %}
+

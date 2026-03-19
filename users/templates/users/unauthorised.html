@@ -1,3 +1,5 @@
+<!-- CODE IN THIS FILE WAS GENERATED USING AI (GPT-5) -->
+
 {% extends 'base.html' %}
 
 {% load static %}
@@ -6,22 +8,37 @@
 
 {% block head %}
     {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/users/unauthorised.css' %}">
     <script type="module" src="{% static 'js/users/unauthorised.js' %}"></script>
 {% endblock %}
 
 {% block body %}
     {{ block.super }}
-    <main>
-        <h1>Sodia</h1>
-        <form id="login" action="{% url 'api:users:login' %}" method="post">
-            <h2>Sign in:</h2>
-            {{ login_form }}
-            <input type="submit" value="Sign in">
-        </form>
-        <form id="registration" action="{% url 'api:users:register' %}" method="post">
-            <h2>Sign up:</h2>
-            {{ registration_form }}
-            <input type="submit" value="Sign up">
-        </form>
+    <main class="auth-landing">
+        <section class="auth-hero">
+            <img class="auth-logo" src="{% static 'img/logo-240.png' %}" alt="Sodia logo">
+            <p>Sign in to continue, or create a new account to get started.</p>
+        </section>
+
+        <section class="auth-grid">
+            <form id="login" class="auth-card" action="{% url 'api:users:login' %}" method="post">
+                <h2>
+                    <span class="material-symbols-outlined" aria-hidden="true">login</span>
+                    <span>Sign in</span>
+                </h2>
+                {{ login_form }}
+                <input type="submit" value="Sign in">
+            </form>
+
+            <form id="registration" class="auth-card" action="{% url 'api:users:register' %}" method="post">
+                <h2>
+                    <span class="material-symbols-outlined" aria-hidden="true">person_add</span>
+                    <span>Sign up</span>
+                </h2>
+                {{ registration_form }}
+                <input type="submit" value="Sign up">
+            </form>
+        </section>
     </main>
 {% endblock %}
+

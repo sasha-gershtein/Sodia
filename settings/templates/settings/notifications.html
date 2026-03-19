@@ -1,3 +1,5 @@
+<!-- CODE IN THIS FILE WAS GENERATED USING AI (GPT-5) -->
+
 {% extends "settings/settings_base.html" %}
 
 {% load static %}
@@ -12,8 +14,13 @@
 {% endblock %}
 
 {% block settings %}
-    <form id="notifications" action="{% url 'api:settings:notifications' %}" method="post">
+    <form id="notifications" class="settings-form-card" action="{% url 'api:settings:notifications' %}" method="post">
+        <h2>
+            <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
+            <span>Notification preferences</span>
+        </h2>
         {{ notifications_form }}
         <input type="submit" value="Save">
     </form>
 {% endblock %}
+

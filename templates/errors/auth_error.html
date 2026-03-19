@@ -1,7 +1,16 @@
+<!-- CODE IN THIS FILE WAS GENERATED USING AI (GPT-5) -->
+
 {% extends 'users/auth_base.html' %}
+{% load static %}
+
+{% block head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/errors/errors.css' %}">
+{% endblock %}
 
 {% block title %}{{ title|default_if_none:"Something went wrong" }} — Sodia{% endblock %}
 
 {% block content %}
     {% include error %}
 {% endblock %}
+

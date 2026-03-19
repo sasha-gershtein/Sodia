@@ -1,3 +1,5 @@
+<!-- CODE IN THIS FILE WAS GENERATED USING AI (GPT-5) -->
+
 {% extends "settings/settings_base.html" %}
 
 {% load static %}
@@ -12,8 +14,13 @@
 {% endblock %}
 
 {% block settings %}
-    <form id="challenges" action="{% url 'api:settings:challenges' %}" method="post">
+    <form id="challenges" class="settings-form-card" action="{% url 'api:settings:challenges' %}" method="post">
+        <h2>
+            <span class="material-symbols-outlined" aria-hidden="true">trophy</span>
+            <span>Challenge matching</span>
+        </h2>
         {{ challenges_form }}
         <input type="submit" value="Save">
     </form>
 {% endblock %}
+

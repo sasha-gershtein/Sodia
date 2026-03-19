@@ -1,3 +1,5 @@
+/* CODE IN THIS FILE WAS GENERATED USING AI (GPT-5) */
+
 .template:empty {
     display: none;
 }
@@ -8,24 +10,154 @@
     display: none;
 }
 
-.comma:has( /*   t r u s t   */
-    ~ .comma:not(.hide-empty),
-    ~ .comma.hide-empty .template:not(:empty)
-)::after {
-    content: ", ";
+.app-main {
+    padding: 18px 20px 32px;
+    animation: fade-in 240ms ease-out;
+}
+
+.app-content-wrap {
+    width: min(900px, 100%);
+    margin: 0 auto;
+    padding: 0 clamp(8px, 2vw, 24px);
 }
 
 .user {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    min-width: 35%;
-    padding: 6px 10px;
-    border-radius: 3px;
-    border: 1px solid #151729;
-    margin: 5px 0;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--text-200);
+    margin: 8px 0;
+    background: var(--background);
+    box-shadow: 0 8px 16px -18px var(--text-950);
 }
 
 .user > * {
-    margin: 0 6px;
+    margin: 0;
 }
+
+.user > a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.08rem;
+    font-weight: 700;
+}
+
+.user > a::before {
+    content: "";
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+    border: 1px solid var(--text-200);
+    background: center / cover no-repeat url("../../img/default_pfp.jpg");
+}
+
+.edit-btn,
+.add-friend-btn,
+.accept-friend-btn,
+.deny-friend-btn,
+.withdraw-friend-btn,
+.message-btn,
+.remove-friend-btn,
+.block-btn,
+.unblock-btn,
+.hidden-actions-btn,
+#respond-friend-menu button,
+#hidden-actions-menu button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.edit-btn::before {
+    content: "edit";
+}
+
+.add-friend-btn::before {
+    content: "person_add";
+}
+
+.accept-friend-btn::before {
+    content: "check_circle";
+}
+
+.deny-friend-btn::before {
+    content: "cancel";
+}
+
+.withdraw-friend-btn::before {
+    content: "undo";
+}
+
+.message-btn::before {
+    content: "mail";
+}
+
+.remove-friend-btn::before {
+    content: "person_remove";
+}
+
+.block-btn::before {
+    content: "block";
+}
+
+.unblock-btn::before {
+    content: "lock_open";
+}
+
+.hidden-actions-btn {
+    width: 42px;
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+    color: transparent;
+}
+
+.hidden-actions-btn::before {
+    content: "more_horiz";
+    color: var(--primary-800);
+}
+
+.hidden-actions-btn:hover,
+.hidden-actions-btn:focus-visible {
+    color: transparent;
+}
+
+.edit-btn::before,
+.add-friend-btn::before,
+.accept-friend-btn::before,
+.deny-friend-btn::before,
+.withdraw-friend-btn::before,
+.message-btn::before,
+.remove-friend-btn::before,
+.block-btn::before,
+.unblock-btn::before,
+.hidden-actions-btn::before,
+#respond-friend-menu button::before,
+#hidden-actions-menu button::before {
+    font-family: "Material Symbols Outlined", sans-serif;
+    font-weight: normal;
+    font-style: normal;
+    font-size: 1.05rem;
+    line-height: 1;
+    display: inline-block;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+

@@ -1,0 +1,86 @@
+/* CODE IN THIS FILE WAS GENERATED USING AI (GPT-5) */
+
+.auth-landing {
+    width: min(1040px, 100%);
+    margin: 0 auto;
+    padding: 28px clamp(14px, 3vw, 34px) 40px;
+}
+
+.auth-hero {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.auth-logo {
+    width: clamp(90px, 15vw, 160px);
+    height: auto;
+    margin-bottom: 12px;
+    filter: drop-shadow(0 8px 16px hsl(228 83% 50% / 0.15));
+}
+
+.auth-hero h1 {
+    margin-bottom: 10px;
+}
+
+.auth-hero p {
+    margin: 0 auto;
+    max-width: 60ch;
+    color: var(--text-700);
+    font-size: 1.06rem;
+}
+
+.auth-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.auth-card {
+    padding: 16px 16px 14px;
+    border: 1px solid var(--text-200);
+    border-radius: 14px;
+    background: var(--background-50);
+    box-shadow: 0 14px 24px -22px var(--text-950);
+}
+
+.auth-card h2 {
+    margin-bottom: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.55rem;
+}
+
+.auth-card > p {
+    margin: 0 0 10px;
+}
+
+.auth-card label {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--text-800);
+    font-weight: 600;
+}
+
+.auth-card .helptext {
+    display: block;
+    margin-top: 4px;
+    color: var(--text-600);
+    font-size: 0.84rem;
+}
+
+.auth-card input[type="submit"] {
+    margin-top: 8px;
+    width: 100%;
+}
+
+.auth-card ul.errorlist {
+    margin: 4px 0 8px;
+}
+
+@media (max-width: 860px) {
+    .auth-grid {
+        grid-template-columns: 1fr;
+    }
+}
+

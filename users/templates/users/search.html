@@ -1,3 +1,5 @@
+<!-- CODE IN THIS FILE WAS GENERATED USING AI (GPT-5) -->
+
 {% extends 'users/auth_base.html' %}
 
 {% load static %}
@@ -11,14 +13,32 @@
 {% block title %}Search — Sodia{% endblock %}
 
 {% block content %}
-    <h1>Search</h1>
-    <form id="search-form" action="{% url 'api:users:search' %}" method="post">
-        {{ search_form }}
-        <input type="submit" value="Search" id="search-btn">
-    </form>
-    <div id="search-results-container">
-        <div id="no-results" hidden><p>Your search returned no results. Please check your query and try again.</p></div>
-        <div id="loading-search-results" hidden><p>Loading...</p></div>
-        <div id="search-results"></div>
-    </div>
+    <section class="search-page">
+        <header class="search-header">
+            <h1>Search</h1>
+            <p>Find people by name, username or other account information</p>
+        </header>
+
+        <form id="search-form" class="search-form-card" action="{% url 'api:users:search' %}" method="post">
+            <ul class="nonfield errorlist"></ul>
+            <div class="field search-field">
+                <!--suppress HtmlFormInputWithoutLabel -->
+                <input type="text" name="query" placeholder="Search users..." maxlength="250" required id="id_query">
+                <button type="submit" id="search-btn">
+                    <span class="material-symbols-outlined" aria-hidden="true">search</span>
+                    <span>Search</span>
+                </button>
+                <ul class="errorlist" id="id_query_errors"></ul>
+            </div>
+        </form>
+
+        <section id="search-results-container" class="search-results-card">
+            <div id="no-results" hidden>
+                <p>Your search returned no results. Please check your query and try again.</p>
+            </div>
+            <div id="loading-search-results" hidden><p>Loading...</p></div>
+            <div id="search-results"></div>
+        </section>
+    </section>
 {% endblock %}
+

@@ -1,5 +1,169 @@
+/* CODE IN THIS FILE WAS GENERATED USING AI (GPT-5) */
+
+.profile-page {
+    width: min(920px, 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.profile-card {
+    padding: 14px 16px;
+    border: 1px solid var(--text-200);
+    border-radius: 14px;
+    background: var(--background-50);
+    box-shadow: 0 14px 24px -24px var(--text-950);
+}
+
+.profile-card h3 {
+    margin-bottom: 10px;
+    font-size: 1.15rem;
+    color: var(--text-800);
+}
+
+.profile-hero h1 {
+    margin-bottom: 2px;
+}
+
+.profile-fullname {
+    margin: 0 0 4px;
+    color: var(--text-700);
+    font-weight: 600;
+}
+
+.profile-username {
+    margin: 0;
+    color: var(--primary-700);
+    font-weight: 700;
+}
+
+#profile-buttons {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
 #profile-buttons button {
-    margin: 6px;
+    margin: 0;
+}
+
+.profile-facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.profile-fact {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border: 1px solid var(--text-200);
+    border-radius: 999px;
+    background: var(--background);
+    color: var(--text-800);
+    font-size: 0.96rem;
+}
+
+.profile-fact::before,
+#profile-friends-count::before {
+    font-family: "Material Symbols Outlined", sans-serif;
+    font-weight: normal;
+    font-style: normal;
+    font-size: 1.05rem;
+    line-height: 1;
+    display: inline-block;
+}
+
+.fact-gender::before {
+    content: "person";
+}
+
+.fact-birthday::before {
+    content: "cake";
+}
+
+.fact-streak::before {
+    content: "local_fire_department";
+}
+
+.fact-year::before {
+    content: "school";
+}
+
+.fact-house::before {
+    content: "home";
+}
+
+.fact-country::before {
+    content: "public";
+}
+
+#friends {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#profile-friends-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0;
+    border: 0;
+    background: none;
+    border-radius: 0;
+    box-shadow: none;
+    font-weight: 700;
+    color: var(--primary-700);
+    text-decoration: none;
+}
+
+#profile-friends-count::before {
+    content: "group";
+}
+
+#profile-friends-count:not([disabled]) {
+    cursor: pointer;
+    border-bottom: 1px solid currentColor;
+}
+
+#profile-friends-count:not([disabled]):hover,
+#profile-friends-count:not([disabled]):focus-visible {
+    background: none;
+    box-shadow: none;
+    transform: none;
+    color: var(--primary-500);
+}
+
+#profile-friends-count[disabled] {
+    color: var(--text-700);
+    border-bottom: 0;
+    cursor: default;
+    pointer-events: none;
+}
+
+#profile-friends-count[disabled]:hover,
+#profile-friends-count[disabled]:focus-visible {
+    background: none;
+    box-shadow: none;
+    transform: none;
+    color: var(--text-700);
+    outline: none;
+}
+
+#friends .context-menu-wrapper {
+    position: relative;
+}
+
+#friends-list {
+    left: 0;
+    top: calc(100% + 8px);
+    min-width: min(460px, 78vw);
+    max-height: 320px;
+    overflow-y: auto;
 }
 
 #friends-list:empty::after {
@@ -9,6 +173,20 @@
 }
 
 #profile-description {
-    max-width: 800px;
+    margin: 0;
+    max-width: 74ch;
+    line-height: 1.5;
     overflow-wrap: anywhere;
 }
+
+@media (max-width: 700px) {
+    #friends {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    #friends-list {
+        min-width: min(92vw, 460px);
+    }
+}
+

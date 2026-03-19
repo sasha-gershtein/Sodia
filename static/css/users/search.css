@@ -1,7 +1,95 @@
+/* CODE IN THIS FILE WAS GENERATED USING AI (GPT-5) */
+
+.search-page {
+    width: min(920px, 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.search-header h1 {
+    margin-bottom: 6px;
+}
+
+.search-header p {
+    margin: 0;
+    color: var(--text-700);
+    max-width: 68ch;
+}
+
+.search-form-card,
+.search-results-card {
+    padding: 14px 16px;
+    border: 1px solid var(--text-200);
+    border-radius: 14px;
+    background: var(--background-50);
+    box-shadow: 0 14px 24px -24px var(--text-950);
+}
+
+#search-form {
+    display: block;
+}
+
+#search-form .search-field {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    align-items: start;
+}
+
+#search-form .search-field > .errorlist {
+    grid-column: 1 / -1;
+    margin: 0;
+}
+
+#search-form .field,
+#search-form .nonfield.errorlist {
+    margin: 0;
+}
+
+#search-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
 #search-results-container {
-    max-width: 500px;
+    display: none;
+}
+
+#search-results-container:has(#loading-search-results:not([hidden])),
+#search-results-container:has(#no-results:not([hidden])),
+#search-results-container:has(#search-results > *) {
+    display: block;
+}
+
+#search-results {
+    margin-top: 4px;
+}
+
+#no-results,
+#loading-search-results {
+    padding: 8px 2px;
+    color: var(--text-700);
+}
+
+#no-results p,
+#loading-search-results p {
+    margin: 0;
 }
 
 #search-results-container:has(#loading-search-results:not([hidden])) > :not(#loading-search-results) {
     display: none;
 }
+
+@media (max-width: 680px) {
+    #search-form .search-field {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+    }
+
+    #search-btn {
+        justify-content: center;
+    }
+}
+

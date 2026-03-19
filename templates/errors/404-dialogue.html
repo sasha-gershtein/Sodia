@@ -1,25 +1,48 @@
+<!-- CODE IN THIS FILE WAS GENERATED USING AI (GPT-5) -->
+
 {% extends 'users/auth_base.html' %}
 {% load static %}
 
 {% block head %}
     {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/errors/errors.css' %}">
     <script type="module" src="{% static 'js/errors/404-profile.js' %}"></script>
 {% endblock %}
 
 {% block title %}Dialogue not found — Sodia{% endblock %}
 
 {% block content %}
-    <h1>404: Dialogue not found</h1>
-    <p>The dialogue you are looking for does not exist.
-        Perhaps, the user you are looking for has changed their username.</p>
-    <p>
-        <a id="search-link" href="{% url 'users:search' %}">Search for user @<span id="404-username-search"></span></a>
-    </p>
-    <p>
-        You can also
-        <a href="#" onclick="if (history.length > 1) history.back(); else window.location = '/'; return false;">
-            go back</a>,
-        <a href="{% url 'messaging:message-home' %}">see all dialogues</a>,
-        or <a href="{% url 'users:home' %}">return to home</a>
-    </p>
+    <section class="error-screen">
+        <article class="error-card">
+            <div class="error-brand">
+                <img src="{% static 'img/logo-horizontal.png' %}" alt="Sodia">
+            </div>
+            <p class="error-kicker">Error 404</p>
+            <h1 class="error-title">Dialogue not found</h1>
+            <p class="error-description">
+                The dialogue you tried to open does not exist.
+                The user's username may have changed.
+            </p>
+            <p class="error-description">
+                <a id="search-link" class="error-inline-link" href="{% url 'users:search' %}">
+                    Search for @<span id="404-username-search"></span>
+                </a>
+            </p>
+            <div class="error-actions">
+                <a href="#" onclick="if (history.length > 1) history.back(); else window.location = '/'; return false;">
+                    <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                    <span>Go back</span>
+                </a>
+                <a class="error-action-secondary" href="{% url 'messaging:message-home' %}">
+                    <span class="material-symbols-outlined" aria-hidden="true">forum</span>
+                    <span>All dialogues</span>
+                </a>
+                <a class="error-action-secondary" href="{% url 'users:home' %}">
+                    <span class="material-symbols-outlined" aria-hidden="true">home</span>
+                    <span>Home</span>
+                </a>
+            </div>
+        </article>
+    </section>
 {% endblock %}
+

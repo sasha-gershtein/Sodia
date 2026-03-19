@@ -1,21 +1,62 @@
-<header>
+<!-- CODE IN THIS FILE WAS GENERATED USING AI (GPT-5) -->
+
+{% load static %}
+
+<header class="app-header">
     <nav>
-        <div class="template-container" id="navigation">
-            <a href="{% url 'users:home' %}">home</a><br>
-            <a href="{% url 'settings:index' %}">settings</a><br>
-            <a href="{% url 'messaging:message-home' %}"
-            >messaging<span class="hide-empty"> (<span class="template"
-                                                       id="navigation-unread-messages-count"></span>)</span></a><br>
-            <a class="hide-empty" id="profile-link">@<span class="template" id="navigation-username"></span></a>
-            <form id="navigation-search-form" action="{% url 'users:search' %}" method="get">
-                <!--suppress HtmlFormInputWithoutLabel -->
-                <input type="text" name="q" id="navigation-search-query" placeholder="Search users...">
-                <input type="submit" value="Search">
-            </form>
-            <form id="logout" action="{% url 'api:users:logout' %}" method="post">
-                <input type="submit" value="Sign out">
-            </form>
-            <hr>
+        <div class="template-container nav-shell" id="navigation">
+            <div class="nav-topbar">
+                <div class="brand-group">
+                    <button class="menu-toggle" id="nav-menu-button" type="button" aria-label="Toggle navigation menu">
+                        <span class="material-symbols-outlined menu-icon" aria-hidden="true">menu</span>
+                        <span class="menu-unread-badge hide-empty" aria-label="Unread messages">
+                            <span class="template" id="navigation-notifications-count"></span>
+                        </span>
+                    </button>
+                    <a class="brand-title" href="{% url 'users:home' %}" aria-label="Sodia home">
+                        <img class="brand-logo" src="{% static 'img/logo-horizontal.png' %}" alt="">
+                    </a>
+                </div>
+                <a class="profile-pill hide-empty" id="profile-link">
+                    <img class="profile-pill-avatar" src="{% static 'img/default_pfp.jpg' %}" alt="">
+                    <span class="profile-pill-name"><span class="template" id="navigation-display-name"></span></span>
+                </a>
+            </div>
+
+            <div class="nav-panel" id="nav-panel" hidden>
+                <form id="navigation-search-form" action="{% url 'users:search' %}" method="get">
+                    <!--suppress HtmlFormInputWithoutLabel -->
+                    <input type="text" name="q" id="navigation-search-query" placeholder="Search people...">
+                    <button type="submit" class="icon-button">
+                        <span class="material-symbols-outlined" aria-hidden="true">search</span>
+                        <span>Search</span>
+                    </button>
+                </form>
+
+                <div class="nav-links">
+                    <a class="nav-item" href="{% url 'users:home' %}">
+                        <span class="material-symbols-outlined nav-icon" aria-hidden="true">home</span>
+                        <span>home</span>
+                    </a>
+                    <a class="nav-item" href="{% url 'messaging:message-home' %}">
+                        <span class="material-symbols-outlined nav-icon" aria-hidden="true">mail</span>
+                        <span>messages<span class="hide-empty"> (<span class="template"
+                                                                       id="navigation-unread-messages-count"></span>)</span></span>
+                    </a>
+                    <a class="nav-item" href="{% url 'settings:index' %}">
+                        <span class="material-symbols-outlined nav-icon" aria-hidden="true">settings</span>
+                        <span>settings</span>
+                    </a>
+                </div>
+
+                <form id="logout" action="{% url 'api:users:logout' %}" method="post">
+                    <button type="submit" class="icon-button signout-button">
+                        <span class="material-symbols-outlined" aria-hidden="true">logout</span>
+                        <span>Sign out</span>
+                    </button>
+                </form>
+            </div>
         </div>
     </nav>
 </header>
+

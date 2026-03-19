@@ -1,0 +1,130 @@
+/* CODE IN THIS FILE WAS GENERATED USING AI (GPT-5) */
+
+.error-main {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    padding: clamp(18px, 3vw, 36px);
+}
+
+.error-screen {
+    width: min(720px, 100%);
+    margin: 0 auto;
+    animation: error-card-in 240ms ease-out;
+}
+
+.error-card {
+    border: 1px solid var(--text-200);
+    border-radius: 16px;
+    background: var(--background-50);
+    box-shadow: 0 18px 34px -30px var(--text-950);
+    padding: clamp(18px, 3vw, 30px);
+}
+
+.error-brand {
+    margin-bottom: 16px;
+}
+
+.error-brand img {
+    width: clamp(140px, 28vw, 220px);
+    height: auto;
+}
+
+.error-kicker {
+    margin: 0 0 6px;
+    color: var(--text-700);
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.error-title {
+    margin: 0 0 10px;
+    font-size: clamp(1.9rem, 4vw, 2.7rem);
+    line-height: 1.1;
+}
+
+.error-description {
+    margin: 0;
+    color: var(--text-800);
+    font-size: 1.06rem;
+    line-height: 1.5;
+}
+
+.error-description + .error-description {
+    margin-top: 10px;
+}
+
+.error-actions {
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
+.error-actions a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 12px;
+    border-radius: 9px;
+    border: 1px solid var(--primary-300);
+    background: var(--primary-50);
+    color: var(--primary-800);
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+}
+
+.error-actions a:hover,
+.error-actions a:focus-visible {
+    background: var(--primary-100);
+    box-shadow: 0 8px 18px -16px var(--text-950);
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+
+.error-actions .error-action-secondary {
+    border-color: var(--text-200);
+    background: var(--background);
+    color: var(--text-900);
+}
+
+.error-actions .error-action-secondary:hover,
+.error-actions .error-action-secondary:focus-visible {
+    background: var(--background-100);
+    border-color: var(--text-300);
+}
+
+.error-actions .material-symbols-outlined {
+    font-size: 1.05rem;
+}
+
+.error-inline-link {
+    font-weight: 600;
+}
+
+@keyframes error-card-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 640px) {
+    .error-actions {
+        flex-direction: column;
+    }
+
+    .error-actions a {
+        width: 100%;
+        justify-content: center;
+    }
+}
+

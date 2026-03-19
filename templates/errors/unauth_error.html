@@ -1,15 +1,18 @@
+<!-- CODE IN THIS FILE WAS GENERATED USING AI (GPT-5) -->
+
 {% extends 'base.html' %}
 
 {% load static %}
 
 {% block head %}
-    <meta charset="UTF-8">
+    {{ block.super }}
     <title>{{ title|default_if_none:"Something went wrong" }} — Sodia</title>
-    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'css/errors/errors.css' %}">
 {% endblock %}
 
 {% block body %}
-    <main>
+    <main class="error-main">
         {% include error %}
     </main>
 {% endblock %}
+

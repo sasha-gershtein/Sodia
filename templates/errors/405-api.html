@@ -1,9 +1,30 @@
+<!-- CODE IN THIS FILE WAS GENERATED USING AI (GPT-5) -->
+
 {% load static %}
 
-<h1>405: Method Not Allowed</h1>
-<p>Oops, something went wrong. You were not supposed to see this page!<br>
-    Please check that scripts are enabled in your browser. If you see this page again, please contact us.<br>
-    You can either
-    <a href="#" onclick="if (history.length > 1) history.back(); else window.location = '/'; return false;">go back</a>
-    or <a href="{% url 'users:home' %}">return to home</a>
-</p>
+<section class="error-screen">
+    <article class="error-card">
+        <div class="error-brand">
+            <img src="{% static 'img/logo-horizontal.png' %}" alt="Sodia">
+        </div>
+        <p class="error-kicker">Error 405</p>
+        <h1 class="error-title">Method not allowed</h1>
+        <p class="error-description">
+            This endpoint does not accept the request method used by your browser.
+        </p>
+        <p class="error-description">
+            This usually happens when an API URL is opened directly instead of being called by the app.
+        </p>
+        <div class="error-actions">
+            <a href="#" onclick="if (history.length > 1) history.back(); else window.location = '/'; return false;">
+                <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                <span>Go back</span>
+            </a>
+            <a class="error-action-secondary" href="{% url 'users:home' %}">
+                <span class="material-symbols-outlined" aria-hidden="true">home</span>
+                <span>Home</span>
+            </a>
+        </div>
+    </article>
+</section>
+

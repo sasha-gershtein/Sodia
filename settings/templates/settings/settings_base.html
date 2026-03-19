@@ -1,9 +1,31 @@
+<!-- CODE IN THIS FILE WAS GENERATED USING AI (GPT-5) -->
+
 {% extends "users/auth_base.html" %}
+
+{% load static %}
+
+{% block head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/settings/settings.css' %}">
+    {% block settings_head %}{% endblock %}
+{% endblock %}
 
 {% block title %}Settings — Sodia{% endblock %}
 
 {% block content %}
-    <h1>{% block page_name %}Settings{% endblock %}</h1>
-    <a href="{% url "settings:index" %}">back to settings</a><br>
-    {% block settings %}{% endblock %}
+    <section class="settings-page">
+        <header class="settings-header">
+            <h1>{% block page_name %}Settings{% endblock %}</h1>
+            {% block settings_nav %}
+                <a class="settings-back" href="{% url "settings:index" %}">
+                    <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                    <span>Back to settings</span>
+                </a>
+            {% endblock %}
+        </header>
+        <div class="settings-content">
+            {% block settings %}{% endblock %}
+        </div>
+    </section>
 {% endblock %}
+

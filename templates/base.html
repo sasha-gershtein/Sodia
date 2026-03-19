@@ -1,3 +1,5 @@
+<!-- CODE IN THIS FILE WAS GENERATED USING AI (GPT-5) -->
+
 {% load static %}
 
 <!DOCTYPE html>
@@ -5,7 +7,9 @@
 <head>
     {% block head %}
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{% block title %}Sodia{% endblock %}</title>
+        <link rel="icon" type="image/png" href="{% static 'img/icon-120.png' %}">
         <link rel="stylesheet" href="{% static 'css/main.css' %}">
         {% csrf_token %}
         <script type="module" src="{% static 'js/api/api.js' %}"></script>
@@ -18,5 +22,10 @@
     </div>
     <div id="info-box"></div>
 {% endblock %}
+<footer class="app-footer">
+    <span>Sodia 2024–2026 by Sasha Gershtein</span>
+    <span>aleksandr.gershtein2019@epsomcollege.org.uk</span>
+</footer>
 </body>
 </html>
+
