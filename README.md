@@ -1,5 +1,9 @@
 # Sodia
 
+<img alt="Sodia logo" src="static/img/logo-512.png" title="logo" width="512"/>
+
+---
+
 **Sodia** (from **so**cial me**dia** — I know, I'm _very_ creative) is a web application, a social media for school
 students. It is designed to help new students to meet people and make friends when they change schools.
 
@@ -39,6 +43,8 @@ Things I decided against:
 * Localisation
 * Logging
 
+---
+
 ## References
 
 Tutorials:
@@ -74,6 +80,8 @@ Other:
 * [Wikipedia](https://en.wikipedia.org/wiki/Main_Page)
 * [Хабр (Habr)](https://habr.com/ru/feed/)
 
+---
+
 ## AI use
 
 Throughout development, I used large language models (LLMs) to help me design and implement features. AI helped me with:
@@ -88,5 +96,16 @@ Throughout development, I used large language models (LLMs) to help me design an
 Some of the autocomplete functionality in my IDE (PyCharm) is probably powered by an LLM, but it never writes code by
 itself.
 
+After completing the project's functionality, I used an AI agent based on GPT-5 to improve the UI design of my website.
+This change only affected the visual design, not the functionality. The AI only changed .html (Django templates)
+and .css (styles) files, it has not made any changes to Python or JavaScript files (I had to make two small changes to
+.js files to adjust to the changes in UI). The templates' structure was kept the same as implemented by me. Every file
+edited by the AI includes the declaration of this fact in a comment at the top of the file.
+
+Please see the [tag v1.1](https://github.com/sasha-gershtein/Sodia/releases/tag/v1.1) on my GitHub repository for the
+version of the project before any changes by AI were introduced.
+
 Unless explicitly stated in code comments and my project report, I **never** used code written entirely by AI. All app's
 functionality is implemented by me, and I made sure to understand exactly what every part of my code does.
+
+Finally, the logo of the project was inpired by an AI-generated image, and then designed by me using Figma.
