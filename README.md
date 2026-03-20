@@ -1,6 +1,6 @@
 # Sodia
 
-<img alt="Sodia logo" src="static/img/logo-512.png" title="logo" width="512"/>
+![Sodia logo](static/img/logo-350-bg.png "logo")
 
 ---
 
