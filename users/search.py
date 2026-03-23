@@ -31,7 +31,7 @@ MAX_TOKEN_LENGTH = 30
 WORDS_SIMILARITY_EXPONENT = 5  # exponent power for the word similarity ratio
 WORD_LENGTH_BONUS = 1.09  # exponent base for the bonus for matching a longer word
 
-SENTENCE_LENGTH_BONUS = 1.5  # multiplier for a match of a sequence of words
+SENTENCE_LENGTH_BONUS = 2  # multiplier for a match of a sequence of words
 
 # weights of user info fields:
 USERNAME_WEIGHT = 10
@@ -49,7 +49,7 @@ USER_SCORE_THRESHOLD = 1 / 3  # minimum score threshold value to include user in
 
 MAX_RESULTS = 50
 
-PROBABILITY_THRESHOLD = 1 / 20  # minimum probability threshold to include user in result
+PROBABILITY_THRESHOLD = 1 / 50  # minimum probability threshold to include user in result
 
 
 def parse(s: str) -> list[str]:

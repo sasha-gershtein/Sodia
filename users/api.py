@@ -51,7 +51,7 @@ def register(request, data):
     session_data.session.authenticate(user)  # attach user to the session
     return {
         "redirect": {
-            "location": reverse("settings:account")  # TODO: registration
+            "location": reverse("settings:account"),
         }
     }
 
